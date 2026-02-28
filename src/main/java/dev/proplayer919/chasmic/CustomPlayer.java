@@ -11,6 +11,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
+import net.minestom.server.tag.Tag;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public class CustomPlayer extends Player {
 
     @Setter
     private boolean streaming = false;
+
+    public static final Tag<Long> LAST_ATTACKED_TICKS = Tag.Long("lastAttackedTicks");
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);

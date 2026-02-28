@@ -2,8 +2,10 @@ package dev.proplayer919.chasmic.items;
 
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.UseCooldown;
 import net.minestom.server.tag.Tag;
 
 @Getter
@@ -42,12 +44,12 @@ public class CustomItem {
 
         if (action == null) {
             itemStack = ItemStack.builder(material)
-                    .customName(displayName)
+                    .set(DataComponents.ITEM_NAME, displayName)
                     .lore(description)
                     .build();
         } else {
             itemStack = ItemStack.builder(material)
-                    .customName(displayName)
+                    .set(DataComponents.ITEM_NAME, displayName)
                     .lore(description)
                     .set(itemActionTag, action.id())
                     .build();

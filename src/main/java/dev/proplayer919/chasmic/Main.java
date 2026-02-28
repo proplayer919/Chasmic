@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic;
 
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
+import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
@@ -38,6 +39,8 @@ public class Main {
     @Getter
     private static CustomItemRegistry customItemRegistry;
 
+    private final static Pos spawnPos = new Pos(0.5, 50, 0.5);
+
 
     static void main(String[] args) {
         // Initialize the server
@@ -73,6 +76,10 @@ public class Main {
 
         InstanceContainer spawn = getInstanceContainer();
 
+        NPC npc = new NPC(UUID.randomUUID(), "NPC", Objects.requireNonNull(PlayerSkin.fromUsername("Notch")), 1, false);
+
+        npc.setInstance(spawn, spawnPos);
+
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         // Attach all modules to the global event handler
@@ -86,12 +93,11 @@ public class Main {
         });
 
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
-            Pos spawnPos = new Pos(0.5, 50, 0.5);
             event.getPlayer().teleport(spawnPos);
 
-            NPC npc = new NPC(UUID.randomUUID(), "NPC", Objects.requireNonNull(PlayerSkin.fromUsername("Notch")), 1, false);
+            TestZombie zombie = new TestZombie();
+            zombie.setInstance(spawn, spawnPos);
 
-            npc.setInstance(spawn, spawnPos);
             npc.addPlayerViewer(event.getPlayer());
 
             event.getPlayer().getInventory().addItemStack(customItemRegistry.getItem("aspect_of_the_shallows").getItemStack());
