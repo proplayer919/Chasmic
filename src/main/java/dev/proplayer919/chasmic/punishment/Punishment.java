@@ -53,11 +53,7 @@ public class Punishment {
         }
 
         // Check if temporary ban has expired
-        if (expiresAt != -1 && System.currentTimeMillis() > expiresAt) {
-            return false;
-        }
-
-        return true;
+        return expiresAt == -1 || System.currentTimeMillis() <= expiresAt;
     }
 
     /**

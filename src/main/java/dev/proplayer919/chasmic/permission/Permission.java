@@ -1,15 +1,12 @@
 package dev.proplayer919.chasmic.permission;
 
-import java.util.*;
-
 /**
  * Represents a permission node in a hierarchical permission system
  * Supports wildcard permissions (e.g., "rank.*", "*")
+ *
+ * @param value true = allow, false = deny
  */
-public class Permission {
-    private final String node;
-    private final boolean value; // true = allow, false = deny
-
+public record Permission(String node, boolean value) {
     public Permission(String node, boolean value) {
         this.node = node.toLowerCase();
         this.value = value;
@@ -17,14 +14,6 @@ public class Permission {
 
     public Permission(String node) {
         this(node, true);
-    }
-
-    public String getNode() {
-        return node;
-    }
-
-    public boolean getValue() {
-        return value;
     }
 
     /**
@@ -57,19 +46,6 @@ public class Permission {
         }
 
         return false;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Permission that = (Permission) o;
-        return value == that.value && Objects.equals(node, that.node);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(node, value);
     }
 
     @Override

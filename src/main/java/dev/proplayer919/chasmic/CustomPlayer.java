@@ -9,6 +9,7 @@ import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -23,6 +24,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerRespawnEvent;
+import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
@@ -56,6 +58,15 @@ public class CustomPlayer extends Player implements HealthCreature {
 
     @Setter
     private boolean streaming = false;
+
+    @Setter
+    private boolean showMsptBossbar = false;
+
+    private final BossBar msptBossBar = BossBar.bossBar(Component.text("MSPT: 0 ms").color(NamedTextColor.GREEN), 0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS);
+
+    private float mspt;
+    private float smoothedMspt = 0f;
+    private static final float MSPT_SMOOTHING_FACTOR = 0.2f; // Exponential smoothing factor
 
     private Date lastDamageTime;
     private CustomCreature lastDamageAttacker;
@@ -106,6 +117,13 @@ public class CustomPlayer extends Player implements HealthCreature {
                 customHealth = playerData != null ? playerData.getMaxHealth() : 100;
                 customMana = playerData != null ? playerData.getMaxMana() : 100;
             }
+        });
+
+        globalEventHandler.addListener(ServerTickMonitorEvent.class, event -> {
+            mspt = (float) event.getTickMonitor().getTickTime();
+
+            // Apply exponential smoothing to MSPT
+            smoothedMspt = smoothedMspt * (1 - MSPT_SMOOTHING_FACTOR) + mspt * MSPT_SMOOTHING_FACTOR;
         });
     }
 
@@ -214,15 +232,20 @@ public class CustomPlayer extends Player implements HealthCreature {
         return getStatFor(PlayerStat.CRITICAL_CHANCE);
     }
 
+    @Override
     public void tick(long time) {
         super.tick(time);
 
-        // Only update action bar if values have changed (prevents massive lag from packet spam)
         if (isOnline() && playerData != null) {
             // Show action bar with health and mana
             Component actionBarContent = getActionBarContent();
 
             sendActionBar(actionBarContent);
+
+            // Update MSPT bossbar if enabled
+            if (showMsptBossbar) {
+                updateMsptBossbar();
+            }
         }
     }
 
@@ -429,4 +452,43 @@ public class CustomPlayer extends Player implements HealthCreature {
             mongoDBHandler.savePlayerData(playerData);
         }
     }
+
+    private void updateMsptBossbar() {
+        // Get memory info
+        Component title = getMsptBossbarTitle(smoothedMspt);
+
+        // Update bossbar progress (MSPT as progress, 50ms as max for 20 TPS)
+        // Max MSPT for 20 TPS is 50ms (1 tick = 50ms)
+        float maxMsptFor20Tps = 50.0f;
+        float progress = Math.min(smoothedMspt / maxMsptFor20Tps, 1.0f);
+
+        BossBar.Color barColor;
+        if (smoothedMspt > maxMsptFor20Tps) {
+            barColor = BossBar.Color.PURPLE;
+        } else if (progress < 0.5f) {
+            barColor = BossBar.Color.GREEN;
+        } else if (progress < 0.8f) {
+            barColor = BossBar.Color.YELLOW;
+        } else {
+            barColor = BossBar.Color.RED;
+        }
+
+        msptBossBar.name(title).progress(progress).color(barColor).overlay(BossBar.Overlay.PROGRESS);
+    }
+
+    private static @NonNull Component getMsptBossbarTitle(double mspt) {
+        Runtime runtime = Runtime.getRuntime();
+        long maxMemory = runtime.maxMemory() / 1024 / 1024; // Convert to MB
+        long totalMemory = runtime.totalMemory() / 1024 / 1024; // Convert to MB
+        long freeMemory = runtime.freeMemory() / 1024 / 1024; // Convert to MB
+        long usedMemory = totalMemory - freeMemory; // Calculate used memory
+
+        // Create bossbar title with MSPT and RAM info
+        Component msptComponent = Component.text(String.format("MSPT: %.2f ms", mspt)).color(NamedTextColor.GREEN);
+        Component separator = Component.text("  |  ").color(NamedTextColor.GRAY);
+        Component memoryComponent = Component.text(String.format("RAM: %d/%d MB", usedMemory, maxMemory)).color(NamedTextColor.AQUA);
+
+        return msptComponent.append(separator).append(memoryComponent);
+    }
 }
+

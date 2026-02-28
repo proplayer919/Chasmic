@@ -36,12 +36,11 @@ public class CommandRegistry {
         commandManager.register(new GamemodeCommand());
         commandManager.register(new GiveCommand());
         commandManager.register(new MobCommand());
-
-        // Register punishment commands
         commandManager.register(new WarnCommand());
         commandManager.register(new KickCommand());
         commandManager.register(new BanCommand());
         commandManager.register(new UnbanCommand());
+        commandManager.register(new PerformanceCommand());
     }
 }
 

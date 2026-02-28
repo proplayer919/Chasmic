@@ -209,23 +209,4 @@ public class NPC extends LivingEntity {
         sendPacketToViewers(getPropertiesPacket());
         sendPacketToViewers(getEquipmentsPacket());
     }
-
-    public <T> void sendTitlePart(TitlePart<T> part, T value) {
-    }
-
-    public void playSound(Sound sound) {
-    }
-
-    public boolean setGameMode(GameMode gameMode) {
-        return false;
-    }
-
-    public void setEnableRespawnScreen(boolean enable) {
-    }
-
-    public void setRespawnPoint(Pos respawnPoint) {
-    }
-
-    public void sendActionBar(Component message) {
-    }
 }

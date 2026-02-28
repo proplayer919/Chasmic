@@ -35,7 +35,7 @@ public class PermissionHolder {
      * Removes a permission from this holder
      */
     public void removePermission(String node) {
-        permissions.removeIf(p -> p.getNode().equalsIgnoreCase(node));
+        permissions.removeIf(p -> p.node().equalsIgnoreCase(node));
     }
 
     /**
@@ -48,14 +48,14 @@ public class PermissionHolder {
 
         // Check for explicit deny first (takes priority)
         for (Permission permission : permissions) {
-            if (permission.matches(node) && !permission.getValue()) {
+            if (permission.matches(node) && !permission.value()) {
                 return false;
             }
         }
 
         // Check for explicit allow
         for (Permission permission : permissions) {
-            if (permission.matches(node) && permission.getValue()) {
+            if (permission.matches(node) && permission.value()) {
                 return true;
             }
         }
