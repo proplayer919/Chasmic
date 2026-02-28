@@ -16,6 +16,18 @@ public class MediaCommand extends Command {
     public MediaCommand() {
         super("media");
 
+        setCondition((sender, commandString) -> {
+            if (sender instanceof CustomPlayer player) {
+                // Allow command if player is not yet initialized (to avoid red text)
+                // Actual permission check happens in executor
+                if (!player.isInitialized()) {
+                    return true;
+                }
+                return player.hasPermission("command.media.record") || player.hasPermission("command.media.stream");
+            }
+            return true; // Console always has permission
+        });
+
         setDefaultExecutor((sender, context) -> {
             sender.sendMessage(Component.text("Usage: /media <record|stream>", NamedTextColor.RED));
         });

@@ -6,12 +6,11 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.entity.EntityFinder;
 
 import java.util.Arrays;
 
@@ -28,15 +27,18 @@ public class RankCommand extends Command {
 
         setCondition((sender, commandString) -> {
             if (sender instanceof CustomPlayer player) {
+                // Allow command if player is not yet initialized
+                // Actual permission check happens in executor
+                if (!player.isInitialized()) {
+                    return true;
+                }
                 return player.hasPermission("admin.command.rank");
             }
             return true; // Console always has permission
         });
 
         // Arguments
-        ArgumentEntity playerArg = ArgumentType.Entity("player")
-                .onlyPlayers(true)
-                .singleEntity(true);
+        PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         ArgumentWord setArg = ArgumentType.Word("set").from("set");
 
@@ -47,15 +49,14 @@ public class RankCommand extends Command {
 
         // /rank <player> - View player's rank
         addSyntax((sender, context) -> {
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }
 
-            CustomPlayer customTarget = (CustomPlayer) target;
             PlayerRank rank = customTarget.getRank();
 
             sender.sendMessage(Component.text(target.getUsername() + "'s rank: ", NamedTextColor.YELLOW)
@@ -65,10 +66,10 @@ public class RankCommand extends Command {
 
         // /rank <player> set <rank> - Set player's rank
         addSyntax((sender, context) -> {
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }
@@ -92,7 +93,6 @@ public class RankCommand extends Command {
                 }
             }
 
-            CustomPlayer customTarget = (CustomPlayer) target;
             customTarget.setRank(newRank);
 
             // Save to database

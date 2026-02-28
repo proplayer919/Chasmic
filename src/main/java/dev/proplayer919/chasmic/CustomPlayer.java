@@ -21,6 +21,7 @@ public class CustomPlayer extends Player {
     private PlayerData playerData;
 
     private final PermissionHolder permissionHolder = new PermissionHolder();
+    private boolean permissionsLoaded = false;
 
     @Setter
     private boolean recording = false;
@@ -30,14 +31,12 @@ public class CustomPlayer extends Player {
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
-        loadRankPermissions();
         updatePermissionLevel();
     }
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile, PlayerRank rank) {
         this(playerConnection, gameProfile);
         this.rank = rank;
-        loadRankPermissions();
         updatePermissionLevel();
     }
 
@@ -46,6 +45,13 @@ public class CustomPlayer extends Player {
         loadRankPermissions();
         updateTabList();
         updatePermissionLevel();
+    }
+
+    /**
+     * Checks if player data has been loaded, which indicates that the player has fully initialized and is ready for permission checks and other operations that depend on player data.
+     */
+    public boolean isInitialized() {
+        return playerData != null && permissionsLoaded;
     }
 
     /**
@@ -69,6 +75,8 @@ public class CustomPlayer extends Player {
                 }
             }
         }
+
+        permissionsLoaded = true;
     }
 
     /**
@@ -144,6 +152,11 @@ public class CustomPlayer extends Player {
     }
 
     public void updateTabList() {
+        // Only send tab list updates if player is in PLAY state
+        if (!isOnline()) {
+            return;
+        }
+
         sendPacketToViewersAndSelf(new PlayerInfoUpdatePacket(
                 PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME,
                 new PlayerInfoUpdatePacket.Entry(
@@ -162,7 +175,7 @@ public class CustomPlayer extends Player {
 
         // Update list order based on priority (higher priority = lower order number for sorting at top)
         // Minestom sorts tab list ascending, so we invert priority
-        int tabListOrder = 1000 - (rank.getPriority() * 100);
+        int tabListOrder = rank.getPriority() * 100;
         sendPacketToViewersAndSelf(new PlayerInfoUpdatePacket(
                 PlayerInfoUpdatePacket.Action.UPDATE_LIST_ORDER,
                 new PlayerInfoUpdatePacket.Entry(

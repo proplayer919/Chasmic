@@ -3,17 +3,15 @@ package dev.proplayer919.chasmic.command;
 import dev.proplayer919.chasmic.CustomPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
-import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.minecraft.ArgumentItemStack;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.utils.entity.EntityFinder;
 
 /**
  * /give command for giving items to players
@@ -26,15 +24,18 @@ public class GiveCommand extends Command {
 
         setCondition((sender, commandString) -> {
             if (sender instanceof CustomPlayer player) {
+                // Allow command if player is not yet initialized (to avoid red text)
+                // Actual permission check happens in executor
+                if (!player.isInitialized()) {
+                    return true;
+                }
                 return player.hasPermission("admin.command.give");
             }
             return true; // Console always has permission
         });
 
         // Arguments
-        ArgumentEntity playerArg = ArgumentType.Entity("player")
-                .onlyPlayers(true)
-                .singleEntity(true);
+        PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         ArgumentItemStack itemArg = ArgumentType.ItemStack("item");
 
@@ -42,10 +43,10 @@ public class GiveCommand extends Command {
 
         // /give <player> <item> [amount] - Give item to player
         addSyntax((sender, context) -> {
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }

@@ -3,6 +3,7 @@ package dev.proplayer919.chasmic.command;
 import dev.proplayer919.chasmic.CustomPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
@@ -10,6 +11,8 @@ import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.utils.entity.EntityFinder;
+
+import java.util.Objects;
 
 /**
  * /gamemode command for changing player gamemode
@@ -22,6 +25,11 @@ public class GamemodeCommand extends Command {
 
         setCondition((sender, commandString) -> {
             if (sender instanceof CustomPlayer player) {
+                // Allow command if player is not yet initialized (to avoid red text)
+                // Actual permission check happens in executor
+                if (!player.isInitialized()) {
+                    return true;
+                }
                 return player.hasPermission("admin.command.gamemode");
             }
             return true; // Console always has permission
@@ -31,9 +39,7 @@ public class GamemodeCommand extends Command {
         ArgumentWord modeArg = ArgumentType.Word("mode")
                 .from("survival", "creative", "adventure", "spectator");
 
-        ArgumentEntity playerArg = ArgumentType.Entity("player")
-                .onlyPlayers(true)
-                .singleEntity(true);
+        PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         // /gamemode <mode> - Set own gamemode
         addSyntax((sender, context) -> {
@@ -65,10 +71,10 @@ public class GamemodeCommand extends Command {
                 return;
             }
 
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }

@@ -5,13 +5,12 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentEntity;
 import net.minestom.server.entity.Player;
-import net.minestom.server.utils.entity.EntityFinder;
 
 /**
  * /perms command for viewing and managing player permissions
@@ -26,15 +25,18 @@ public class PermsCommand extends Command {
 
         setCondition((sender, commandString) -> {
             if (sender instanceof CustomPlayer player) {
+                // Allow command if player is not yet initialized (to avoid red text)
+                // Actual permission check happens in executor
+                if (!player.isInitialized()) {
+                    return true;
+                }
                 return player.hasPermission("admin.command.perms");
             }
             return true; // Console always has permission
         });
 
         // Arguments
-        ArgumentEntity playerArg = ArgumentType.Entity("player")
-                .onlyPlayers(true)
-                .singleEntity(true);
+        PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         ArgumentWord setArg = ArgumentType.Word("set").from("set");
 
@@ -45,15 +47,13 @@ public class PermsCommand extends Command {
 
         // /perms <player> - View player's permissions
         addSyntax((sender, context) -> {
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }
-
-            CustomPlayer customTarget = (CustomPlayer) target;
 
             sender.sendMessage(Component.text("=== Permissions for " + target.getUsername() + " ===", NamedTextColor.GOLD));
             sender.sendMessage(Component.text("Rank: ", NamedTextColor.YELLOW)
@@ -78,18 +78,16 @@ public class PermsCommand extends Command {
 
         // /perms <player> set <permission> <true|false> - Set permission
         addSyntax((sender, context) -> {
-            EntityFinder finder = context.get(playerArg);
-            Player target = finder.findFirstPlayer(sender);
+            String targetName = context.get(playerArg);
+            Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
-            if (target == null) {
+            if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
                 return;
             }
 
             String permission = String.join(".", context.get(permArg));
             boolean value = context.get(boolArg).equals("true");
-
-            CustomPlayer customTarget = (CustomPlayer) target;
 
             if (value) {
                 // Grant permission

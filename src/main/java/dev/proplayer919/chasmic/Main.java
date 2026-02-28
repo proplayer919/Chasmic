@@ -51,8 +51,7 @@ public class Main {
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
                 .register(new ChatModule())
                 .register(new ServerListPingModule())
-                .register(new TabListModule())
-                .register(new WelcomeMessageModule("Welcome to ChasmicMC!")); // Send welcome to new players
+                .register(new TabListModule());
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler);
