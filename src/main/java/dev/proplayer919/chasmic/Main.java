@@ -2,8 +2,11 @@ package dev.proplayer919.chasmic;
 
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
+import dev.proplayer919.chasmic.items.CustomItemRegistry;
+import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.npc.NPC;
+import lombok.Getter;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.ChunkRange;
@@ -26,7 +29,15 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class Main {
+    @Getter
     private static MongoDBHandler mongoDBHandler;
+
+    @Getter
+    private static ItemActionRegistry itemActionRegistry;
+
+    @Getter
+    private static CustomItemRegistry customItemRegistry;
+
 
     static void main(String[] args) {
         // Initialize the server
@@ -53,6 +64,10 @@ public class Main {
                 .register(new ServerListPingModule())
                 .register(new TabListModule());
 
+        // Initialize registries
+        itemActionRegistry = new ItemActionRegistry();
+        customItemRegistry = new CustomItemRegistry();
+
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler);
 
@@ -62,6 +77,9 @@ public class Main {
 
         // Attach all modules to the global event handler
         moduleManager.attachAll(globalEventHandler);
+
+        // Attach event listeners for custom item actions
+        itemActionRegistry.registerEvents(globalEventHandler);
 
         globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(spawn);
@@ -75,6 +93,8 @@ public class Main {
 
             npc.setInstance(spawn, spawnPos);
             npc.addPlayerViewer(event.getPlayer());
+
+            event.getPlayer().getInventory().addItemStack(customItemRegistry.getItem("aspect_of_the_shallows").getItemStack());
         });
 
 

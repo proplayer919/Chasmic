@@ -40,6 +40,12 @@ public class PlayerData {
     @BsonProperty("permissions")
     private List<String> customPermissions = new ArrayList<>();
 
+    @BsonProperty("maxHealth")
+    private int maxHealth = 100;
+
+    @BsonProperty("maxMana")
+    private int maxMana = 100;
+
     /**
      * Gets the PlayerRank enum from the rank ID
      */

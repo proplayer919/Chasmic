@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic.module;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -23,7 +24,24 @@ public class ServerListPingModule implements Module {
     }
 
     public ServerListPingModule() {
-        this(Component.text("Welcome to my Minecraft server!", NamedTextColor.GOLD), 500);
+        this(createDefaultMotd(), 500);
+    }
+
+    private static Component createDefaultMotd() {
+        Component line1 = Component.empty()
+                .append(Component.text("                     "))
+                .append(Component.text("Chasmic", NamedTextColor.GREEN, TextDecoration.BOLD))
+                .append(Component.text(" <1.21.11>", NamedTextColor.RED));
+
+        Component line2 = Component.empty()
+                .append(Component.text("               Custom Items ", NamedTextColor.LIGHT_PURPLE))
+                .append(Component.text("| ", NamedTextColor.GOLD))
+                .append(Component.text("Story MMORPG", NamedTextColor.AQUA));
+
+        return Component.empty()
+                .append(line1)
+                .append(Component.newline())
+                .append(line2);
     }
 
     @Override
@@ -36,8 +54,6 @@ public class ServerListPingModule implements Module {
                     .playerInfo(Status.PlayerInfo.builder()
                             .onlinePlayers(onlinePlayers)
                             .maxPlayers(maxPlayers)
-                            .sample(NamedAndIdentified.named("Notch"))
-                            .sample(NamedAndIdentified.named(Component.text("Herobrine", NamedTextColor.AQUA)))
                             .build())
                     .build());
         });

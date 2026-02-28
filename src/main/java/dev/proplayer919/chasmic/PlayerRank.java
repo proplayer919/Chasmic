@@ -9,7 +9,7 @@ import java.util.List;
 
 @Getter
 public enum PlayerRank {
-    DEFAULT("default", 0, NamedTextColor.WHITE, NamedTextColor.GRAY,
+    DEFAULT("default", null, 0, NamedTextColor.WHITE, NamedTextColor.GRAY,
             List.of()),
 
     VIP("vip", Component.text("[VIP]").color(NamedTextColor.GREEN), 1, NamedTextColor.GREEN, NamedTextColor.WHITE,
@@ -67,7 +67,7 @@ public enum PlayerRank {
         this.defaultPermissions = defaultPermissions;
     }
 
-    PlayerRank(String id, int priority, TextColor usernameColor, TextColor messageColor, List<String> defaultPermissions) {
-        this(id, null, priority, usernameColor, messageColor, defaultPermissions);
+    public Component getDisplayName() {
+        return name != null ? name : Component.text("Default").color(NamedTextColor.WHITE);
     }
 }

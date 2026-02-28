@@ -60,7 +60,7 @@ public class RankCommand extends Command {
             PlayerRank rank = customTarget.getRank();
 
             sender.sendMessage(Component.text(target.getUsername() + "'s rank: ", NamedTextColor.YELLOW)
-                    .append(rank.getName())
+                    .append(rank.getDisplayName())
                     .append(Component.text(" (Priority: " + rank.getPriority() + ")", NamedTextColor.GRAY)));
         }, playerArg);
 
@@ -102,10 +102,10 @@ public class RankCommand extends Command {
             }
 
             sender.sendMessage(Component.text("Set " + target.getUsername() + "'s rank to ", NamedTextColor.GREEN)
-                    .append(newRank.getName()));
+                    .append(newRank.getDisplayName()));
 
             target.sendMessage(Component.text("Your rank has been updated to ", NamedTextColor.YELLOW)
-                    .append(newRank.getName()));
+                    .append(newRank.getDisplayName()));
 
         }, playerArg, setArg, rankArg);
 

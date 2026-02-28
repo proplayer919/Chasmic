@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic;
 
+import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
@@ -11,7 +12,10 @@ import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class CustomPlayer extends Player {
@@ -19,6 +23,14 @@ public class CustomPlayer extends Player {
 
     @Setter
     private PlayerData playerData;
+
+    @Setter
+    private int customHealth = 100;
+
+    @Setter
+    private int customMana = 100;
+
+    private final Map<String, Date> itemCooldowns = new HashMap<>();
 
     private final PermissionHolder permissionHolder = new PermissionHolder();
     private boolean permissionsLoaded = false;
@@ -45,6 +57,10 @@ public class CustomPlayer extends Player {
         loadRankPermissions();
         updateTabList();
         updatePermissionLevel();
+    }
+
+    public void usedItem(String itemId) {
+        itemCooldowns.put(itemId, new Date());
     }
 
     /**
@@ -191,5 +207,54 @@ public class CustomPlayer extends Player {
                         false
                 )
         ));
+    }
+
+    public void setMaxHealth(int maxHealth) {
+        if (customHealth > maxHealth) {
+            customHealth = maxHealth;
+        }
+
+        // Save to database
+        MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+        if (playerData != null && mongoDBHandler != null) {
+            playerData.setMaxHealth(maxHealth);
+            mongoDBHandler.savePlayerData(playerData);
+        }
+    }
+
+    public void setMaxMana(int maxMana) {
+        if (customMana > maxMana) {
+            customMana = maxMana;
+        }
+
+        // Save to database
+        MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+        if (playerData != null && mongoDBHandler != null) {
+            playerData.setMaxMana(maxMana);
+            mongoDBHandler.savePlayerData(playerData);
+        }
+    }
+
+    @Override
+    public void tick(long time) {
+        super.tick(time);
+
+        // Handle mana and health regeneration
+        if (isOnline()) {
+            // Regenerate mana
+            if (customMana < playerData.getMaxMana()) {
+                customMana = Math.min(customMana + 1, playerData.getMaxMana());
+            }
+
+            // Regenerate health
+            if (customHealth < playerData.getMaxHealth()) {
+                customHealth = Math.min(customHealth + 1, playerData.getMaxHealth());
+            }
+
+            // Show action bar with health and mana
+            Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
+            Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
+            sendActionBar(healthDisplay.append(Component.text("   ")).append(manaDisplay));
+        }
     }
 }
