@@ -15,7 +15,7 @@ import java.util.List;
 
 public class TestZombie extends CustomCreature {
     public TestZombie() {
-        super("test-zombie", "Test Zombie", EntityType.ZOMBIE, 50, CreatureType.UNDEAD, 5);
+        super("test-zombie", "Test Zombie", EntityType.ZOMBIE, 50, CreatureType.UNDEAD, 5.0f, 0f, 0.05f);
 
         addAIGroup(
                 List.of(

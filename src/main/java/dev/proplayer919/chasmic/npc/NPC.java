@@ -2,13 +2,9 @@ package dev.proplayer919.chasmic.npc;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import lombok.Getter;
-import lombok.Setter;
-import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.title.TitlePart;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.collision.BoundingBox;
-import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.*;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.metadata.LivingEntityMeta;

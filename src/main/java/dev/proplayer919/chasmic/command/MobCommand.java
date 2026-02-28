@@ -4,11 +4,9 @@ import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
-import net.minestom.server.entity.Player;
 
 /**
  * /mpb command for spawning a mob at the player's location

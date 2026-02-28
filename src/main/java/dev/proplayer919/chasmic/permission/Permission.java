@@ -1,5 +1,7 @@
 package dev.proplayer919.chasmic.permission;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Represents a permission node in a hierarchical permission system
  * Supports wildcard permissions (e.g., "rank.*", "*")
@@ -49,7 +51,7 @@ public record Permission(String node, boolean value) {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return (value ? "" : "-") + node;
     }
 }

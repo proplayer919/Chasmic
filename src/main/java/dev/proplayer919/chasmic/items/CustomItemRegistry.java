@@ -3,7 +3,6 @@ package dev.proplayer919.chasmic.items;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.PlayerStat;
 import dev.proplayer919.chasmic.PlayerStatBonus;
-import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
 
 import java.util.*;

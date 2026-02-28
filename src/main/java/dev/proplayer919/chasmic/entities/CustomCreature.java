@@ -8,7 +8,6 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.registry.RegistryKey;
 
@@ -24,7 +23,8 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
 
     private final CreatureType creatureType;
 
-    private int attackDamage = 10; // Example attack damage, can be customized per creature
+    @Getter
+    private float attack = 1.0f; // Flat attack damage
 
     @Getter
     private float defense = 0.0f; // Defense damage reduction (0-1, where 0.5 = 50% reduction)
@@ -48,15 +48,16 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
         this.creatureType = creatureType;
     }
 
-    public CustomCreature(String id, String name, EntityType entityType, int maxHealth, CreatureType creatureType, int attackDamage) {
+    public CustomCreature(String id, String name, EntityType entityType, int maxHealth, CreatureType creatureType, float attack, float defense, float criticalChance) {
         this(id, name, entityType, maxHealth, creatureType);
-        this.attackDamage = attackDamage;
+        this.attack = attack;
+        this.defense = defense;
+        this.criticalChance = criticalChance;
     }
 
     @Override
     public float getAttackStat() {
-        // Creatures use attackDamage directly, not a multiplier
-        return 1.0f;
+        return attack;
     }
 
     @Override
