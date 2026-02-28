@@ -8,6 +8,7 @@ import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.npc.NPC;
+import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import lombok.Getter;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
@@ -42,6 +43,9 @@ public class Main {
     @Getter
     private static AccessoryRegistry accessoryRegistry;
 
+    @Getter
+    private static PunishmentManager punishmentManager;
+
     private final static Pos spawnPos = new Pos(0.5, 41, 0.5);
 
 
@@ -57,6 +61,9 @@ public class Main {
         // Initialize MongoDB handler
         mongoDBHandler = new MongoDBHandler(); // Uses default: mongodb://localhost:27017, database "chasmic"
 
+        // Initialize punishment manager
+        punishmentManager = new PunishmentManager(mongoDBHandler);
+
         // Add shutdown hook to close MongoDB connection
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
             System.out.println("Closing MongoDB connection...");
@@ -65,6 +72,7 @@ public class Main {
 
         // Initialize modules
         ModuleManager moduleManager = new ModuleManager()
+                .register(new BanCheckModule(punishmentManager)) // Check for bans on login
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
                 .register(new ChatModule()) // Handle chat formatting and commands
                 .register(new ServerListPingModule()) // Custom MOTD and player count
@@ -79,7 +87,7 @@ public class Main {
         accessoryRegistry = new AccessoryRegistry();
 
         // Register commands
-        CommandRegistry.registerCommands(mongoDBHandler);
+        CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
 
         InstanceContainer spawn = getInstanceContainer();
 

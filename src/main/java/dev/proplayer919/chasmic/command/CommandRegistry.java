@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.command;
 
 import dev.proplayer919.chasmic.data.MongoDBHandler;
+import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 
@@ -12,13 +13,20 @@ public class CommandRegistry {
     /**
      * Registers all commands with Minestom's command manager
      * @param mongoDBHandler The MongoDB handler for database operations
+     * @param punishmentManager The punishment manager for handling punishments
      */
-    public static void registerCommands(MongoDBHandler mongoDBHandler) {
+    public static void registerCommands(MongoDBHandler mongoDBHandler, PunishmentManager punishmentManager) {
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
         // Set MongoDB handler for commands that need it
         RankCommand.setMongoDBHandler(mongoDBHandler);
         PermsCommand.setMongoDBHandler(mongoDBHandler);
+
+        // Set punishment manager for punishment commands
+        WarnCommand.setPunishmentManager(punishmentManager);
+        KickCommand.setPunishmentManager(punishmentManager);
+        BanCommand.setPunishmentManager(punishmentManager);
+        UnbanCommand.setPunishmentManager(punishmentManager);
 
         // Register commands
         commandManager.register(new MediaCommand());
@@ -28,6 +36,12 @@ public class CommandRegistry {
         commandManager.register(new GamemodeCommand());
         commandManager.register(new GiveCommand());
         commandManager.register(new MobCommand());
+
+        // Register punishment commands
+        commandManager.register(new WarnCommand());
+        commandManager.register(new KickCommand());
+        commandManager.register(new BanCommand());
+        commandManager.register(new UnbanCommand());
     }
 }
 
