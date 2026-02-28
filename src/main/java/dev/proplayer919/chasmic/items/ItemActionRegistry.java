@@ -6,7 +6,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.network.packet.server.play.SetCooldownPacket;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,7 +17,7 @@ public class ItemActionRegistry {
 
     public ItemActionRegistry() {
         // Register items actions here
-        registerItemAction(new ItemAction("warp", 0.5, 20, new ItemWarpAction()));
+        registerItemAction(new ItemAction("warp", 0.25, 20, new ItemWarpAction()));
     }
 
     public void registerEvents(EventNode<Event> eventNode) {
@@ -39,8 +41,13 @@ public class ItemActionRegistry {
             }
 
             // Check cooldown
-            if (player.getItemCooldowns().getOrDefault(actionId, new java.util.Date(0)).after(new java.util.Date())) {
-                player.sendMessage(Component.text("This item is on cooldown!").color(NamedTextColor.RED));
+            Date lastUsed = player.getItemCooldowns().get(actionId);
+            if (lastUsed != null) {
+                long timeSinceLastUse = new Date().getTime() - lastUsed.getTime();
+                if (timeSinceLastUse < itemAction.cooldownSeconds() * 1000) {
+                    player.sendMessage(Component.text("You must wait before using this item again!").color(NamedTextColor.RED));
+                    return;
+                }
             }
 
             // Check mana cost
@@ -50,14 +57,16 @@ public class ItemActionRegistry {
                 return;
             }
 
-            // Deduct mana cost
-            player.setCustomMana(playerMana - itemAction.manaCost());
-
             // Execute the action
-            itemAction.actionHandler().handleAction(player);
+            ItemActionResult result = itemAction.actionHandler().handleAction(player);
 
-            // Set cooldown
-            player.usedItem(actionId);
+            if (result.success) {
+                // Deduct mana cost
+                player.setCustomMana(playerMana - itemAction.manaCost());
+
+                // Set cooldown
+                player.usedItem(actionId);
+            }
         });
     }
 

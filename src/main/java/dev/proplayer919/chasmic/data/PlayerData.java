@@ -46,6 +46,16 @@ public class PlayerData {
     @BsonProperty("maxMana")
     private int maxMana = 100;
 
+    // Combat Stats
+    @BsonProperty("attack")
+    private float attack = 1.0f; // Attack damage multiplier
+
+    @BsonProperty("defense")
+    private float defense = 0.0f; // Defense damage reduction (0-1, where 0.5 = 50% reduction)
+
+    @BsonProperty("criticalChance")
+    private float criticalChance = 0.0f; // Critical chance multiplier (0-1, where 0.1 = 10% chance)
+
     /**
      * Gets the PlayerRank enum from the rank ID
      */

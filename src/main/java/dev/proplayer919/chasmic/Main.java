@@ -11,7 +11,6 @@ import lombok.Getter;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.ChunkRange;
-import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.PlayerSkin;
 import net.minestom.server.event.GlobalEventHandler;
@@ -39,7 +38,7 @@ public class Main {
     @Getter
     private static CustomItemRegistry customItemRegistry;
 
-    private final static Pos spawnPos = new Pos(0.5, 50, 0.5);
+    private final static Pos spawnPos = new Pos(0.5, 41, 0.5);
 
 
     static void main(String[] args) {
@@ -65,6 +64,8 @@ public class Main {
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
                 .register(new ChatModule())
                 .register(new ServerListPingModule())
+                .register(new EntityAttackModule())  // Creatures attacking players
+                .register(new PlayerAttackModule())  // Players attacking creatures
                 .register(new TabListModule());
 
         // Initialize registries
@@ -94,6 +95,7 @@ public class Main {
 
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             event.getPlayer().teleport(spawnPos);
+            event.getPlayer().setRespawnPoint(spawnPos);
 
             TestZombie zombie = new TestZombie();
             zombie.setInstance(spawn, spawnPos);
@@ -114,29 +116,17 @@ public class Main {
         InstanceContainer spawn = instanceManager.createInstanceContainer();
         spawn.setChunkSupplier(LightingChunk::new);
 
-        spawn.setGenerator(unit -> {
-            final Point start = unit.absoluteStart();
-            final Point size = unit.size();
+        spawn.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
 
-            // Fill every 5th layer with stone
-            for (int y = 0; y < size.y(); y++) {
-                for (int x = 0; x < size.x(); x++) {
-                    for (int z = 0; z < size.z(); z++) {
-                        if (y % 5 == 0) {
-                            unit.modifier().setBlock(start.add(x, y, z), Block.STONE);
-                        }
-                    }
-                }
-            }
-        });
-
+        // Load chunks synchronously before server starts
         var chunks = new ArrayList<CompletableFuture<Chunk>>();
         ChunkRange.chunksInRange(0, 0, 32, (x, z) -> chunks.add(spawn.loadChunk(x, z)));
 
-        CompletableFuture.runAsync(() -> {
-            CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).join();
-            LightingChunk.relight(spawn, spawn.getChunks());
-        });
+        // Wait for all chunks to load
+        CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).join();
+
+        // Relight the chunks
+        LightingChunk.relight(spawn, spawn.getChunks());
 
         return spawn;
     }

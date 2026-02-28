@@ -2,24 +2,40 @@ package dev.proplayer919.chasmic;
 
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
+import dev.proplayer919.chasmic.entities.CustomCreature;
+import dev.proplayer919.chasmic.entities.HealthCreature;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.adventure.audience.Audiences;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityCreature;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
+import net.minestom.server.entity.damage.Damage;
+import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.GlobalEventHandler;
+import net.minestom.server.event.player.PlayerDeathEvent;
+import net.minestom.server.event.player.PlayerRespawnEvent;
+import net.minestom.server.network.packet.server.play.DeathCombatEventPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
-import net.minestom.server.tag.Tag;
+import net.minestom.server.registry.RegistryKey;
+import net.minestom.server.timer.TaskSchedule;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Getter
-public class CustomPlayer extends Player {
+public class CustomPlayer extends Player implements HealthCreature {
     private PlayerRank rank = PlayerRank.DEFAULT;
 
     @Setter
@@ -42,17 +58,198 @@ public class CustomPlayer extends Player {
     @Setter
     private boolean streaming = false;
 
-    public static final Tag<Long> LAST_ATTACKED_TICKS = Tag.Long("lastAttackedTicks");
+    private Date lastDamageTime;
+    private CustomCreature lastDamageAttacker;
+
+    // Action bar throttling to prevent lag
+    private int lastActionBarHealth = -1;
+    private int lastActionBarMana = -1;
+    private boolean lastActionBarRecording = false;
+    private boolean lastActionBarStreaming = false;
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
         updatePermissionLevel();
+        setupRegenSchedule();
+        setupPlayerAttributes();
+        setupEventListeners();
     }
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile, PlayerRank rank) {
         this(playerConnection, gameProfile);
         this.rank = rank;
-        updatePermissionLevel();
+    }
+
+    private void setupPlayerAttributes() {
+        getAttribute(Attribute.ATTACK_SPEED).addModifier(new AttributeModifier(UUID.randomUUID().toString(), 1000, AttributeOperation.ADD_VALUE));
+    }
+
+    private void setupEventListeners() {
+        GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
+        globalEventHandler.addListener(PlayerDeathEvent.class, event -> {
+            if (event.getPlayer().getUuid().equals(getUuid())) {
+                event.setChatMessage(null);
+
+                if (lastDamageAttacker != null) {
+                    event.setDeathText(Component.text("☠  Killed by " + lastDamageAttacker.getName()).color(NamedTextColor.RED));
+                    lastDamageAttacker = null;
+                } else {
+                    event.setDeathText(Component.text("☠ You died!").color(NamedTextColor.RED));
+                }
+            }
+        });
+
+        globalEventHandler.addListener(PlayerRespawnEvent.class, event -> {
+            if (event.getPlayer().getUuid().equals(getUuid())) {
+                // Reset health and mana on respawn
+                customHealth = playerData != null ? playerData.getMaxHealth() : 100;
+                customMana = playerData != null ? playerData.getMaxMana() : 100;
+            }
+        });
+    }
+
+    private void setupRegenSchedule() {
+        // Schedule health regeneration with interval dependent on max health
+        MinecraftServer.getSchedulerManager().submitTask(() -> {
+            // Only regenerate if player is online, has player data loaded, and it's been at least 5 seconds since last damage
+            if (isOnline() && playerData != null && (lastDamageTime == null || new Date().getTime() - lastDamageTime.getTime() >= 5000)) {
+                // Regenerate health
+                if (customHealth < playerData.getMaxHealth()) {
+                    customHealth = Math.min(customHealth + 1, playerData.getMaxHealth());
+                }
+            }
+
+            // Calculate interval: 50000 / maxHealth milliseconds (for 100 max = 500ms)
+            if (playerData != null) {
+                long healthInterval = Math.max(50000 / playerData.getMaxHealth(), 10);
+                return TaskSchedule.millis(healthInterval);
+            }
+            return TaskSchedule.millis(500);
+        });
+
+        // Schedule mana regeneration with interval dependent on max mana
+        MinecraftServer.getSchedulerManager().submitTask(() -> {
+            if (isOnline() && playerData != null) {
+                // Regenerate mana
+                if (customMana < playerData.getMaxMana()) {
+                    customMana = Math.min(customMana + 1, playerData.getMaxMana());
+                }
+            }
+
+            // Calculate interval: 25000 / maxMana milliseconds (for 100 max = 250ms)
+            if (playerData != null) {
+                long manaInterval = Math.max(25000 / playerData.getMaxMana(), 10);
+                return TaskSchedule.millis(manaInterval);
+            }
+            return TaskSchedule.millis(250);
+        });
+    }
+
+    @Override
+    public void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos) {
+        if (getGameMode() == GameMode.CREATIVE || getGameMode() == GameMode.SPECTATOR) {
+            return; // No damage in creative or spectator mode
+        }
+
+        lastDamageTime = new Date();
+
+        if (attacker instanceof CustomCreature) {
+            lastDamageAttacker = (CustomCreature) attacker;
+        } else {
+            lastDamageAttacker = null;
+        }
+
+        // Apply defense stat to reduce damage
+        int finalDamage = applyDefenseToIncomingDamage(amount);
+
+        this.customHealth -= finalDamage;
+
+        if (this.customHealth <= 0) {
+            this.customHealth = 0;
+            this.kill();
+        }
+    }
+
+    /**
+     * Apply player's defense stat to reduce incoming damage
+     */
+    private int applyDefenseToIncomingDamage(int incomingDamage) {
+        if (playerData == null) {
+            return incomingDamage;
+        }
+
+        float defense = playerData.getDefense();
+        // Defense stat reduces damage by the specified percentage
+        // defense = 0.5 means 50% damage reduction
+        float damageReduction = incomingDamage * defense;
+        int finalDamage = Math.round(incomingDamage - damageReduction);
+
+        return Math.max(1, finalDamage); // Minimum 1 damage always gets through
+    }
+
+    @Override
+    public float getAttackStat() {
+        if (playerData == null) {
+            return 1.0f;
+        }
+        return playerData.getAttack();
+    }
+
+    @Override
+    public float getDefenseStat() {
+        if (playerData == null) {
+            return 0.0f;
+        }
+        return playerData.getDefense();
+    }
+
+    @Override
+    public float getCriticalChanceStat() {
+        if (playerData == null) {
+            return 0.0f;
+        }
+        return playerData.getCriticalChance();
+    }
+
+    public void tick(long time) {
+        super.tick(time);
+
+        // Only update action bar if values have changed (prevents massive lag from packet spam)
+        if (isOnline() && playerData != null) {
+            boolean healthChanged = lastActionBarHealth != customHealth;
+            boolean manaChanged = lastActionBarMana != customMana;
+            boolean recordingChanged = lastActionBarRecording != recording;
+            boolean streamingChanged = lastActionBarStreaming != streaming;
+
+            if (healthChanged || manaChanged || recordingChanged || streamingChanged) {
+                // Show action bar with health and mana
+                Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
+                Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
+                Component actionBarContent = healthDisplay.append(Component.text("   ")).append(manaDisplay);
+
+                // Add streaming/recording status if applicable
+                if (streaming || recording) {
+                    actionBarContent = actionBarContent.append(Component.text("   |   ").color(NamedTextColor.GRAY));
+                    if (recording) {
+                        actionBarContent = actionBarContent.append(Component.text("● Recording").color(NamedTextColor.RED));
+                    }
+                    if (streaming) {
+                        if (recording) {
+                            actionBarContent = actionBarContent.append(Component.text(" "));
+                        }
+                        actionBarContent = actionBarContent.append(Component.text("● Streaming").color(NamedTextColor.LIGHT_PURPLE));
+                    }
+                }
+
+                sendActionBar(actionBarContent);
+
+                // Update tracked values
+                lastActionBarHealth = customHealth;
+                lastActionBarMana = customMana;
+                lastActionBarRecording = recording;
+                lastActionBarStreaming = streaming;
+            }
+        }
     }
 
     public void setRank(PlayerRank rank) {
@@ -235,29 +432,6 @@ public class CustomPlayer extends Player {
         if (playerData != null && mongoDBHandler != null) {
             playerData.setMaxMana(maxMana);
             mongoDBHandler.savePlayerData(playerData);
-        }
-    }
-
-    @Override
-    public void tick(long time) {
-        super.tick(time);
-
-        // Handle mana and health regeneration
-        if (isOnline()) {
-            // Regenerate mana
-            if (customMana < playerData.getMaxMana()) {
-                customMana = Math.min(customMana + 1, playerData.getMaxMana());
-            }
-
-            // Regenerate health
-            if (customHealth < playerData.getMaxHealth()) {
-                customHealth = Math.min(customHealth + 1, playerData.getMaxHealth());
-            }
-
-            // Show action bar with health and mana
-            Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
-            Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
-            sendActionBar(healthDisplay.append(Component.text("   ")).append(manaDisplay));
         }
     }
 }

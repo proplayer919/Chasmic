@@ -4,6 +4,7 @@ import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.entities.CreatureType;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ai.goal.MeleeAttackGoal;
 import net.minestom.server.entity.ai.goal.RandomStrollGoal;
 import net.minestom.server.entity.ai.target.ClosestEntityTarget;
@@ -14,7 +15,7 @@ import java.util.List;
 
 public class TestZombie extends CustomCreature {
     public TestZombie() {
-        super(EntityType.ZOMBIE, 50, CreatureType.UNDEAD);
+        super("test-zombie", "Test Zombie", EntityType.ZOMBIE, 50, CreatureType.UNDEAD, 5);
 
         addAIGroup(
                 List.of(
@@ -23,8 +24,13 @@ public class TestZombie extends CustomCreature {
                 ),
                 List.of(
                         new LastEntityDamagerTarget(this, 32), // First target the last entity which attacked you
-                        new ClosestEntityTarget(this, 32, entity -> entity instanceof CustomPlayer) // If there is none, target the nearest player
+                        new ClosestEntityTarget(this, 32, entity ->
+                                entity instanceof CustomPlayer player &&
+                                player.getGameMode() != GameMode.CREATIVE &&
+                                player.getGameMode() != GameMode.SPECTATOR
+                        ) // If there is none, target the nearest player (not in creative/spectator)
                 )
         );
     }
 }
+

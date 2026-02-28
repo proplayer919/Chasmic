@@ -5,7 +5,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.item.component.UseCooldown;
 import net.minestom.server.tag.Tag;
 
 @Getter
@@ -19,6 +18,7 @@ public class CustomItem {
 
     private ItemAction action;
     static final Tag<String> itemActionTag = Tag.String("custom_item_action");
+    static final Tag<String> itemIdTag = Tag.String("custom_item_id");
 
     public CustomItem(String id, Component displayName, Material material, Component description, ItemType itemType, float baseDamage) {
         this.id = id;
@@ -46,15 +46,21 @@ public class CustomItem {
             itemStack = ItemStack.builder(material)
                     .set(DataComponents.ITEM_NAME, displayName)
                     .lore(description)
+                    .set(itemIdTag, id)
                     .build();
         } else {
             itemStack = ItemStack.builder(material)
                     .set(DataComponents.ITEM_NAME, displayName)
                     .lore(description)
                     .set(itemActionTag, action.id())
+                    .set(itemIdTag, id)
                     .build();
         }
 
         return itemStack;
+    }
+
+    public static String getItemId(ItemStack itemStack) {
+        return itemStack.getTag(itemIdTag);
     }
 }
