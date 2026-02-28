@@ -4,6 +4,9 @@ import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.PlayerStatBonus;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -14,17 +17,17 @@ import java.util.Collection;
 @Getter
 public class CustomItem {
     private final String id;
-    private final Component displayName;
+    private final String displayName;
     private final Material material;
-    private final Component description;
+    private final String description;
     private final ItemType itemType;
     private final Collection<PlayerStatBonus> statBonuses;
 
     private ItemAction action;
-    static final Tag<String> itemActionTag = Tag.String("custom_item_action");
-    static final Tag<String> itemIdTag = Tag.String("custom_item_id");
+    public static final Tag<String> itemActionTag = Tag.String("custom_item_action");
+    public static final Tag<String> itemIdTag = Tag.String("custom_item_id");
 
-    public CustomItem(String id, Component displayName, Material material, Component description, ItemType itemType, Collection<PlayerStatBonus> statBonuses) {
+    public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Collection<PlayerStatBonus> statBonuses) {
         this.id = id;
         this.displayName = displayName;
         this.material = material;
@@ -33,7 +36,7 @@ public class CustomItem {
         this.statBonuses = statBonuses;
     }
 
-    public CustomItem(String id, Component displayName, Material material, Component description, ItemType itemType, Collection<PlayerStatBonus> statBonuses, ItemAction action) {
+    public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Collection<PlayerStatBonus> statBonuses, ItemAction action) {
         this.id = id;
         this.displayName = displayName;
         this.material = material;
@@ -48,14 +51,14 @@ public class CustomItem {
 
         if (action == null) {
             itemStack = ItemStack.builder(material)
-                    .set(DataComponents.ITEM_NAME, displayName)
-                    .lore(description)
+                    .set(DataComponents.ITEM_NAME, Component.text(displayName))
+                    .lore(Component.text(description).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.WHITE))
                     .set(itemIdTag, id)
                     .build();
         } else {
             itemStack = ItemStack.builder(material)
-                    .set(DataComponents.ITEM_NAME, displayName)
-                    .lore(description)
+                    .set(DataComponents.ITEM_NAME, Component.text(displayName))
+                    .lore(Component.text(description).decoration(TextDecoration.ITALIC, false).color(NamedTextColor.WHITE))
                     .set(itemActionTag, action.id())
                     .set(itemIdTag, id)
                     .build();

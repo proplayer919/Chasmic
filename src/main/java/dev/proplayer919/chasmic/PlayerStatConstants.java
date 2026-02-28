@@ -6,15 +6,10 @@ public class PlayerStatConstants {
     private final static float BASE_CRITICAL_CHANCE = 0.05f; // Base critical chance (5%)
 
     public static float getBaseValue(PlayerStat stat) {
-        switch (stat) {
-            case ATTACK:
-                return BASE_ATTACK;
-            case DEFENSE:
-                return BASE_DEFENSE;
-            case CRITICAL_CHANCE:
-                return BASE_CRITICAL_CHANCE;
-            default:
-                throw new IllegalArgumentException("Unknown stat: " + stat);
-        }
+        return switch (stat) {
+            case ATTACK -> BASE_ATTACK;
+            case DEFENSE -> BASE_DEFENSE;
+            case CRITICAL_CHANCE -> BASE_CRITICAL_CHANCE;
+        };
     }
 }

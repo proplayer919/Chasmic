@@ -79,25 +79,20 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
      * Only calls setCustomName if health actually changed to prevent lag
      */
     private void updateHealthDisplay() {
-        boolean shouldShowHealth = customHealth < customMaxHealth;
+        boolean shouldShowHealth = customHealth < customMaxHealth && customHealth > 0;
 
         // Only update if health display state changed
         if (shouldShowHealth) {
             // Only update if health value actually changed
             if (lastDisplayedHealth != customHealth) {
-                Component healthDisplay = Component.text("❤ " + Math.max(customHealth, 0) + "/" + customMaxHealth)
+                Component healthDisplay = Component.text("❤ " + customHealth + "/" + customMaxHealth)
                         .color(NamedTextColor.RED);
                 setCustomName(healthDisplay);
                 setCustomNameVisible(true);
                 lastDisplayedHealth = customHealth;
             }
         } else {
-            // Only update if we were previously showing health
-            if (lastDisplayedHealth != -1) {
-                setCustomName(Component.text(name));
-                setCustomNameVisible(false);
-                lastDisplayedHealth = -1;
-            }
+            setCustomNameVisible(false);
         }
     }
 

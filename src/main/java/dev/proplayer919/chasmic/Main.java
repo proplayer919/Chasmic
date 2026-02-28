@@ -66,11 +66,12 @@ public class Main {
         // Initialize modules
         ModuleManager moduleManager = new ModuleManager()
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
-                .register(new ChatModule())
-                .register(new ServerListPingModule())
+                .register(new ChatModule()) // Handle chat formatting and commands
+                .register(new ServerListPingModule()) // Custom MOTD and player count
                 .register(new EntityAttackModule())  // Creatures attacking players
                 .register(new PlayerAttackModule())  // Players attacking creatures
-                .register(new TabListModule());
+                .register(new ItemActionModule()) // Handle custom item actions
+                .register(new TabListModule()); // Update tab list on player spawn
 
         // Initialize registries
         itemActionRegistry = new ItemActionRegistry();
@@ -90,9 +91,6 @@ public class Main {
 
         // Attach all modules to the global event handler
         moduleManager.attachAll(globalEventHandler);
-
-        // Attach event listeners for custom item actions
-        itemActionRegistry.registerEvents(globalEventHandler);
 
         globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(spawn);

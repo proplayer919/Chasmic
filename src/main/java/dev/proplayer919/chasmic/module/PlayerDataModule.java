@@ -31,6 +31,8 @@ public class PlayerDataModule implements Module {
                         // Store the player data in the player object for later use
                         player.setPlayerData(playerData);
 
+                        player.dataLoadCallback();
+
                         // Mark that we need to load the rank on the first tick
                         player.setTag(NEEDS_RANK_LOAD, true);
                     })

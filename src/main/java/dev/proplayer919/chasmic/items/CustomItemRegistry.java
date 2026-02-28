@@ -14,9 +14,9 @@ public class CustomItemRegistry {
     public CustomItemRegistry() {
         // Register items here
         registerItem(new CustomItem("aspect_of_the_shallows",
-                Component.text("Aspect of the Shallows"),
+                "Aspect of the Shallows",
                 Material.GOLDEN_SWORD,
-                Component.text("A powerful magical weapon that can teleport the wielder quickly away from danger."),
+                "A powerful magical weapon that can teleport the wielder quickly away from danger.",
                 ItemType.WEAPON_MELEE,
                 new ArrayList<>(List.of(new PlayerStatBonus(PlayerStat.ATTACK, 5.0f))),
                 Main.getItemActionRegistry().getItemAction("warp")));

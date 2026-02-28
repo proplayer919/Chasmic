@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
+import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
 import net.minestom.server.entity.Player;
 
 /**
@@ -32,10 +33,12 @@ public class MobCommand extends Command {
 
         // Arguments
         ArgumentWord mobTypeArg = new ArgumentWord("mob").from("test-zombie");
+        ArgumentInteger amountArg = (ArgumentInteger) new ArgumentInteger("amount").setDefaultValue(1);
 
         // /mob <mob> - Spawn mob at player's location
         addSyntax((sender, context) -> {
             String mobType = context.get(mobTypeArg);
+            int amount = context.get(amountArg);
 
             if (!(sender instanceof CustomPlayer player)) {
                 sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
@@ -48,16 +51,23 @@ public class MobCommand extends Command {
                 return;
             }
 
-            switch (mobType) {
-                case "test-zombie" -> {
-                    // Spawn a test zombie at the player's location
+            // Check if the amount is greater than 0
+            if (amount <= 0) {
+                sender.sendMessage(Component.text("Amount must be greater than 0!", NamedTextColor.RED));
+                return;
+            }
+
+            if (mobType.equals("test-zombie")) {
+                // Spawn a test zombie at the player's location
+                for (int i = 0; i < amount; i++) {
                     TestZombie testZombie = new TestZombie();
                     testZombie.setInstance(player.getInstance(), player.getPosition());
-                    sender.sendMessage(Component.text("Spawned a test zombie!", NamedTextColor.GREEN));
                 }
-                default -> sender.sendMessage(Component.text("Unknown mob type: " + mobType, NamedTextColor.RED));
+                sender.sendMessage(Component.text("Spawned " + amount + "x Test Zombies!", NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("Unknown mob type: " + mobType, NamedTextColor.RED));
             }
-        }, mobTypeArg);
+        }, mobTypeArg, amountArg);
     }
 }
 

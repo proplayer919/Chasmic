@@ -60,12 +60,6 @@ public class CustomPlayer extends Player implements HealthCreature {
     private Date lastDamageTime;
     private CustomCreature lastDamageAttacker;
 
-    // Action bar throttling to prevent lag
-    private int lastActionBarHealth = -1;
-    private int lastActionBarMana = -1;
-    private boolean lastActionBarRecording = false;
-    private boolean lastActionBarStreaming = false;
-
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
         updatePermissionLevel();
@@ -77,6 +71,14 @@ public class CustomPlayer extends Player implements HealthCreature {
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile, PlayerRank rank) {
         this(playerConnection, gameProfile);
         this.rank = rank;
+    }
+
+    public void dataLoadCallback() {
+        // Called after player data is loaded to set initial health/mana
+        if (playerData != null) {
+            this.customHealth = playerData.getMaxHealth();
+            this.customMana = playerData.getMaxMana();
+        }
     }
 
     private void setupPlayerAttributes() {
@@ -217,23 +219,10 @@ public class CustomPlayer extends Player implements HealthCreature {
 
         // Only update action bar if values have changed (prevents massive lag from packet spam)
         if (isOnline() && playerData != null) {
-            boolean healthChanged = lastActionBarHealth != customHealth;
-            boolean manaChanged = lastActionBarMana != customMana;
-            boolean recordingChanged = lastActionBarRecording != recording;
-            boolean streamingChanged = lastActionBarStreaming != streaming;
+            // Show action bar with health and mana
+            Component actionBarContent = getActionBarContent();
 
-            if (healthChanged || manaChanged || recordingChanged || streamingChanged) {
-                // Show action bar with health and mana
-                Component actionBarContent = getActionBarContent();
-
-                sendActionBar(actionBarContent);
-
-                // Update tracked values
-                lastActionBarHealth = customHealth;
-                lastActionBarMana = customMana;
-                lastActionBarRecording = recording;
-                lastActionBarStreaming = streaming;
-            }
+            sendActionBar(actionBarContent);
         }
     }
 

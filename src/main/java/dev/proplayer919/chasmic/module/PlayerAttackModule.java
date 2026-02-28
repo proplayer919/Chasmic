@@ -1,19 +1,16 @@
 package dev.proplayer919.chasmic.module;
 
 import dev.proplayer919.chasmic.CustomPlayer;
-import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.combat.AttackResult;
 import dev.proplayer919.chasmic.combat.CombatUtils;
 import dev.proplayer919.chasmic.entities.CustomCreature;
-import dev.proplayer919.chasmic.items.CustomItem;
-import dev.proplayer919.chasmic.items.CustomItemRegistry;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -52,8 +49,8 @@ public class PlayerAttackModule implements Module {
             // Apply knockback
             applyKnockback(creature, player);
 
-            // Play attack sound
-            playAttackSound(player, creature);
+            // Play attack sound (with critical hit sound if applicable)
+            playAttackSound(player, creature, attackResult);
         });
     }
 
@@ -89,15 +86,26 @@ public class PlayerAttackModule implements Module {
 
     /**
      * Play attack sound for the player attacking
+     * Plays a special sound effect when the attack is a critical hit
      */
-    private void playAttackSound(CustomPlayer player, CustomCreature creature) {
-        // Play sword hit sound to player
-        player.playSound(Sound.sound(
-                net.kyori.adventure.key.Key.key("minecraft:entity.player.attack.sweep"),
-                Sound.Source.PLAYER,
-                1.0f,
-                1.0f
-        ));
+    private void playAttackSound(CustomPlayer player, CustomCreature creature, AttackResult attackResult) {
+        if (attackResult.isCritical()) {
+            // Play critical hit sound - a higher pitched and more impactful sound
+            player.playSound(Sound.sound(
+                    Key.key("minecraft:entity.player.attack.crit"),
+                    Sound.Source.PLAYER,
+                    1.0f,
+                    1.0f
+            ));
+        } else {
+            // Play normal sword hit sound to player
+            player.playSound(Sound.sound(
+                    Key.key("minecraft:entity.player.attack.sweep"),
+                    Sound.Source.PLAYER,
+                    0.5f,
+                    1.0f
+            ));
+        }
     }
 
     @Override

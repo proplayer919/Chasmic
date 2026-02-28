@@ -22,7 +22,7 @@ public class AccessoryBag {
     public List<String> serialize() {
         List<String> serialized = new ArrayList<>();
         for (Accessory accessory : accessories) {
-            serialized.add(accessory.id());
+            serialized.add(accessory.getId());
         }
         return serialized;
     }
@@ -47,7 +47,7 @@ public class AccessoryBag {
     public Map<PlayerStat, Float> sumStats() {
         Map<PlayerStat, Float> stats = new HashMap<>();
         for (Accessory accessory : accessories) {
-            for (PlayerStatBonus statBonus : accessory.statsBonuses()) {
+            for (PlayerStatBonus statBonus : accessory.getStatsBonuses()) {
                 stats.put(statBonus.stat(), stats.getOrDefault(statBonus.stat(), 0f) + statBonus.bonusAmount());
             }
         }
