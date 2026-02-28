@@ -17,7 +17,7 @@ public class ItemActionRegistry {
 
     public ItemActionRegistry() {
         // Register items actions here
-        registerItemAction(new ItemAction("warp", 0.25, 20, new ItemWarpAction()));
+        registerItemAction(new ItemAction("warp", 0, 20, new ItemWarpAction()));
     }
 
     public void registerEvents(EventNode<Event> eventNode) {

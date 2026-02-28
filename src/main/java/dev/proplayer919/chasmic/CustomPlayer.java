@@ -1,36 +1,35 @@
 package dev.proplayer919.chasmic;
 
+import dev.proplayer919.chasmic.combat.CombatUtils;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
+import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.adventure.audience.Audiences;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
-import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
-import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerRespawnEvent;
-import net.minestom.server.network.packet.server.play.DeathCombatEventPacket;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.timer.TaskSchedule;
+import org.jspecify.annotations.NonNull;
 
 import java.util.*;
 
@@ -160,7 +159,7 @@ public class CustomPlayer extends Player implements HealthCreature {
         }
 
         // Apply defense stat to reduce damage
-        int finalDamage = applyDefenseToIncomingDamage(amount);
+        int finalDamage = CombatUtils.applyDefenseToIncomingDamage(amount, getDefenseStat());
 
         this.customHealth -= finalDamage;
 
@@ -170,45 +169,47 @@ public class CustomPlayer extends Player implements HealthCreature {
         }
     }
 
-    /**
-     * Apply player's defense stat to reduce incoming damage
-     */
-    private int applyDefenseToIncomingDamage(int incomingDamage) {
+    private Collection<PlayerStatBonus> getMainHandItemStatBonuses() {
+        ItemStack mainHandItem = getItemInMainHand();
+        if (!mainHandItem.isAir()) {
+            CustomItem customItem = CustomItem.getCustomItemFromItemStack(mainHandItem);
+            if (customItem != null) {
+                return customItem.getStatBonuses();
+            }
+        }
+        return Collections.emptyList();
+    }
+
+    private float getStatFor(PlayerStat stat) {
+        float baseValue = PlayerStatConstants.getBaseValue(stat);
         if (playerData == null) {
-            return incomingDamage;
+            return baseValue;
+        }
+        float bonus = playerData.getAccessoryBagObject().sumStats().getOrDefault(stat, 0f);
+
+        Collection<PlayerStatBonus> mainHandBonuses = getMainHandItemStatBonuses();
+        for (PlayerStatBonus statBonus : mainHandBonuses) {
+            if (statBonus.stat() == stat) {
+                bonus += statBonus.bonusAmount();
+            }
         }
 
-        float defense = playerData.getDefense();
-        // Defense stat reduces damage by the specified percentage
-        // defense = 0.5 means 50% damage reduction
-        float damageReduction = incomingDamage * defense;
-        int finalDamage = Math.round(incomingDamage - damageReduction);
-
-        return Math.max(1, finalDamage); // Minimum 1 damage always gets through
+        return baseValue + bonus;
     }
 
     @Override
     public float getAttackStat() {
-        if (playerData == null) {
-            return 1.0f;
-        }
-        return playerData.getAttack();
+        return getStatFor(PlayerStat.ATTACK);
     }
 
     @Override
     public float getDefenseStat() {
-        if (playerData == null) {
-            return 0.0f;
-        }
-        return playerData.getDefense();
+        return getStatFor(PlayerStat.DEFENSE);
     }
 
     @Override
     public float getCriticalChanceStat() {
-        if (playerData == null) {
-            return 0.0f;
-        }
-        return playerData.getCriticalChance();
+        return getStatFor(PlayerStat.CRITICAL_CHANCE);
     }
 
     public void tick(long time) {
@@ -223,23 +224,7 @@ public class CustomPlayer extends Player implements HealthCreature {
 
             if (healthChanged || manaChanged || recordingChanged || streamingChanged) {
                 // Show action bar with health and mana
-                Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
-                Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
-                Component actionBarContent = healthDisplay.append(Component.text("   ")).append(manaDisplay);
-
-                // Add streaming/recording status if applicable
-                if (streaming || recording) {
-                    actionBarContent = actionBarContent.append(Component.text("   |   ").color(NamedTextColor.GRAY));
-                    if (recording) {
-                        actionBarContent = actionBarContent.append(Component.text("● Recording").color(NamedTextColor.RED));
-                    }
-                    if (streaming) {
-                        if (recording) {
-                            actionBarContent = actionBarContent.append(Component.text(" "));
-                        }
-                        actionBarContent = actionBarContent.append(Component.text("● Streaming").color(NamedTextColor.LIGHT_PURPLE));
-                    }
-                }
+                Component actionBarContent = getActionBarContent();
 
                 sendActionBar(actionBarContent);
 
@@ -250,6 +235,27 @@ public class CustomPlayer extends Player implements HealthCreature {
                 lastActionBarStreaming = streaming;
             }
         }
+    }
+
+    private @NonNull Component getActionBarContent() {
+        Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
+        Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
+        Component actionBarContent = healthDisplay.append(Component.text("   ")).append(manaDisplay);
+
+        // Add streaming/recording status if applicable
+        if (streaming || recording) {
+            actionBarContent = actionBarContent.append(Component.text("   |   ").color(NamedTextColor.GRAY));
+            if (recording) {
+                actionBarContent = actionBarContent.append(Component.text("● Recording").color(NamedTextColor.RED));
+            }
+            if (streaming) {
+                if (recording) {
+                    actionBarContent = actionBarContent.append(Component.text(" "));
+                }
+                actionBarContent = actionBarContent.append(Component.text("● Streaming").color(NamedTextColor.LIGHT_PURPLE));
+            }
+        }
+        return actionBarContent;
     }
 
     public void setRank(PlayerRank rank) {

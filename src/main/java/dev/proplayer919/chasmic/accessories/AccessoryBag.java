@@ -1,0 +1,56 @@
+package dev.proplayer919.chasmic.accessories;
+
+import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.Main;
+import dev.proplayer919.chasmic.PlayerStat;
+import lombok.Getter;
+
+import java.util.*;
+
+@Getter
+public class AccessoryBag {
+    private final Collection<Accessory> accessories;
+
+    public AccessoryBag() {
+        this.accessories = new ArrayList<>();
+    }
+
+    public AccessoryBag(Collection<Accessory> accessories) {
+        this.accessories = accessories;
+    }
+
+    public List<String> serialize() {
+        List<String> serialized = new ArrayList<>();
+        for (Accessory accessory : accessories) {
+            serialized.add(accessory.id());
+        }
+        return serialized;
+    }
+
+    public void deserialize(List<String> accessoryIds) {
+        for (String id : accessoryIds) {
+            Accessory accessory = Main.getAccessoryRegistry().getAccessoryById(id);
+            if (accessory != null) {
+                accessories.add(accessory);
+            }
+        }
+    }
+
+    public void addAccessory(Accessory accessory) {
+        this.accessories.add(accessory);
+    }
+
+    public void removeAccessory(Accessory accessory) {
+        this.accessories.remove(accessory);
+    }
+
+    public Map<PlayerStat, Float> sumStats() {
+        Map<PlayerStat, Float> stats = new HashMap<>();
+        for (Accessory accessory : accessories) {
+            for (PlayerStatBonus statBonus : accessory.statsBonuses()) {
+                stats.put(statBonus.stat(), stats.getOrDefault(statBonus.stat(), 0f) + statBonus.bonusAmount());
+            }
+        }
+        return stats;
+    }
+}

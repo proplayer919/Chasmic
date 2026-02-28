@@ -35,7 +35,7 @@ public class PlayerAttackModule implements Module {
             }
 
             // Get the base damage from the player's held item
-            float baseDamage = getBaseDamage(player);
+            float baseDamage = player.getAttackStat();
 
             // Apply player stats and check for critical hit
             AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, player);
@@ -55,41 +55,6 @@ public class PlayerAttackModule implements Module {
             // Play attack sound
             playAttackSound(player, creature);
         });
-    }
-
-    /**
-     * Get the base damage from the player's held item, or return default damage
-     */
-    private float getBaseDamage(CustomPlayer player) {
-        // Get the player's held item
-        ItemStack heldItem = player.getItemInMainHand();
-
-        if (heldItem.isAir()) {
-            // No item held, use unarmed damage
-            return 1.0f;
-        }
-
-        // Try to get the custom item ID from the held item
-        String itemId = CustomItem.getItemId(heldItem);
-
-        if (itemId == null) {
-            // Not a custom item, use default damage
-            return 1.0f;
-        }
-
-        // Get the custom item from the registry
-        CustomItemRegistry itemRegistry = Main.getCustomItemRegistry();
-        if (itemRegistry == null) {
-            return 1.0f;
-        }
-
-        CustomItem customItem = itemRegistry.getItem(itemId);
-        if (customItem == null) {
-            return 1.0f;
-        }
-
-        // Return the custom item's base damage
-        return customItem.getBaseDamage();
     }
 
     /**

@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic;
 
+import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
@@ -38,6 +39,9 @@ public class Main {
     @Getter
     private static CustomItemRegistry customItemRegistry;
 
+    @Getter
+    private static AccessoryRegistry accessoryRegistry;
+
     private final static Pos spawnPos = new Pos(0.5, 41, 0.5);
 
 
@@ -71,6 +75,7 @@ public class Main {
         // Initialize registries
         itemActionRegistry = new ItemActionRegistry();
         customItemRegistry = new CustomItemRegistry();
+        accessoryRegistry = new AccessoryRegistry();
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler);

@@ -1,9 +1,11 @@
 package dev.proplayer919.chasmic.data;
 
 import dev.proplayer919.chasmic.PlayerRank;
+import dev.proplayer919.chasmic.accessories.AccessoryBag;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.bson.codecs.pojo.annotations.BsonIgnore;
 import org.bson.codecs.pojo.annotations.BsonId;
 import org.bson.codecs.pojo.annotations.BsonProperty;
@@ -15,7 +17,8 @@ import java.util.UUID;
 /**
  * Represents player data stored in MongoDB
  */
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class PlayerData {
@@ -46,15 +49,23 @@ public class PlayerData {
     @BsonProperty("maxMana")
     private int maxMana = 100;
 
-    // Combat Stats
-    @BsonProperty("attack")
-    private float attack = 1.0f; // Attack damage multiplier
+    // Currencies
+    @BsonProperty("purse")
+    private int purse = 0; // In-game currency
 
-    @BsonProperty("defense")
-    private float defense = 0.0f; // Defense damage reduction (0-1, where 0.5 = 50% reduction)
+    @BsonProperty("bank")
+    private int bank = 0; // Banked currency
 
-    @BsonProperty("criticalChance")
-    private float criticalChance = 0.0f; // Critical chance multiplier (0-1, where 0.1 = 10% chance)
+    // Other currencies
+    @BsonProperty("riftGold")
+    private int riftGold = 0; // Rift Gold currency
+
+    @BsonProperty("upgradePoints")
+    private int upgradePoints = 0; // Upgrade points for character progression
+
+    // Accessory data
+    @BsonIgnore
+    private List<String> accessoryIds = new ArrayList<>(); // List of accessory IDs in the player's bag
 
     /**
      * Gets the PlayerRank enum from the rank ID
@@ -72,6 +83,28 @@ public class PlayerData {
         }
 
         return PlayerRank.DEFAULT;
+    }
+
+    @BsonProperty("accessoryBag")
+    public List<String> getAccessoryBag() {
+        return accessoryIds;
+    }
+
+    @BsonProperty("accessoryBag")
+    public void setAccessoryBag(List<String> accessoryBag) {
+        this.accessoryIds = accessoryBag;
+    }
+
+    /**
+     * Gets the AccessoryBag object from the stored accessory IDs
+     */
+    @BsonIgnore
+    public AccessoryBag getAccessoryBagObject() {
+        AccessoryBag bag = new AccessoryBag();
+        if (accessoryIds != null) {
+            bag.deserialize(accessoryIds);
+        }
+        return bag;
     }
 
     /**

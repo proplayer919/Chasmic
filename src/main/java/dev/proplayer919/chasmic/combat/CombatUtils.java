@@ -21,4 +21,13 @@ public class CombatUtils {
 
         return new AttackResult(finalDamage, isCritical);
     }
+
+    public static int applyDefenseToIncomingDamage(int incomingDamage, float defense) {
+        // Defense stat reduces damage by the specified percentage
+        // defense = 0.5 means 50% damage reduction
+        float damageReduction = incomingDamage * defense;
+        int finalDamage = Math.round(incomingDamage - damageReduction);
+
+        return Math.max(1, finalDamage); // Minimum 1 damage always gets through
+    }
 }
