@@ -36,13 +36,13 @@ public class ServerListPingModule implements Module {
     private static Component createDefaultMotd() {
         Component line1 = Component.empty()
                 .append(Component.text("                     "))
-                .append(Component.text("Chasmic", NamedTextColor.GREEN, TextDecoration.BOLD))
-                .append(Component.text(" [1.21.11]", NamedTextColor.RED));
+                .append(Component.text("Chasmic", NamedTextColor.YELLOW, TextDecoration.BOLD))
+                .append(Component.text(" [1.21.11]", NamedTextColor.GRAY));
 
         Component line2 = Component.empty()
-                .append(Component.text("               Custom Items ", NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text("| ", NamedTextColor.GOLD))
-                .append(Component.text("Story MMORPG", NamedTextColor.AQUA));
+                .append(Component.text("               Custom Items ", NamedTextColor.GOLD))
+                .append(Component.text("| ", NamedTextColor.DARK_GRAY))
+                .append(Component.text("Story MMORPG", NamedTextColor.GREEN));
 
         return Component.empty()
                 .append(line1)
