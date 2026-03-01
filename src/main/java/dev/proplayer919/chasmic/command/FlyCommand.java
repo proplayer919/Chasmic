@@ -38,6 +38,11 @@ public class FlyCommand extends Command {
                 return;
             }
 
+            if (!player.hasPermission("admin.command.fly")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             boolean newFlyState = !player.isAllowFlying();
             player.setAllowFlying(newFlyState);
 

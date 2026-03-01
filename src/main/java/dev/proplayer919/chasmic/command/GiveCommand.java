@@ -51,6 +51,11 @@ public class GiveCommand extends Command {
                 return;
             }
 
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             ItemStack item = context.get(itemArg);
             int amount = Math.min(64, Math.max(1, context.get(amountArg)));
 

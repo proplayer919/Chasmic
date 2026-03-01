@@ -55,6 +55,11 @@ public class PermsCommand extends Command {
                 return;
             }
 
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             sender.sendMessage(Component.text("=== Permissions for " + target.getUsername() + " ===", NamedTextColor.GOLD));
             sender.sendMessage(Component.text("Rank: ", NamedTextColor.YELLOW)
                     .append(customTarget.getRank().getName()));
@@ -83,6 +88,11 @@ public class PermsCommand extends Command {
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                return;
+            }
+
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 

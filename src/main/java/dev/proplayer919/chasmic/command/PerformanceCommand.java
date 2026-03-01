@@ -32,6 +32,11 @@ public class PerformanceCommand extends Command {
                 return;
             }
 
+            if (!player.hasPermission("admin.command.performance")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
+                return;
+            }
+
             boolean newState = !player.isShowMsptBossbar();
             player.setShowMsptBossbar(newState);
 

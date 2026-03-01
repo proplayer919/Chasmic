@@ -36,6 +36,11 @@ public class KillAllCommand extends Command {
                 return;
             }
 
+            if (!player.hasPermission("admin.command.killall")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             Instance instance = player.getInstance();
             if (instance == null) {
                 sender.sendMessage(Component.text("You are not in an instance!", NamedTextColor.RED));

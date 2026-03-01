@@ -57,6 +57,11 @@ public class RankCommand extends Command {
                 return;
             }
 
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             PlayerRank rank = customTarget.getRank();
 
             sender.sendMessage(Component.text(target.getUsername() + "'s rank: ", NamedTextColor.YELLOW)
@@ -71,6 +76,11 @@ public class RankCommand extends Command {
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
+                return;
+            }
+
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 

@@ -44,6 +44,11 @@ public class GamemodeCommand extends Command {
                 return;
             }
 
+            if (!player.hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             String modeStr = context.get(modeArg).toLowerCase();
             GameMode gameMode = parseGameMode(modeStr);
 
@@ -61,6 +66,11 @@ public class GamemodeCommand extends Command {
         addSyntax((sender, context) -> {
             String modeStr = context.get(modeArg).toLowerCase();
             GameMode gameMode = parseGameMode(modeStr);
+
+            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
 
             if (gameMode == null) {
                 sender.sendMessage(Component.text("Invalid gamemode!", NamedTextColor.RED));

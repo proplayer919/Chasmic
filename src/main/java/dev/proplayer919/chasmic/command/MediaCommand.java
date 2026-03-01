@@ -43,6 +43,11 @@ public class MediaCommand extends Command {
                 return;
             }
 
+            if (!player.hasPermission("command.media.record") && !player.hasPermission("command.media.stream")) {
+                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
+                return;
+            }
+
             String action = context.get(subcommand);
 
             if (action.equals("record")) {
