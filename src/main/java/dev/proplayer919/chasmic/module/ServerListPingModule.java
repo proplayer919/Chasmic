@@ -10,16 +10,23 @@ import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.ping.Status;
 import org.jetbrains.annotations.NotNull;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+
 /**
  * Module that handles server list ping (MOTD and player info)
  */
 public class ServerListPingModule implements Module {
     private final Component description;
     private final int maxPlayers;
+    private final byte[] favicon;
 
     public ServerListPingModule(Component description, int maxPlayers) {
         this.description = description;
         this.maxPlayers = maxPlayers;
+        this.favicon = loadFavicon();
     }
 
     public ServerListPingModule() {
@@ -30,7 +37,7 @@ public class ServerListPingModule implements Module {
         Component line1 = Component.empty()
                 .append(Component.text("                     "))
                 .append(Component.text("Chasmic", NamedTextColor.GREEN, TextDecoration.BOLD))
-                .append(Component.text(" <1.21.11>", NamedTextColor.RED));
+                .append(Component.text(" [1.21.11]", NamedTextColor.RED));
 
         Component line2 = Component.empty()
                 .append(Component.text("               Custom Items ", NamedTextColor.LIGHT_PURPLE))
@@ -43,18 +50,40 @@ public class ServerListPingModule implements Module {
                 .append(line2);
     }
 
+    private static byte[] loadFavicon() {
+        try (InputStream inputStream = ServerListPingModule.class.getResourceAsStream("/logo.png")) {
+            if (inputStream == null) {
+                System.err.println("Failed to load logo.png from resources");
+                return null;
+            }
+
+            BufferedImage image = ImageIO.read(inputStream);
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+            ImageIO.write(image, "png", outputStream);
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            System.err.println("Error loading favicon: " + e.getMessage());
+            return null;
+        }
+    }
+
     @Override
     public void attach(@NotNull EventNode<Event> eventNode) {
         eventNode.addListener(ServerListPingEvent.class, event -> {
             int onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayerCount();
 
-            event.setStatus(Status.builder()
+            Status.Builder statusBuilder = Status.builder()
                     .description(description)
                     .playerInfo(Status.PlayerInfo.builder()
                             .onlinePlayers(onlinePlayers)
                             .maxPlayers(maxPlayers)
-                            .build())
-                    .build());
+                            .build());
+
+            if (favicon != null) {
+                statusBuilder.favicon(favicon);
+            }
+
+            event.setStatus(statusBuilder.build());
         });
     }
 

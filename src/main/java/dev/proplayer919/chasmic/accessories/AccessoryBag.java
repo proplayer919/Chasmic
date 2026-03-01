@@ -3,20 +3,12 @@ package dev.proplayer919.chasmic.accessories;
 import dev.proplayer919.chasmic.PlayerStatBonus;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.PlayerStat;
-import lombok.Getter;
 
 import java.util.*;
 
-@Getter
-public class AccessoryBag {
-    private final Collection<Accessory> accessories;
-
+public record AccessoryBag(Collection<Accessory> accessories) {
     public AccessoryBag() {
-        this.accessories = new ArrayList<>();
-    }
-
-    public AccessoryBag(Collection<Accessory> accessories) {
-        this.accessories = accessories;
+        this(new ArrayList<>());
     }
 
     public List<String> serialize() {
