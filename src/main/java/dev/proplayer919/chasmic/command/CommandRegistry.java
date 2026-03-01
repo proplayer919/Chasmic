@@ -35,6 +35,7 @@ public class CommandRegistry {
         commandManager.register(new FlyCommand());
         commandManager.register(new GamemodeCommand());
         commandManager.register(new GiveCommand());
+        commandManager.register(new CustomGiveCommand());
         commandManager.register(new MobCommand());
         commandManager.register(new WarnCommand());
         commandManager.register(new KickCommand());

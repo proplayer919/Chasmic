@@ -13,9 +13,9 @@ import net.minestom.server.utils.time.TimeUnit;
 
 import java.util.List;
 
-public class TestZombie extends CustomCreature {
-    public TestZombie() {
-        super("test-zombie", "Test Zombie", EntityType.ZOMBIE, 50, CreatureType.UNDEAD, 5.0f, 0f, 0.5f);
+public class Nella extends CustomCreature {
+    public Nella() {
+        super("nella", "Nella", EntityType.MAGMA_CUBE, 50000, CreatureType.MAGMA, 500.0f, 250.0f, 5.0f);
 
         addAIGroup(
                 List.of(

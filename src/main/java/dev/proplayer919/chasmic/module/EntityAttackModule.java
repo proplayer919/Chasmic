@@ -37,7 +37,7 @@ public class EntityAttackModule implements Module {
             int baseDamage = 1;
 
             // Apply creature attack stat and check for critical hit
-            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, creature);
+            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, creature, healthCreature);
 
             // Calculate final damage (rounded)
             int finalDamage = Math.round(attackResult.getDamage());
@@ -48,7 +48,7 @@ public class EntityAttackModule implements Module {
             // Apply knockback to player (now with proper validation)
             if (target instanceof CustomPlayer player) {
                 applyKnockback(player, creature);
-                // playAttackSound(creature, player);
+                playAttackSound(creature, player);
             }
         });
     }
@@ -70,10 +70,10 @@ public class EntityAttackModule implements Module {
 
             direction = direction.normalize();
 
-            // Apply knockback (0.3 blocks horizontal, 0.2 vertical)
-            double knockbackX = direction.x() * 0.3;
-            double knockbackZ = direction.z() * 0.3;
-            double knockbackY = 0.2;
+            // Apply knockback (0.6 blocks horizontal, 0.4 vertical)
+            double knockbackX = direction.x() * 0.6;
+            double knockbackZ = direction.z() * 0.6;
+            double knockbackY = 0.4;
 
             Vec knockbackVelocity = new Vec(knockbackX, knockbackY, knockbackZ);
 

@@ -35,7 +35,7 @@ public class PlayerAttackModule implements Module {
             float baseDamage = player.getAttackStat();
 
             // Apply player stats and check for critical hit
-            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, player);
+            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, player, creature);
 
             // Calculate final damage (rounded)
             int finalDamage = Math.round(attackResult.getDamage());
@@ -71,10 +71,10 @@ public class PlayerAttackModule implements Module {
 
             direction = direction.normalize();
 
-            // Apply knockback (0.5 blocks horizontal, 0.3 vertical)
-            double knockbackX = direction.x() * 0.5;
-            double knockbackZ = direction.z() * 0.5;
-            double knockbackY = 0.3;
+            // Apply knockback (1 block horizontal, 0.6 vertical)
+            double knockbackX = direction.x();
+            double knockbackZ = direction.z();
+            double knockbackY = 0.6;
 
             Vec knockbackVelocity = new Vec(knockbackX, knockbackY, knockbackZ);
 

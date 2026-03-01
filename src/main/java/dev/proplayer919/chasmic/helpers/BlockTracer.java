@@ -5,7 +5,7 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
 
-public class BlockTracer {
+public abstract class BlockTracer {
     public static BlockTraceResult trace(Instance instance, Pos start, double maxDistance) {
         // Get the direction from the player's look angle
         Vec direction = start.direction();

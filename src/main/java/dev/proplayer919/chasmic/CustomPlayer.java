@@ -178,10 +178,7 @@ public class CustomPlayer extends Player implements HealthCreature {
             lastDamageAttacker = null;
         }
 
-        // Apply defense stat to reduce damage
-        int finalDamage = CombatUtils.applyDefenseToIncomingDamage(amount, getDefenseStat());
-
-        this.customHealth -= finalDamage;
+        this.customHealth -= amount;
 
         if (this.customHealth <= 0) {
             this.customHealth = 0;
@@ -200,6 +197,20 @@ public class CustomPlayer extends Player implements HealthCreature {
         return Collections.emptyList();
     }
 
+    private Collection<PlayerStatBonus> getArmorStatBonuses() {
+        List<PlayerStatBonus> statBonuses = new ArrayList<>();
+        List<ItemStack> armorItems = List.of(getHelmet(), getChestplate(), getLeggings(), getBoots());
+        for (ItemStack armorItem : armorItems) {
+            if (!armorItem.isAir()) {
+                CustomItem customItem = CustomItem.getCustomItemFromItemStack(armorItem);
+                if (customItem != null) {
+                    statBonuses.addAll(customItem.getStatBonuses());
+                }
+            }
+        }
+        return statBonuses;
+    }
+
     private float getStatFor(PlayerStat stat) {
         float baseValue = PlayerStatConstants.getBaseValue(stat);
         if (playerData == null) {
@@ -209,6 +220,13 @@ public class CustomPlayer extends Player implements HealthCreature {
 
         Collection<PlayerStatBonus> mainHandBonuses = getMainHandItemStatBonuses();
         for (PlayerStatBonus statBonus : mainHandBonuses) {
+            if (statBonus.stat() == stat) {
+                bonus += statBonus.bonusAmount();
+            }
+        }
+
+        Collection<PlayerStatBonus> armorBonuses = getArmorStatBonuses();
+        for (PlayerStatBonus statBonus : armorBonuses) {
             if (statBonus.stat() == stat) {
                 bonus += statBonus.bonusAmount();
             }

@@ -7,5 +7,6 @@ public enum CreatureType {
     AQUATIC,
     DEMONIC,
     GOBLIN,
+    MAGMA,
     OTHER
 }

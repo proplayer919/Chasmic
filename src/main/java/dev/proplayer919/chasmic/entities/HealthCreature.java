@@ -12,11 +12,11 @@ public interface HealthCreature {
     void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos);
 
     /**
-     * Get the attack stat for this creature (damage multiplier)
-     * Default: 1.0f
+     * Get the attack stat for this creature (damage bonus)
+     * Default: 0.0f
      */
     default float getAttackStat() {
-        return 1.0f;
+        return 0.0f;
     }
 
     /**

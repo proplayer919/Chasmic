@@ -4,6 +4,7 @@ import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
+import dev.proplayer919.chasmic.helpers.PlayerHeadCreator;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
@@ -112,8 +113,6 @@ public class Main {
             zombie.setInstance(spawn, spawnPos);
 
             npc.addPlayerViewer(event.getPlayer());
-
-            event.getPlayer().getInventory().addItemStack(customItemRegistry.getItem("aspect_of_the_shallows").getItemStack());
         });
 
 
