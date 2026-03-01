@@ -41,6 +41,7 @@ public class CommandRegistry {
         commandManager.register(new BanCommand());
         commandManager.register(new UnbanCommand());
         commandManager.register(new PerformanceCommand());
+        commandManager.register(new KillAllCommand());
     }
 }
 

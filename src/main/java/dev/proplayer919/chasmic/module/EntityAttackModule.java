@@ -34,7 +34,7 @@ public class EntityAttackModule implements Module {
             }
 
             // Get base damage from creature
-            int baseDamage = creature.getAttackDamage();
+            int baseDamage = 1;
 
             // Apply creature attack stat and check for critical hit
             AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, creature);
