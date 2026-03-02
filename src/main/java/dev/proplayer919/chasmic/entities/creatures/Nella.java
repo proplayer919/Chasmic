@@ -3,19 +3,26 @@ package dev.proplayer919.chasmic.entities.creatures;
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.entities.CreatureType;
 import dev.proplayer919.chasmic.entities.CustomCreature;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ai.goal.MeleeAttackGoal;
 import net.minestom.server.entity.ai.goal.RandomStrollGoal;
 import net.minestom.server.entity.ai.target.ClosestEntityTarget;
 import net.minestom.server.entity.ai.target.LastEntityDamagerTarget;
+import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.attribute.AttributeModifier;
+import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.utils.time.TimeUnit;
 
 import java.util.List;
+import java.util.UUID;
 
 public class Nella extends CustomCreature {
     public Nella() {
         super("nella", "Nella", EntityType.MAGMA_CUBE, 50000, CreatureType.MAGMA, 500.0f, 250.0f, 5.0f);
+
+        getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(UUID.randomUUID().toString(), 5.0, AttributeOperation.ADD_VALUE));
 
         addAIGroup(
                 List.of(

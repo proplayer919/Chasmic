@@ -23,13 +23,8 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
 
     private final CreatureType creatureType;
 
-    @Getter
     private float attack = 1.0f; // Flat attack damage
-
-    @Getter
     private float defense = 0.0f; // Defense damage reduction (0-1, where 0.5 = 50% reduction)
-
-    @Getter
     private float criticalChance = 0.0f; // Critical chance (0-1, where 0.1 = 10% chance)
 
     private final String id;
