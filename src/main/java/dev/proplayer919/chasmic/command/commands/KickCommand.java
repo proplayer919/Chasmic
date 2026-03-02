@@ -1,6 +1,8 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import dev.proplayer919.chasmic.punishment.PunishmentMessages;
@@ -10,38 +12,26 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentStringArray;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.entity.Player;
 
 /**
- * /warn command for warning players
- * Permission: admin.command.warn
+ * /kick command for kicking players
+ * Permission: admin.command.kick
  */
-public class WarnCommand extends Command {
+public class KickCommand extends PermissionCommand {
     @Setter
     private static PunishmentManager punishmentManager;
 
-    public WarnCommand() {
-        super("warn");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.warn");
-            }
-            return true; // Console always has permission
-        });
+    public KickCommand() {
+        super("kick", "admin.command.kick");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
         ArgumentStringArray reasonArg = ArgumentType.StringArray("reason");
 
-        // /warn <player> <reason> - Warn a player
+        // /kick <player> <reason> - Kick a player
         addSyntax((sender, context) -> {
             if (!checkPermission(sender)) return;
 
@@ -56,29 +46,32 @@ public class WarnCommand extends Command {
                 return;
             }
 
-            // Create punishment
+            String adminName = sender instanceof Player p ? p.getUsername() : "Console";
+
+            // Create punishment record
             Punishment punishment = new Punishment();
             punishment.setId(punishmentManager.generatePunishmentId());
             punishment.setPlayerUuid(customTarget.getUuid());
             punishment.setPlayerName(customTarget.getUsername());
-            punishment.setType(PunishmentType.WARNING);
+            punishment.setType(PunishmentType.KICK);
             punishment.setReason(reason);
-            punishment.setIssuedBy(sender instanceof Player p ? p.getUsername() : "Console");
+            punishment.setIssuedBy(adminName);
             punishment.setIssuedAt(System.currentTimeMillis());
-            punishment.setExpiresAt(-1); // Warnings don't expire
+            punishment.setExpiresAt(-1);
             punishment.setActive(true);
 
             // Save to database
             punishmentManager.savePunishment(punishment);
 
-            // Send warning message to player using utility
-            customTarget.sendMessage(Component.empty());
-            customTarget.sendMessage(PunishmentMessages.createWarningMessage(punishment));
-            customTarget.sendMessage(Component.empty());
+            // Create kick screen using utility
+            Component kickMessage = PunishmentMessages.createKickMessage(punishment);
+
+            // Kick the player
+            customTarget.kick(kickMessage);
 
             // Notify sender
             sender.sendMessage(Component.text("✔ ", NamedTextColor.GREEN)
-                    .append(Component.text("Warned ", NamedTextColor.YELLOW))
+                    .append(Component.text("Kicked ", NamedTextColor.YELLOW))
                     .append(Component.text(customTarget.getUsername(), NamedTextColor.GOLD))
                     .append(Component.text(" for: ", NamedTextColor.YELLOW))
                     .append(Component.text(reason, NamedTextColor.WHITE)));
@@ -87,8 +80,8 @@ public class WarnCommand extends Command {
             for (Player player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
                 if (player instanceof CustomPlayer admin && admin.hasPermission("admin.notifications") && !admin.equals(sender)) {
                     admin.sendMessage(Component.text("[ADMIN] ", NamedTextColor.RED, TextDecoration.BOLD)
-                            .append(Component.text(punishment.getIssuedBy(), NamedTextColor.GOLD))
-                            .append(Component.text(" warned ", NamedTextColor.YELLOW))
+                            .append(Component.text(adminName, NamedTextColor.GOLD))
+                            .append(Component.text(" kicked ", NamedTextColor.YELLOW))
                             .append(Component.text(customTarget.getUsername(), NamedTextColor.GOLD))
                             .append(Component.text(" for: ", NamedTextColor.YELLOW))
                             .append(Component.text(reason, NamedTextColor.GRAY)));
@@ -97,17 +90,7 @@ public class WarnCommand extends Command {
 
         }, playerArg, reasonArg);
 
-        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /warn <player> <reason>", NamedTextColor.RED)));
-    }
-
-    private boolean checkPermission(CommandSender sender) {
-        if (sender instanceof CustomPlayer player) {
-            if (!player.hasPermission("admin.command.warn")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-                return false;
-            }
-        }
-        return true;
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /kick <player> <reason>", NamedTextColor.RED)));
     }
 }
 

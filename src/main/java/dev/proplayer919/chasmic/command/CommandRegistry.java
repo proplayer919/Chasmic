@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.command;
 
+import dev.proplayer919.chasmic.command.commands.*;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import net.minestom.server.MinecraftServer;

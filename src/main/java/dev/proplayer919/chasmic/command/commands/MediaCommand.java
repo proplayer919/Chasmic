@@ -1,9 +1,9 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 
@@ -11,22 +11,10 @@ import net.minestom.server.command.builder.arguments.ArgumentWord;
  * /media command for toggling recording and streaming status
  * Permissions: command.media.record, command.media.stream
  */
-public class MediaCommand extends Command {
+public class MediaCommand extends PermissionCommand {
 
     public MediaCommand() {
-        super("media");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("command.media.record") || player.hasPermission("command.media.stream");
-            }
-            return true; // Console always has permission
-        });
+        super("media", "command.media.record"); // Base permission, but we check both in executors
 
         setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /media <record|stream>", NamedTextColor.RED)));
 
@@ -36,15 +24,9 @@ public class MediaCommand extends Command {
 
         // /media record
         addSyntax((sender, context) -> {
-            if (!(sender instanceof CustomPlayer player)) {
-                sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
-                return;
-            }
+            if (!checkPlayerPermission(sender)) return;
 
-            if (!player.hasPermission("command.media.record") && !player.hasPermission("command.media.stream")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
-                return;
-            }
+            CustomPlayer player = (CustomPlayer) sender;
 
             String action = context.get(subcommand);
 

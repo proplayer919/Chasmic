@@ -11,7 +11,7 @@ import net.minestom.server.item.Material;
 import java.util.Collection;
 
 @Getter
-public class Accessory {
+public abstract class Accessory {
     private final String id;
     private final String name;
     private final String description;

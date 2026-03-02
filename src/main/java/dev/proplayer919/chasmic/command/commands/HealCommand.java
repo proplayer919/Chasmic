@@ -1,54 +1,38 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 
 /**
  * /heal command for fully healing the player
  * Permission: admin.command.heal
  */
-public class HealCommand extends Command {
+public class HealCommand extends PermissionCommand {
 
     public HealCommand() {
-        super("heal");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.heal");
-            }
-            return true; // Console always has permission
-        });
+        super("heal", "admin.command.heal");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         // /heal - Heal self
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof CustomPlayer player)) {
-                sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
-                return;
-            }
+            if (!checkPlayerPermission(sender)) return;
 
-            if (!player.hasPermission("admin.command.heal")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
-                return;
-            }
-
+            CustomPlayer player = (CustomPlayer) sender;
             player.setCustomHealth(player.getMaxCustomHealth());
             player.setCustomMana(player.getMaxCustomMana());
         });
 
         // /heal <player> - Heal another player
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 

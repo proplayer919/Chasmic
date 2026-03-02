@@ -1,6 +1,8 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import dev.proplayer919.chasmic.punishment.PunishmentMessages;
@@ -10,8 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentStringArray;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -23,22 +23,12 @@ import java.util.concurrent.TimeUnit;
  * /ban command for banning players (permanent or temporary)
  * Permission: admin.command.ban
  */
-public class BanCommand extends Command {
+public class BanCommand extends PermissionCommand {
     @Setter
     private static PunishmentManager punishmentManager;
 
     public BanCommand() {
-        super("ban");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.ban");
-            }
-            return true; // Console always has permission
-        });
+        super("ban", "admin.command.ban");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
@@ -132,15 +122,6 @@ public class BanCommand extends Command {
         });
     }
 
-    private boolean checkPermission(CommandSender sender) {
-        if (sender instanceof CustomPlayer player) {
-            if (!player.hasPermission("admin.command.ban")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-                return false;
-            }
-        }
-        return true;
-    }
 
     /**
      * Parse duration string (e.g., "1d", "30m", "2h") to milliseconds

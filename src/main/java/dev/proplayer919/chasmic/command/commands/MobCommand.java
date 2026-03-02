@@ -1,11 +1,11 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.entities.creatures.Nella;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
 
@@ -13,22 +13,10 @@ import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
  * /mpb command for spawning a mob at the player's location
  * Permission: admin.command.mob
  */
-public class MobCommand extends Command {
+public class MobCommand extends PermissionCommand {
 
     public MobCommand() {
-        super("mob");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.mob");
-            }
-            return true; // Console always has permission
-        });
+        super("mob", "admin.command.mob");
 
         // Arguments
         ArgumentWord mobTypeArg = new ArgumentWord("mob").from("test-zombie", "nella");
@@ -36,19 +24,12 @@ public class MobCommand extends Command {
 
         // /mob <mob> - Spawn mob at player's location
         addSyntax((sender, context) -> {
+            if (!checkPlayerPermission(sender)) return;
+
+            CustomPlayer player = (CustomPlayer) sender;
             String mobType = context.get(mobTypeArg);
             int amount = context.get(amountArg);
 
-            if (!(sender instanceof CustomPlayer player)) {
-                sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
-                return;
-            }
-
-            // Check for permission
-            if (!player.hasPermission("admin.command.mob")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-                return;
-            }
 
             // Check if the amount is greater than 0
             if (amount <= 0) {

@@ -1,13 +1,14 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.PlayerRank;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.entity.Player;
@@ -18,24 +19,12 @@ import java.util.Arrays;
  * /rank command for viewing and setting player ranks
  * Permission: admin.command.rank
  */
-public class RankCommand extends Command {
+public class RankCommand extends PermissionCommand {
     @Setter
     private static MongoDBHandler mongoDBHandler;
 
     public RankCommand() {
-        super("rank");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.rank");
-            }
-            return true; // Console always has permission
-        });
+        super("rank", "admin.command.rank");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
@@ -49,16 +38,13 @@ public class RankCommand extends Command {
 
         // /rank <player> - View player's rank
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 
@@ -71,16 +57,13 @@ public class RankCommand extends Command {
 
         // /rank <player> set <rank> - Set player's rank
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 
@@ -122,5 +105,4 @@ public class RankCommand extends Command {
         setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /rank <player> [set <rank>]", NamedTextColor.RED)));
     }
 }
-
 

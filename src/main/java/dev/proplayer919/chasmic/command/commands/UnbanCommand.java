@@ -1,6 +1,8 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import lombok.Setter;
@@ -8,8 +10,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.CommandSender;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 
 import java.util.UUID;
@@ -18,22 +18,12 @@ import java.util.UUID;
  * /unban command for unbanning players
  * Permission: admin.command.unban
  */
-public class UnbanCommand extends Command {
+public class UnbanCommand extends PermissionCommand {
     @Setter
     private static PunishmentManager punishmentManager;
 
     public UnbanCommand() {
-        super("unban");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.unban");
-            }
-            return true; // Console always has permission
-        });
+        super("unban", "admin.command.unban");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
@@ -91,16 +81,6 @@ public class UnbanCommand extends Command {
         }, playerArg);
 
         setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /unban <player>", NamedTextColor.RED)));
-    }
-
-    private boolean checkPermission(CommandSender sender) {
-        if (sender instanceof CustomPlayer player) {
-            if (!player.hasPermission("admin.command.unban")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command!", NamedTextColor.RED));
-                return false;
-            }
-        }
-        return true;
     }
 }
 

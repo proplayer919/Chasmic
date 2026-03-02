@@ -1,47 +1,30 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 
 /**
  * /fly command for toggling flight mode
  * Permission: admin.command.fly
  */
-public class FlyCommand extends Command {
+public class FlyCommand extends PermissionCommand {
 
     public FlyCommand() {
-        super("fly");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.fly");
-            }
-            return true; // Console always has permission
-        });
+        super("fly", "admin.command.fly");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
         // /fly - Toggle own flight
         setDefaultExecutor((sender, context) -> {
-            if (!(sender instanceof CustomPlayer player)) {
-                sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
-                return;
-            }
+            if (!checkPlayerPermission(sender)) return;
 
-            if (!player.hasPermission("admin.command.fly")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
-                return;
-            }
+            CustomPlayer player = (CustomPlayer) sender;
 
             boolean newFlyState = !player.isAllowFlying();
             player.setAllowFlying(newFlyState);

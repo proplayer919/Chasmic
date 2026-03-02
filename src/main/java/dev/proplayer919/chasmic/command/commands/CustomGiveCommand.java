@@ -1,13 +1,14 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.accessories.Accessory;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.items.CustomItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
@@ -22,22 +23,10 @@ import java.util.List;
  * /cgive command for giving custom items and accessories to players
  * Permission: admin.command.cgive
  */
-public class CustomGiveCommand extends Command {
+public class CustomGiveCommand extends PermissionCommand {
 
     public CustomGiveCommand() {
-        super("cgive");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.cgive");
-            }
-            return true; // Console always has permission
-        });
+        super("cgive", "admin.command.cgive");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
@@ -54,16 +43,13 @@ public class CustomGiveCommand extends Command {
 
         // /cgive <player> <item> [amount] - Give item to player
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (!(target instanceof CustomPlayer)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 

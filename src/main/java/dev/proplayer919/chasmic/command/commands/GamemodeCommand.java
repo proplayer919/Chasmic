@@ -1,10 +1,11 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.entity.GameMode;
@@ -14,22 +15,10 @@ import net.minestom.server.entity.Player;
  * /gamemode command for changing player gamemode
  * Permission: admin.command.gamemode
  */
-public class GamemodeCommand extends Command {
+public class GamemodeCommand extends PermissionCommand {
 
     public GamemodeCommand() {
-        super("gamemode");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.gamemode");
-            }
-            return true; // Console always has permission
-        });
+        super("gamemode", "admin.command.gamemode");
 
         // Arguments
         ArgumentWord modeArg = ArgumentType.Word("mode")
@@ -39,16 +28,9 @@ public class GamemodeCommand extends Command {
 
         // /gamemode <mode> - Set own gamemode
         addSyntax((sender, context) -> {
-            if (!(sender instanceof CustomPlayer player)) {
-                sender.sendMessage(Component.text("Only players can use this command!", NamedTextColor.RED));
-                return;
-            }
+            if (!checkPlayerPermission(sender)) return;
 
-            if (!player.hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
-                return;
-            }
-
+            CustomPlayer player = (CustomPlayer) sender;
             String modeStr = context.get(modeArg).toLowerCase();
             GameMode gameMode = parseGameMode(modeStr);
 
@@ -64,13 +46,11 @@ public class GamemodeCommand extends Command {
 
         // /gamemode <mode> <player> - Set another player's gamemode
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String modeStr = context.get(modeArg).toLowerCase();
             GameMode gameMode = parseGameMode(modeStr);
 
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
-                return;
-            }
 
             if (gameMode == null) {
                 sender.sendMessage(Component.text("Invalid gamemode!", NamedTextColor.RED));

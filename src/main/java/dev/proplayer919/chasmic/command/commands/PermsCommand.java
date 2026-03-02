@@ -1,12 +1,13 @@
-package dev.proplayer919.chasmic.command;
+package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
@@ -16,24 +17,12 @@ import net.minestom.server.entity.Player;
  * /perms command for viewing and managing player permissions
  * Permission: admin.command.perms
  */
-public class PermsCommand extends Command {
+public class PermsCommand extends PermissionCommand {
     @Setter
     private static MongoDBHandler mongoDBHandler;
 
     public PermsCommand() {
-        super("perms");
-
-        setCondition((sender, commandString) -> {
-            if (sender instanceof CustomPlayer player) {
-                // Allow command if player is not yet initialized (to avoid red text)
-                // Actual permission check happens in executor
-                if (!player.isInitialized()) {
-                    return true;
-                }
-                return player.hasPermission("admin.command.perms");
-            }
-            return true; // Console always has permission
-        });
+        super("perms", "admin.command.perms");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
@@ -47,16 +36,13 @@ public class PermsCommand extends Command {
 
         // /perms <player> - View player's permissions
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 
@@ -83,16 +69,13 @@ public class PermsCommand extends Command {
 
         // /perms <player> set <permission> <true|false> - Set permission
         addSyntax((sender, context) -> {
+            if (!checkPermission(sender)) return;
+
             String targetName = context.get(playerArg);
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
 
             if (!(target instanceof CustomPlayer customTarget)) {
                 sender.sendMessage(Component.text("Player not found!", NamedTextColor.RED));
-                return;
-            }
-
-            if ((sender instanceof CustomPlayer) && !((CustomPlayer) sender).hasPermission("admin.command.gamemode")) {
-                sender.sendMessage(Component.text("You don't have permission to use this command").color(NamedTextColor.RED));
                 return;
             }
 
