@@ -5,14 +5,14 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.proplayer919</groupId>
-  <artifactId>Chasmic</artifactId>
+  <artifactId>chasmic</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <distributionManagement>
     <repository>
       <id>github</id>
       <name>GitHub Packages</name>
-      <url>https://maven.pkg.github.com/proplayer919/Chasmic</url>
+      <url>https://maven.pkg.github.com/proplayer919/chasmic</url>
     </repository>
   </distributionManagement>
 
