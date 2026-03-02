@@ -4,9 +4,7 @@ import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
-import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 
 /**

@@ -21,7 +21,7 @@ public class ItemWarpAction implements ItemActionHandler {
         BlockTraceResult traceResult = BlockTracer.trace(customPlayer.getInstance(), position, 10);
 
         // Teleport the player
-        if (!traceResult.hit) {
+        if (!traceResult.hit()) {
             // If we didn't hit any block, teleport to the forward position
             customPlayer.teleport(forwardPosition);
 

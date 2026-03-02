@@ -119,9 +119,7 @@ public class RankCommand extends Command {
 
         }, playerArg, setArg, rankArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /rank <player> [set <rank>]", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /rank <player> [set <rank>]", NamedTextColor.RED)));
     }
 }
 

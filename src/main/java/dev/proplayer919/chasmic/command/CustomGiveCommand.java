@@ -9,12 +9,10 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
-import net.minestom.server.command.builder.arguments.minecraft.ArgumentItemStack;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
-import net.minestom.server.item.Material;
 
 /**
  * /cgive command for giving custom items to players

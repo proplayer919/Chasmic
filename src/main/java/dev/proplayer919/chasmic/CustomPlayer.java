@@ -1,6 +1,5 @@
 package dev.proplayer919.chasmic;
 
-import dev.proplayer919.chasmic.combat.CombatUtils;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;

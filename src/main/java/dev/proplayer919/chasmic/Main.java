@@ -48,7 +48,7 @@ public class Main {
     private final static Pos spawnPos = new Pos(0.5, 41, 0.5);
 
 
-    static void main(String[] args) {
+    static void main() {
         // Initialize the server
         MinecraftServer minecraftServer = MinecraftServer.init();
 
@@ -99,9 +99,7 @@ public class Main {
         // Attach all modules to the global event handler
         moduleManager.attachAll(globalEventHandler);
 
-        globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            event.setSpawningInstance(spawn);
-        });
+        globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> event.setSpawningInstance(spawn));
 
         globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
             event.getPlayer().teleport(spawnPos);

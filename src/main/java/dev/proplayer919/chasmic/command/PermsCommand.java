@@ -123,9 +123,7 @@ public class PermsCommand extends Command {
 
         }, playerArg, setArg, permArg, boolArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /perms <player> [set <permission> <true|false>]", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /perms <player> [set <permission> <true|false>]", NamedTextColor.RED)));
     }
 }
 

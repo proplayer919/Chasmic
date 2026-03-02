@@ -46,7 +46,7 @@ public class UnbanCommand extends Command {
 
             // Try to find online player first
             Player target = MinecraftServer.getConnectionManager().getOnlinePlayerByUsername(targetName);
-            UUID targetUuid = null;
+            UUID targetUuid;
 
             if (target instanceof CustomPlayer customTarget) {
                 targetUuid = customTarget.getUuid();
@@ -90,9 +90,7 @@ public class UnbanCommand extends Command {
 
         }, playerArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /unban <player>", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /unban <player>", NamedTextColor.RED)));
     }
 
     private boolean checkPermission(CommandSender sender) {

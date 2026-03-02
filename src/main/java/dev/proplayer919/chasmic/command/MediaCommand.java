@@ -28,9 +28,7 @@ public class MediaCommand extends Command {
             return true; // Console always has permission
         });
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /media <record|stream>", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /media <record|stream>", NamedTextColor.RED)));
 
         // Create subcommand argument with suggestions
         ArgumentWord subcommand = ArgumentType.Word("action")

@@ -4,8 +4,8 @@ import lombok.Getter;
 
 @Getter
 public class AttackResult {
-    float damage;
-    boolean isCritical;
+    private final float damage;
+    private final boolean isCritical;
 
     AttackResult(float damage, boolean isCritical) {
         this.damage = damage;

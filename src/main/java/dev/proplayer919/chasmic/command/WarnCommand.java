@@ -97,9 +97,7 @@ public class WarnCommand extends Command {
 
         }, playerArg, reasonArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /warn <player> <reason>", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /warn <player> <reason>", NamedTextColor.RED)));
     }
 
     private boolean checkPermission(CommandSender sender) {

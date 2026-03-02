@@ -100,9 +100,7 @@ public class KickCommand extends Command {
 
         }, playerArg, reasonArg);
 
-        setDefaultExecutor((sender, context) -> {
-            sender.sendMessage(Component.text("Usage: /kick <player> <reason>", NamedTextColor.RED));
-        });
+        setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /kick <player> <reason>", NamedTextColor.RED)));
     }
 
     private boolean checkPermission(CommandSender sender) {

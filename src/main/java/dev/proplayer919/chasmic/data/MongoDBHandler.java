@@ -63,9 +63,7 @@ public class MongoDBHandler {
      * @return CompletableFuture with PlayerData, or null if not found
      */
     public CompletableFuture<PlayerData> loadPlayerData(UUID uuid) {
-        return CompletableFuture.supplyAsync(() -> {
-            return playerCollection.find(Filters.eq("_id", uuid)).first();
-        });
+        return CompletableFuture.supplyAsync(() -> playerCollection.find(Filters.eq("_id", uuid)).first());
     }
 
     /**
@@ -74,13 +72,11 @@ public class MongoDBHandler {
      * @return CompletableFuture that completes when save is done
      */
     public CompletableFuture<Void> savePlayerData(PlayerData playerData) {
-        return CompletableFuture.runAsync(() -> {
-            playerCollection.replaceOne(
-                    Filters.eq("_id", playerData.getUuid()),
-                    playerData,
-                    new ReplaceOptions().upsert(true)
-            );
-        });
+        return CompletableFuture.runAsync(() -> playerCollection.replaceOne(
+                Filters.eq("_id", playerData.getUuid()),
+                playerData,
+                new ReplaceOptions().upsert(true)
+        ));
     }
 
     /**
