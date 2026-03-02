@@ -4,14 +4,12 @@ import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
-import dev.proplayer919.chasmic.helpers.PlayerHeadCreator;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.npc.NPC;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import lombok.Getter;
-import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.ChunkRange;
 import net.minestom.server.coordinate.Pos;
@@ -52,9 +50,9 @@ public class Main {
 
     static void main(String[] args) {
         // Initialize the server
-        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
+        MinecraftServer minecraftServer = MinecraftServer.init();
 
-        MinecraftServer.setBrandName("ChasmicMC");
+        MinecraftServer.setBrandName("Chasmic");
 
         // Register custom player provider
         MinecraftServer.getConnectionManager().setPlayerProvider(CustomPlayer::new);
@@ -90,9 +88,9 @@ public class Main {
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
 
-        InstanceContainer spawn = getInstanceContainer();
+        InstanceContainer spawn = createSpawnInstance();
 
-        NPC npc = new NPC(UUID.randomUUID(), "NPC", Objects.requireNonNull(PlayerSkin.fromUsername("Notch")), 1, false);
+        NPC npc = new NPC(UUID.randomUUID(), "NPC_Test_Guy", Objects.requireNonNull(PlayerSkin.fromUsername("jeb_")), 1, false);
 
         npc.setInstance(spawn, spawnPos);
 
@@ -120,7 +118,7 @@ public class Main {
         minecraftServer.start("0.0.0.0", 25565);
     }
 
-    private static @NonNull InstanceContainer getInstanceContainer() {
+    private static @NonNull InstanceContainer createSpawnInstance() {
         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
 
         InstanceContainer spawn = instanceManager.createInstanceContainer();
