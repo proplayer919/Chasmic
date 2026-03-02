@@ -65,6 +65,10 @@ public class CustomItemRegistry {
         registerArmorSet("volcanic", "Crimson armor that provides a significant boost to defense.", Rarity.RARE, new ArrayList<>(List.of(
                 new PlayerStatBonus(PlayerStat.DEFENSE, 25.0f)
         )), ArmorTier.LEATHER, DyeColor.RED.color());
+
+        registerArmorSet("abyssal", "Abyssal armor that provides a significant boost to defense.", Rarity.EPIC, new ArrayList<>(List.of(
+                new PlayerStatBonus(PlayerStat.DEFENSE, 35.0f)
+        )), ArmorTier.LEATHER, DyeColor.BLUE.color());
     }
 
     public void registerItem(CustomItem item) {
