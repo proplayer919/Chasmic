@@ -83,6 +83,14 @@ public class CustomPlayer extends Player implements HealthCreature {
         this.rank = rank;
     }
 
+    public int getMaxCustomHealth() {
+        return playerData.getMaxHealth();
+    }
+
+    public int getMaxCustomMana() {
+        return playerData.getMaxMana();
+    }
+
     public void dataLoadCallback() {
         // Called after player data is loaded to set initial health/mana
         if (playerData != null) {

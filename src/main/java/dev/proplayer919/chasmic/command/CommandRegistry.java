@@ -44,5 +44,6 @@ public class CommandRegistry {
         commandManager.register(new PerformanceCommand());
         commandManager.register(new KillAllCommand());
         commandManager.register(new SetMaxCommand());
+        commandManager.register(new HealCommand());
     }
 }
