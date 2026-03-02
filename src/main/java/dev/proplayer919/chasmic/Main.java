@@ -10,6 +10,7 @@ import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.npc.NPC;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;
 import lombok.Getter;
+import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.ChunkRange;
 import net.minestom.server.coordinate.Pos;
@@ -50,7 +51,7 @@ public class Main {
 
     static void main() {
         // Initialize the server
-        MinecraftServer minecraftServer = MinecraftServer.init();
+        MinecraftServer minecraftServer = MinecraftServer.init(new Auth.Online());
 
         MinecraftServer.setBrandName("Chasmic");
 
