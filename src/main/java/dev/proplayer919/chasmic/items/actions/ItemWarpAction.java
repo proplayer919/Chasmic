@@ -5,6 +5,8 @@ import dev.proplayer919.chasmic.helpers.BlockTraceResult;
 import dev.proplayer919.chasmic.helpers.BlockTracer;
 import dev.proplayer919.chasmic.items.ItemActionHandler;
 import dev.proplayer919.chasmic.items.ItemActionResult;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
@@ -24,6 +26,9 @@ public class ItemWarpAction implements ItemActionHandler {
         if (!traceResult.hit()) {
             // If we didn't hit any block, teleport to the forward position
             customPlayer.teleport(forwardPosition);
+
+            // Play a sound
+            customPlayer.playSound(Sound.sound(Key.key("entity.enderman.teleport"), Sound.Source.PLAYER, 0.5f, 1f));
 
             return new ItemActionResult(true);
         } else {

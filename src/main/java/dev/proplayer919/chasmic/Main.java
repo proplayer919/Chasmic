@@ -46,7 +46,14 @@ public class Main {
     @Getter
     private static PunishmentManager punishmentManager;
 
-    private final static Pos spawnPos = new Pos(0.5, 41, 0.5);
+    @Getter
+    private static final Pos spawnPos = new Pos(0.5, 41, 0.5);
+
+    @Getter
+    private static InstanceContainer spawnInstance;
+
+    @Getter
+    private static NPC npc;
 
 
     static void main() {
@@ -80,7 +87,8 @@ public class Main {
                 .register(new PlayerAttackModule())  // Players attacking creatures
                 .register(new ItemActionModule()) // Handle custom item actions
                 .register(new TabListModule()) // Update tab list on player spawn
-                .register(new MenuItemModule()); // Give players the menu item
+                .register(new MenuItemModule()) // Give players the menu item
+                .register(new PlayerSpawnModule()); // Handle player spawning and teleporting to spawn
 
         // Initialize registries
         itemActionRegistry = new ItemActionRegistry();
@@ -90,29 +98,16 @@ public class Main {
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
 
-        InstanceContainer spawn = createSpawnInstance();
+        // Create spawn instance and preload chunks
+        spawnInstance = createSpawnInstance();
 
-        NPC npc = new NPC(UUID.randomUUID(), "NPC_Test_Guy", Objects.requireNonNull(PlayerSkin.fromUsername("jeb_")), 1, false);
-
-        npc.setInstance(spawn, spawnPos);
+        npc = new NPC(UUID.randomUUID(), "NPC_Test_Guy", Objects.requireNonNull(PlayerSkin.fromUsername("jeb_")), 1, false);
+        npc.setInstance(spawnInstance, spawnPos);
 
         GlobalEventHandler globalEventHandler = MinecraftServer.getGlobalEventHandler();
 
         // Attach all modules to the global event handler
         moduleManager.attachAll(globalEventHandler);
-
-        globalEventHandler.addListener(AsyncPlayerConfigurationEvent.class, event -> event.setSpawningInstance(spawn));
-
-        globalEventHandler.addListener(PlayerSpawnEvent.class, event -> {
-            event.getPlayer().teleport(spawnPos);
-            event.getPlayer().setRespawnPoint(spawnPos);
-
-            TestZombie zombie = new TestZombie();
-            zombie.setInstance(spawn, spawnPos);
-
-            npc.addPlayerViewer(event.getPlayer());
-        });
-
 
         // Start the server
         minecraftServer.start("0.0.0.0", 25565);
