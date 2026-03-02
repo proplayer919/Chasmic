@@ -34,7 +34,7 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("harvester_helmet_common",
                 "Harvester Helmet",
                 Material.IRON_HELMET,
-                "A sturdy helmet that provides basic protection for the head and some farming bonuses.",
+                "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,
                 Rarity.COMMON,
                 new ArrayList<>(List.of(
@@ -56,7 +56,7 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("harvester_helmet_rare",
                 "Harvester Helmet",
                 Material.IRON_HELMET,
-                "A sturdy helmet that provides adequate protection for the head and good farming bonuses.",
+                "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,
                 Rarity.RARE,
                 new ArrayList<>(List.of(
@@ -67,7 +67,7 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("harvester_helmet_epic",
                 "Harvester Helmet",
                 Material.IRON_HELMET,
-                "A sturdy helmet that provides great protection for the head and lots of farming bonuses.",
+                "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,
                 Rarity.EPIC,
                 new ArrayList<>(List.of(
@@ -78,7 +78,7 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("harvester_helmet_legendary",
                 "Harvester Helmet",
                 Material.IRON_HELMET,
-                "A sturdy helmet that provides amazing protection for the head and massive farming bonuses.",
+                "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,
                 Rarity.LEGENDARY,
                 new ArrayList<>(List.of(
@@ -89,7 +89,7 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("harvester_helmet_mythic",
                 "Harvester Helmet",
                 Material.IRON_HELMET,
-                "A sturdy helmet that provides heavenly protection for the head and gigantic farming bonuses.",
+                "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,
                 Rarity.MYTHIC,
                 new ArrayList<>(List.of(

@@ -78,7 +78,8 @@ public class Main {
                 .register(new EntityAttackModule())  // Creatures attacking players
                 .register(new PlayerAttackModule())  // Players attacking creatures
                 .register(new ItemActionModule()) // Handle custom item actions
-                .register(new TabListModule()); // Update tab list on player spawn
+                .register(new TabListModule()) // Update tab list on player spawn
+                .register(new MenuItemModule()); // Give players the menu item
 
         // Initialize registries
         itemActionRegistry = new ItemActionRegistry();

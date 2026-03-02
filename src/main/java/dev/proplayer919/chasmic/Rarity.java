@@ -11,7 +11,8 @@ public enum Rarity {
     RARE("rare", NamedTextColor.BLUE),
     EPIC("epic", NamedTextColor.LIGHT_PURPLE),
     LEGENDARY("legendary", NamedTextColor.GOLD),
-    MYTHIC("mythic", NamedTextColor.YELLOW),;
+    MYTHIC("mythic", NamedTextColor.YELLOW),
+    SPECIAL("special", NamedTextColor.RED);
 
     private final String rarityName;
     private final TextColor color;

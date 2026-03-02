@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic.accessories;
 
 import dev.proplayer919.chasmic.accessories.types.ImmaterialBand;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,5 +19,9 @@ public class AccessoryRegistry {
 
     public void registerAccessory(Accessory accessory) {
         accessoryMap.put(accessory.getId(), accessory);
+    }
+
+    public Collection<Accessory> getAllAccessories() {
+        return accessoryMap.values();
     }
 }
