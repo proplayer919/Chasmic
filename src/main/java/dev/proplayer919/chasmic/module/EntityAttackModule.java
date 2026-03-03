@@ -45,42 +45,10 @@ public class EntityAttackModule implements Module {
             // Apply damage to target
             healthCreature.damage(finalDamage, DamageType.MOB_ATTACK, entity, target.getPosition());
 
-            // Apply knockback to player (now with proper validation)
             if (target instanceof CustomPlayer player) {
-                applyKnockback(player, creature);
                 playAttackSound(creature, player);
             }
         });
-    }
-
-    /**
-     * Apply knockback to the player based on attack direction
-     */
-    private void applyKnockback(CustomPlayer player, CustomCreature creature) {
-        try {
-            // Get direction from creature to player
-            Vec creaturePos = creature.getPosition().asVec();
-            Vec playerPos = player.getPosition().asVec();
-            Vec direction = playerPos.sub(creaturePos);
-
-            // Check if direction is valid (not zero vector)
-            if (direction.lengthSquared() < 0.01) {
-                return; // Creature and player at same position, skip knockback
-            }
-
-            direction = direction.normalize();
-
-            // Apply knockback (0.6 blocks horizontal, 0.4 vertical)
-            double knockbackX = direction.x() * 0.6;
-            double knockbackZ = direction.z() * 0.6;
-            double knockbackY = 0.4;
-
-            Vec knockbackVelocity = new Vec(knockbackX, knockbackY, knockbackZ);
-
-            player.setVelocity(knockbackVelocity);
-        } catch (Exception e) {
-            // Silently fail on any knockback calculation errors
-        }
     }
 
     /**

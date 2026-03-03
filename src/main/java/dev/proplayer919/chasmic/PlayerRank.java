@@ -5,7 +5,10 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 public enum PlayerRank {
@@ -45,10 +48,13 @@ public enum PlayerRank {
     MEDIA("media", Component.text("[MEDIA]").color(NamedTextColor.RED), 7, NamedTextColor.RED, NamedTextColor.WHITE,
             List.of("command.media.record", "command.media.stream")),
 
-    ADMIN("admin", Component.text("[ADMIN]").color(NamedTextColor.LIGHT_PURPLE), 8, NamedTextColor.LIGHT_PURPLE, NamedTextColor.WHITE,
+    BUILDER("builder", Component.text("[BUILDER]").color(NamedTextColor.YELLOW), 8, NamedTextColor.YELLOW, NamedTextColor.WHITE,
+            List.of("builder.*")),
+
+    ADMIN("admin", Component.text("[ADMIN]").color(NamedTextColor.LIGHT_PURPLE), 9, NamedTextColor.LIGHT_PURPLE, NamedTextColor.WHITE,
             List.of("admin.*")),
 
-    OWNER("owner", Component.text("[OWNER]").color(NamedTextColor.GOLD), 9, NamedTextColor.GOLD, NamedTextColor.WHITE,
+    OWNER("owner", Component.text("[OWNER]").color(NamedTextColor.GOLD), 10, NamedTextColor.GOLD, NamedTextColor.WHITE,
             List.of("*"));
 
     private final String id;
@@ -69,5 +75,17 @@ public enum PlayerRank {
 
     public Component getDisplayName() {
         return name != null ? name : Component.text("Default").color(NamedTextColor.WHITE);
+    }
+
+    public List<String> getInheritedDefaultPermissions() {
+        Set<String> inheritedPermissions = new LinkedHashSet<>();
+
+        for (PlayerRank rank : values()) {
+            if (rank.priority <= this.priority) {
+                inheritedPermissions.addAll(rank.defaultPermissions);
+            }
+        }
+
+        return new ArrayList<>(inheritedPermissions);
     }
 }

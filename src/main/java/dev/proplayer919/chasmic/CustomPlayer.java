@@ -4,6 +4,7 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
+import dev.proplayer919.chasmic.sidebar.SidebarManager;
 import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
@@ -61,6 +62,8 @@ public class CustomPlayer extends Player implements HealthCreature {
     @Setter
     private boolean showMsptBossbar = false;
 
+    private SidebarManager sidebarManager;
+
     private final BossBar msptBossBar = BossBar.bossBar(Component.text("MSPT: 0 ms").color(NamedTextColor.GREEN), 0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS);
 
     private float mspt;
@@ -96,6 +99,12 @@ public class CustomPlayer extends Player implements HealthCreature {
         if (playerData != null) {
             this.customHealth = playerData.getMaxHealth();
             this.customMana = playerData.getMaxMana();
+
+            // Initialize scoreboard manager after player data is loaded.
+            // Sidebar packets are sent later from PlayerSpawnEvent via showSidebar().
+            if (sidebarManager == null) {
+                sidebarManager = new SidebarManager(this);
+            }
         }
     }
 
@@ -257,6 +266,12 @@ public class CustomPlayer extends Player implements HealthCreature {
         return getStatFor(PlayerStat.CRITICAL_CHANCE);
     }
 
+    public void showSidebar() {
+        if (sidebarManager != null) {
+            sidebarManager.show();
+        }
+    }
+
     @Override
     public void tick(long time) {
         super.tick(time);
@@ -270,6 +285,11 @@ public class CustomPlayer extends Player implements HealthCreature {
             // Update MSPT bossbar if enabled
             if (showMsptBossbar) {
                 updateMsptBossbar();
+            }
+
+            // Update scoreboard
+            if (sidebarManager != null) {
+                sidebarManager.update();
             }
         }
     }
@@ -319,8 +339,8 @@ public class CustomPlayer extends Player implements HealthCreature {
     private void loadRankPermissions() {
         permissionHolder.clearPermissions();
 
-        // Load rank permissions
-        for (String permission : rank.getDefaultPermissions()) {
+        // Load inherited rank permissions (this rank + all lower priorities)
+        for (String permission : rank.getInheritedDefaultPermissions()) {
             permissionHolder.addPermission(permission);
         }
 

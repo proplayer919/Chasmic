@@ -51,7 +51,7 @@ public class PermsCommand extends PermissionCommand {
                     .append(customTarget.getRank().getName()));
 
             sender.sendMessage(Component.text("Rank Permissions:", NamedTextColor.AQUA));
-            for (String perm : customTarget.getRank().getDefaultPermissions()) {
+            for (String perm : customTarget.getRank().getInheritedDefaultPermissions()) {
                 sender.sendMessage(Component.text("  • " + perm, NamedTextColor.GRAY));
             }
 
@@ -109,5 +109,3 @@ public class PermsCommand extends PermissionCommand {
         setDefaultExecutor((sender, context) -> sender.sendMessage(Component.text("Usage: /perms <player> [set <permission> <true|false>]", NamedTextColor.RED)));
     }
 }
-
-

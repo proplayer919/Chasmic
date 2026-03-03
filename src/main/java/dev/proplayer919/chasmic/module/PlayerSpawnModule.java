@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.module;
 
+import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import net.minestom.server.event.Event;
@@ -21,6 +22,10 @@ public class PlayerSpawnModule implements Module {
             event.getPlayer().teleport(Main.getSpawnPos());
             event.getPlayer().setRespawnPoint(Main.getSpawnPos());
 
+            if (event.getPlayer() instanceof CustomPlayer customPlayer) {
+                customPlayer.showSidebar();
+            }
+
             TestZombie zombie = new TestZombie();
             zombie.setInstance(Main.getSpawnInstance(), Main.getSpawnPos());
 
@@ -33,4 +38,3 @@ public class PlayerSpawnModule implements Module {
         return "PlayerSpawnModule";
     }
 }
-

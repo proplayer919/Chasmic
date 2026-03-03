@@ -18,8 +18,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class MenuItemModule implements Module {
-    private static final ItemStack menuItem = ItemCreator.createItem(1, Material.NETHER_STAR, "menu", "Chasmic Menu", "Use this to access the Chasmic Menu and manage your profile.", Rarity.SPECIAL, Collections.emptyList(), null, null, null);
-    private static final ItemStack blockedSlotItem = ItemCreator.createItem(1, Material.BARRIER, "blocked", "Blocked Slot", "You cannot use this inventory slot in Chasmic!", Rarity.SPECIAL, Collections.emptyList(), null, null, null);
+    private static final ItemStack menuItem = ItemCreator.createItem(1, Material.NETHER_STAR, "menu", "Chasmic Menu", "Use this to access the Chasmic Menu and manage your profile.", Rarity.SPECIAL, Collections.emptyList(), null, null, null, false);
+    private static final ItemStack blockedSlotItem = ItemCreator.createItem(1, Material.BARRIER, "blocked", "Blocked Slot", "You cannot use this inventory slot in Chasmic!", Rarity.SPECIAL, Collections.emptyList(), null, null, null, false);
     private static final Collection<Integer> blockedSlots = List.of(36, 37, 38, 39, 40);
     private static final int menuSlot = 8;
 

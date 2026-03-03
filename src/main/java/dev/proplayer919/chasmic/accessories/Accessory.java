@@ -38,7 +38,7 @@ public abstract class Accessory {
     }
 
     public ItemStack getItemStack(int amount) {
-        return ItemCreator.createItem(amount, material, id, name, description, rarity, statsBonuses, playerHeadTexture, leatherColor, null);
+        return ItemCreator.createItem(amount, material, id, name, description, rarity, statsBonuses, playerHeadTexture, leatherColor, null, false);
     }
 
     public ItemStack getItemStack() {

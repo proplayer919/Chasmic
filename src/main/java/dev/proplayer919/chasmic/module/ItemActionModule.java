@@ -69,6 +69,6 @@ public class ItemActionModule implements Module {
 
     @Override
     public String getName() {
-        return "TabListModule";
+        return "ItemActionModule";
     }
 }

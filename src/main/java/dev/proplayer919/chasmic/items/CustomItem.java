@@ -21,6 +21,7 @@ public class CustomItem {
     private final ItemType itemType;
     private final Rarity rarity;
     private final Collection<PlayerStatBonus> statBonuses;
+    private int healthRestoration; // Amount of health restored if edible
     private ItemAction action;
     private String playerHeadTexture; // Optional field for player head items
     private Color leatherColor; // Optional field for leather armor items
@@ -53,8 +54,13 @@ public class CustomItem {
         return this;
     }
 
+    public CustomItem withHealthRestoration(int healthRestoration) {
+        this.healthRestoration = healthRestoration;
+        return this;
+    }
+
     public ItemStack getItemStack(int amount) {
-        return ItemCreator.createItem(amount, material, id, displayName, description, rarity, statBonuses, playerHeadTexture, leatherColor, action);
+        return ItemCreator.createItem(amount, material, id, displayName, description, rarity, statBonuses, playerHeadTexture, leatherColor, action, itemType == ItemType.FOOD);
     }
 
     public ItemStack getItemStack() {

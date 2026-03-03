@@ -32,6 +32,14 @@ public class CustomItemRegistry {
                         new PlayerStatBonus(PlayerStat.CRITICAL_CHANCE, 14.0f)
                 ))));
 
+        registerItem(new CustomItem("bagel",
+                "Bagel",
+                Material.PLAYER_HEAD,
+                "A delicious bagel that restores health when consumed.",
+                ItemType.FOOD,
+                Rarity.COMMON,
+                new ArrayList<>(List.of())).withHealthRestoration(20).withPlayerHeadTexture(PlayerHeads.BAGEL));
+
         registerItemWithRarities("harvester_helmet", "Harvester Helmet", Material.IRON_HELMET,
                 "A sturdy helmet that provides protection for the head and farming bonuses.",
                 ItemType.ARMOR,

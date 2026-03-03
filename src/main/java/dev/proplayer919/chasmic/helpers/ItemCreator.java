@@ -10,16 +10,21 @@ import net.minestom.server.color.Color;
 import net.minestom.server.component.DataComponents;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
+import net.minestom.server.item.component.Food;
+import net.minestom.server.tag.Tag;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 import static dev.proplayer919.chasmic.items.CustomItem.itemActionTag;
 import static dev.proplayer919.chasmic.items.CustomItem.itemIdTag;
 
 public abstract class ItemCreator {
-    public static ItemStack createItem(int amount, Material material, String id, String name, String description, Rarity rarity, Collection<PlayerStatBonus> statBonuses, String playerHeadTexture, Color leatherColor, ItemAction action) {
+    public static final Tag<String> itemUuidTag = Tag.String("custom_item_uuid");
+
+    public static ItemStack createItem(int amount, Material material, String id, String name, String description, Rarity rarity, Collection<PlayerStatBonus> statBonuses, String playerHeadTexture, Color leatherColor, ItemAction action, boolean edible) {
         ItemStack.Builder builder;
         if (playerHeadTexture != null) {
             builder = PlayerHeadCreator.getHeadBuilder(playerHeadTexture);
@@ -29,6 +34,10 @@ public abstract class ItemCreator {
 
         if (leatherColor != null) {
             builder.set(DataComponents.DYED_COLOR, leatherColor);
+        }
+
+        if (edible) {
+            builder.set(DataComponents.FOOD, new Food(0, 0f, true));
         }
 
         // Build lore
@@ -61,6 +70,8 @@ public abstract class ItemCreator {
         builder.set(DataComponents.ITEM_NAME, Component.text(name).color(rarity.getColor()))
                 .lore(lore)
                 .set(itemIdTag, id);
+
+        builder.set(itemUuidTag, UUID.randomUUID().toString());
 
         if (action != null) {
             builder.set(itemActionTag, action.id());

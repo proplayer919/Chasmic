@@ -46,42 +46,9 @@ public class PlayerAttackModule implements Module {
             // Set the creature's last attacker
             creature.setLastAttacker(player);
 
-            // Apply knockback
-            applyKnockback(creature, player);
-
             // Play attack sound (with critical hit sound if applicable)
             playAttackSound(player, creature, attackResult);
         });
-    }
-
-    /**
-     * Apply knockback to the creature based on attack direction
-     */
-    private void applyKnockback(CustomCreature creature, CustomPlayer player) {
-        try {
-            // Get direction from player to creature
-            Vec playerPos = player.getPosition().asVec();
-            Vec creaturePos = creature.getPosition().asVec();
-            Vec direction = creaturePos.sub(playerPos);
-
-            // Check if direction is valid (not zero vector)
-            if (direction.lengthSquared() < 0.01) {
-                return; // Player and creature at same position, skip knockback
-            }
-
-            direction = direction.normalize();
-
-            // Apply knockback (1 block horizontal, 0.6 vertical)
-            double knockbackX = direction.x();
-            double knockbackZ = direction.z();
-            double knockbackY = 0.6;
-
-            Vec knockbackVelocity = new Vec(knockbackX, knockbackY, knockbackZ);
-
-            creature.setVelocity(knockbackVelocity);
-        } catch (Exception e) {
-            // Silently fail on any knockback calculation errors
-        }
     }
 
     /**
