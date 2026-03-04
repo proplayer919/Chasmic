@@ -163,7 +163,7 @@ public class SidebarManager {
         if (hour >= 5 && hour < 21) {
             return Component.text("☀").color(NamedTextColor.YELLOW); // Day
         } else {
-            return Component.text("\uD83C\uDF19").color(NamedTextColor.AQUA); // Night
+            return Component.text("☽").color(NamedTextColor.AQUA); // Night
         }
     }
 
