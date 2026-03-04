@@ -151,12 +151,13 @@ public class Main {
 
         spawn.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
 
+        // Disable automatic time progression so our Chasmic time scheduler has full control
+        spawn.setTimeRate(0);
+
         // Set instance time to match Chasmic time
-        // In Minecraft: 0 = midnight, 6000 = noon, 12000 = midnight again
-        // Chasmic time: 0-23 hours, 0-59 minutes, 0-999 milliseconds per minute
-        // Conversion uses smooth interpolation for seamless transitions
         long interpolatedTime = ChasmicTime.getInterpolatedInstanceTime();
         spawn.setTime(interpolatedTime);
+
         return spawn;
     }
 }

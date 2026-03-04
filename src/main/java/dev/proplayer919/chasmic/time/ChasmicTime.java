@@ -19,7 +19,8 @@ import java.time.Instant;
 public class ChasmicTime {
 
     // Fixed epoch: March 1, 2026 00:00:00 UTC
-    private static final long EPOCH_SECONDS = Instant.parse("2026-03-01T00:00:00Z").getEpochSecond();
+    private static final long EPOCH_MILLISECONDS = Instant.parse("2026-03-01T00:00:00Z").getEpochSecond() * 1000;
+    private static final long EPOCH_SECONDS = EPOCH_MILLISECONDS / 1000;
 
     private static final int CHASMIC_MINUTES_PER_HOUR = 60;
     private static final int CHASMIC_HOURS_PER_DAY = 24;
@@ -32,16 +33,6 @@ public class ChasmicTime {
     public static long getTotalChasmicMinutes() {
         long currentSeconds = Instant.now().getEpochSecond();
         return currentSeconds - EPOCH_SECONDS; // 1 real second = 1 Chasmic minute
-    }
-
-    /**
-     * Gets the total elapsed Chasmic minutes since epoch with millisecond precision
-     * Returns the value in milliseconds (divide by 1000 to get minutes)
-     */
-    public static long getTotalChasmicMinutesMillis() {
-        long currentNanos = System.nanoTime();
-        long epochNanos = EPOCH_SECONDS * 1_000_000_000L;
-        return (currentNanos - epochNanos) / 1_000_000L; // Convert nanos to millis, 1 real ms = 1 Chasmic ms
     }
 
     /**
@@ -127,41 +118,46 @@ public class ChasmicTime {
     }
 
     /**
-     * Gets the current Minecraft instance time that smoothly interpolates with millisecond precision
-     * Conversion: 1 Chasmic hour = 1000 Minecraft ticks
-     * 1 Chasmic minute = 16.666... Minecraft ticks
-     * 1 Chasmic millisecond = 0.016666... Minecraft ticks
-     * <p>
-     * Minecraft time is a 24000-tick cycle (0 = midnight, 6000 = noon, 12000 = midnight)
-     * Chasmic time is 0-23 hours, 0-59 minutes, 0-999 milliseconds
-     * <p>
-     * Returns the interpolated Minecraft instance time
+     * Gets the current Minecraft instance time from Chasmic time
      */
     public static long getInterpolatedInstanceTime() {
-        long totalChasmicMillis = getTotalChasmicMinutesMillis();
+        long currentMilliseconds = Instant.now().toEpochMilli();
+        double dayProgress = getChasmicDayProgress(currentMilliseconds);
 
-        // Extract hours, minutes, and milliseconds from total Chasmic time
-        long totalChasmicSeconds = totalChasmicMillis / 1000;
-        long chasmicHours = (totalChasmicSeconds / 3600) % 24;
-        long chasmicMinutes = (totalChasmicSeconds / 60) % 60;
-        long chasmicMillis = totalChasmicMillis % 1000;
+        // Interpolate Minecraft time based on day progress
+        // -1.0 (midnight) -> 18000 ticks
+        // 0.0 (noon) -> 6000 ticks
+        // 1.0 (next midnight) -> 18000 ticks
 
-        // Convert to Minecraft ticks with smooth interpolation
-        // Each hour = 1000 ticks, each minute = 16.666... ticks, each millisecond = 0.016666... ticks
-        double instanceTime = (chasmicHours * 1000.0) + (chasmicMinutes * 16.666666666) + (chasmicMillis * 0.016666666);
+        // Interpolate between 18000 (midnight) to 6000 (noon) and back to 18000 (next midnight)
+        long mcTime = (long) ((1 - dayProgress) * 6000 + dayProgress * 18000);
+        return mcTime % 24000; // Ensure it wraps around at 24000 ticks
+    }
 
-        // Clamp to 0-24000 range (24-hour Minecraft day cycle)
-        return Math.round(instanceTime) % 24000;
+    private static double getChasmicDayProgress(long currentMilliseconds) {
+        long elapsedMilliseconds = currentMilliseconds - EPOCH_MILLISECONDS;
+
+        // 24000 ticks / day in MC
+        // 0/24000 = sunrise, 6000 = noon, 12000 = sunset, 18000 = midnight
+
+        // What progress are we in the Chasmic day? (-1.0 to 1.0 where -1.0 is midnight, 0.0 is noon, and 1.0 is the next midnight)
+        double millisPerChasmicDay = CHASMIC_HOURS_PER_DAY * CHASMIC_MINUTES_PER_HOUR * 1000; // 24 hours * 60 minutes * 1000 ms
+        double dayProgress = (elapsedMilliseconds % millisPerChasmicDay) / millisPerChasmicDay;
+        dayProgress = (dayProgress * 2) - 1; // Convert to range -1.0 to 1.0
+        return dayProgress;
     }
 
     /**
      * Gets a short formatted time string for display
-     * Format: "HH:MM"
+     * Format: "1:43pm"
      */
-    public static String getFormattedTimeShort() {
+    public static String getShortFormattedTime() {
         int hour = getChasmicHour();
         int minute = getChasmicMinute();
-        return String.format("%02d:%02d", hour, minute);
+        String amPm = hour >= 12 ? "pm" : "am";
+        int displayHour = hour % 12;
+        if (displayHour == 0) displayHour = 12; // Convert 0 to 12 for 12-hour format
+        return String.format("%d:%02d%s", displayHour, minute, amPm);
     }
 
     /**

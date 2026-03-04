@@ -63,6 +63,9 @@ public class PlayerData {
     @BsonProperty("upgradePoints")
     private int upgradePoints = 0; // Upgrade points for character progression
 
+    @BsonProperty("shards")
+    private int shards = 0; // Shards currency for special purchases
+
     // Accessory data
     @BsonIgnore
     private List<String> accessoryIds = new ArrayList<>(); // List of accessory IDs in the player's bag

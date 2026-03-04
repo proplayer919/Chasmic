@@ -2,56 +2,56 @@ package dev.proplayer919.chasmic.sidebar;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.helpers.CurrencyFormatter;
+import dev.proplayer919.chasmic.time.ChasmicSeason;
 import dev.proplayer919.chasmic.time.ChasmicTime;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.scoreboard.Sidebar;
 import org.jspecify.annotations.NonNull;
 
+import java.util.Date;
+import java.util.UUID;
+
 /**
- * Manager for handling player sidebars
- * Displays Chasmic Time, Season/Day, and Currency information
+ * Manager for handling player sidebars.
  */
 public class SidebarManager {
 
     private final CustomPlayer player;
     private final Sidebar sidebar;
     private long lastUpdate = 0;
-    private static final long UPDATE_INTERVAL_MILLIS = 500; // Update every 500ms
+    private static final long UPDATE_INTERVAL_MILLIS = 100; // Update every 100ms
     private boolean visible = false;
+    private boolean bankLineVisible = false;
+    private boolean shardsLineVisible = false;
 
     public SidebarManager(@NonNull CustomPlayer player) {
         this.player = player;
-        this.sidebar = new Sidebar(Component.text("Chasmic Info").color(NamedTextColor.GOLD));
+        this.sidebar = new Sidebar(Component.text("CHASMIC").color(NamedTextColor.YELLOW).decoration(TextDecoration.BOLD, true));
         setupScoreboard();
     }
 
     /**
-     * Sets up the initial scoreboard structure
+     * Sets up the initial scoreboard structure.
      */
     private void setupScoreboard() {
-        // Add empty line at top for spacing
-        sidebar.createLine(new Sidebar.ScoreboardLine("space1", Component.text(""), 10));
+        sidebar.createLine(new Sidebar.ScoreboardLine("serverInfo", buildServerInfoLine(), 12, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("topSpace", Component.text(""), 11, Sidebar.NumberFormat.blank()));
 
-        // Time display
-        sidebar.createLine(new Sidebar.ScoreboardLine("timeLabel", Component.text("Time").color(NamedTextColor.YELLOW), 9));
-        sidebar.createLine(new Sidebar.ScoreboardLine("time", Component.text("  " + ChasmicTime.getFormattedTimeShort()).color(NamedTextColor.WHITE), 8));
+        sidebar.createLine(new Sidebar.ScoreboardLine("date", buildDateLine(), 10, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("time", buildTimeLine(), 9, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("location", buildLocationLine(), 8, Sidebar.NumberFormat.blank()));
 
-        // Season and day
-        sidebar.createLine(new Sidebar.ScoreboardLine("seasonLabel", Component.text("Season").color(NamedTextColor.GREEN), 7));
-        sidebar.createLine(new Sidebar.ScoreboardLine("season", Component.text("  " + ChasmicTime.getSeasonAndDayString()).color(NamedTextColor.WHITE), 6));
+        sidebar.createLine(new Sidebar.ScoreboardLine("space1", Component.text(""), 7, Sidebar.NumberFormat.blank()));
 
-        // Currency section
-        sidebar.createLine(new Sidebar.ScoreboardLine("space2", Component.text(""), 5));
-        sidebar.createLine(new Sidebar.ScoreboardLine("currencyLabel", Component.text("Currency").color(NamedTextColor.LIGHT_PURPLE), 4));
+        sidebar.createLine(new Sidebar.ScoreboardLine("purse", buildPurseLine(), 6, Sidebar.NumberFormat.blank()));
+        syncDynamicCurrencyLines();
 
-        if (player.getPlayerData() != null) {
-            String purseStr = CurrencyFormatter.formatCurrency(player.getPlayerData().getPurse());
-            sidebar.createLine(new Sidebar.ScoreboardLine("purse", Component.text("  Purse: " + purseStr).color(NamedTextColor.GOLD), 3));
+        sidebar.createLine(new Sidebar.ScoreboardLine("space2", Component.text(""), 3, Sidebar.NumberFormat.blank()));
 
-            String bankStr = CurrencyFormatter.formatCurrency(player.getPlayerData().getBank());
-            sidebar.createLine(new Sidebar.ScoreboardLine("bank", Component.text("  Bank: " + bankStr).color(NamedTextColor.AQUA), 2));
-        }
+        sidebar.createLine(new Sidebar.ScoreboardLine("year", buildYearLine(), 2, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("address", Component.text("play.chasmic.net").color(NamedTextColor.YELLOW), 1, Sidebar.NumberFormat.blank()));
     }
 
     /**
@@ -66,8 +66,8 @@ public class SidebarManager {
     }
 
     /**
-     * Updates the scoreboard with current information
-     * Should be called regularly (e.g., every tick)
+     * Updates the scoreboard with current information.
+     * Should be called regularly (e.g., every tick).
      */
     public void update() {
         if (!visible) {
@@ -83,21 +83,109 @@ public class SidebarManager {
 
         lastUpdate = currentTime;
 
-        // Update time
-        String formattedTime = ChasmicTime.getFormattedTimeShort();
-        sidebar.updateLineContent("time", Component.text("  " + formattedTime).color(NamedTextColor.WHITE));
+        sidebar.updateLineContent("date", buildDateLine());
+        sidebar.updateLineContent("time", buildTimeLine());
+        sidebar.updateLineContent("location", buildLocationLine());
+        sidebar.updateLineContent("purse", buildPurseLine());
+        syncDynamicCurrencyLines();
+        if (bankLineVisible) {
+            sidebar.updateLineContent("bank", buildBankLine());
+        }
+        if (shardsLineVisible) {
+            sidebar.updateLineContent("shards", buildShardsLine());
+        }
+        sidebar.updateLineContent("year", buildYearLine());
+    }
 
-        // Update season and day
-        String seasonAndDay = ChasmicTime.getSeasonAndDayString();
-        sidebar.updateLineContent("season", Component.text("  " + seasonAndDay).color(NamedTextColor.WHITE));
+    private Component buildServerInfoLine() {
+        // DD/MM/YY XXXXXX
+        Date date = new Date();
+        String dateStr = String.format("%1$td/%1$tm/%1$tY", date);
+        return Component.text(dateStr).color(NamedTextColor.GRAY).append(Component.text(" " + UUID.randomUUID().toString().substring(0, 6)).color(NamedTextColor.DARK_GRAY));
+    }
 
-        // Update currency if player data is loaded
-        if (player.getPlayerData() != null) {
-            String purseStr = CurrencyFormatter.formatCurrency(player.getPlayerData().getPurse());
-            sidebar.updateLineContent("purse", Component.text("  Purse: " + purseStr).color(NamedTextColor.GOLD));
+    private Component buildDateLine() {
+        int dayOfSeason = ChasmicTime.getChasmicDayOfSeason() + 1;
+        ChasmicSeason season = ChasmicTime.getCurrentSeason();
+        String text = " " + season.getDisplayName() + " " + dayOfSeason + getOrdinalSuffix(dayOfSeason);
+        return Component.text(text).color(NamedTextColor.WHITE);
+    }
 
-            String bankStr = CurrencyFormatter.formatCurrency(player.getPlayerData().getBank());
-            sidebar.updateLineContent("bank", Component.text("  Bank: " + bankStr).color(NamedTextColor.AQUA));
+    private Component buildTimeLine() {
+        return Component.text(" " + ChasmicTime.getShortFormattedTime()).color(NamedTextColor.GRAY).append(Component.text(" ", NamedTextColor.WHITE)).append(getTimeEmoji());
+    }
+
+    private Component buildLocationLine() {
+        return Component.text(" ◇ ").color(NamedTextColor.WHITE)
+                .append(Component.text("Chasmic City").color(NamedTextColor.AQUA));
+    }
+
+    private Component buildPurseLine() {
+        String purseStr = CurrencyFormatter.formatCurrency(player.getPlayerData() != null ? player.getPlayerData().getPurse() : 0);
+        return Component.text("Purse: ").color(NamedTextColor.WHITE)
+                .append(Component.text(purseStr).color(NamedTextColor.GOLD));
+    }
+
+    private Component buildBankLine() {
+        int bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
+        String bankStr = CurrencyFormatter.formatCurrency(bank);
+        return Component.text("Bank: ").color(NamedTextColor.WHITE)
+                .append(Component.text(bankStr).color(NamedTextColor.YELLOW));
+    }
+
+    private Component buildShardsLine() {
+        int shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
+        String shardsStr = CurrencyFormatter.formatCurrency(shards);
+        return Component.text("Shards: ").color(NamedTextColor.WHITE)
+                .append(Component.text(shardsStr).color(NamedTextColor.AQUA));
+    }
+
+    private Component buildYearLine() {
+        return Component.text("Year " + ChasmicTime.getChasmicYear()).color(NamedTextColor.GRAY);
+    }
+
+    private String getOrdinalSuffix(int day) {
+        if (day % 100 >= 11 && day % 100 <= 13) {
+            return "th";
+        }
+
+        return switch (day % 10) {
+            case 1 -> "st";
+            case 2 -> "nd";
+            case 3 -> "rd";
+            default -> "th";
+        };
+    }
+
+    private Component getTimeEmoji() {
+        // Use different emojis based on time of day (morning, afternoon, evening, night)
+        int hour = ChasmicTime.getChasmicHour();
+        if (hour >= 5 && hour < 21) {
+            return Component.text("☀").color(NamedTextColor.YELLOW); // Day
+        } else {
+            return Component.text("\uD83C\uDF19").color(NamedTextColor.AQUA); // Night
+        }
+    }
+
+    private void syncDynamicCurrencyLines() {
+        int bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
+        boolean shouldShowBank = bank > 0;
+        if (shouldShowBank && !bankLineVisible) {
+            sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 5));
+            bankLineVisible = true;
+        } else if (!shouldShowBank && bankLineVisible) {
+            sidebar.removeLine("bank");
+            bankLineVisible = false;
+        }
+
+        int shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
+        boolean shouldShowShards = shards > 0;
+        if (shouldShowShards && !shardsLineVisible) {
+            sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 4));
+            shardsLineVisible = true;
+        } else if (!shouldShowShards && shardsLineVisible) {
+            sidebar.removeLine("shards");
+            shardsLineVisible = false;
         }
     }
 
