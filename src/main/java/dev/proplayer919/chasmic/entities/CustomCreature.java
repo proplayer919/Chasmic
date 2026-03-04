@@ -7,7 +7,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.registry.RegistryKey;
 
@@ -18,51 +17,31 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
     @Setter
     private int customHealth;
 
-    @Setter
-    private int customMaxHealth;
-
     private final CreatureType creatureType;
-
-    private float attack = 1.0f; // Flat attack damage
-    private float defense = 0.0f; // Defense damage reduction (0-1, where 0.5 = 50% reduction)
-    private float criticalChance = 0.0f; // Critical chance (0-1, where 0.1 = 10% chance)
-
-    private final String id;
-    private final String name;
 
     private Entity lastAttacker;
     private Date lastDamageTime;
     private int lastDisplayedHealth = -1; // Cache for health display to prevent unnecessary updates
 
-    public CustomCreature(String id, String name, EntityType entityType, int maxHealth, CreatureType creatureType) {
-        super(entityType);
-        this.id = id;
-        this.name = name;
-        this.customMaxHealth = maxHealth;
-        this.customHealth = maxHealth;
+    public CustomCreature(CreatureType creatureType) {
+        super(creatureType.entityType());
         this.creatureType = creatureType;
-    }
-
-    public CustomCreature(String id, String name, EntityType entityType, int maxHealth, CreatureType creatureType, float attack, float defense, float criticalChance) {
-        this(id, name, entityType, maxHealth, creatureType);
-        this.attack = attack;
-        this.defense = defense;
-        this.criticalChance = criticalChance;
+        this.customHealth = creatureType.maxHealth();
     }
 
     @Override
     public float getAttackStat() {
-        return attack;
+        return creatureType.attack();
     }
 
     @Override
     public float getDefenseStat() {
-        return defense;
+        return creatureType.defense();
     }
 
     @Override
     public float getCriticalChanceStat() {
-        return criticalChance;
+        return creatureType.criticalChance();
     }
 
     public void setLastAttacker(Entity attacker) {

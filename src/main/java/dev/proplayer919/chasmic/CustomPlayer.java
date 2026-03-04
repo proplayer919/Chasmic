@@ -119,7 +119,7 @@ public class CustomPlayer extends Player implements HealthCreature {
                 event.setChatMessage(null);
 
                 if (lastDamageAttacker != null) {
-                    event.setDeathText(Component.text("☠  Killed by " + lastDamageAttacker.getName()).color(NamedTextColor.RED));
+                    event.setDeathText(Component.text("☠  Killed by " + lastDamageAttacker.getCreatureType().name()).color(NamedTextColor.RED));
                     lastDamageAttacker = null;
                 } else {
                     event.setDeathText(Component.text("☠ You died!").color(NamedTextColor.RED));

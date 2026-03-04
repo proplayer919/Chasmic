@@ -1,7 +1,8 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
 import dev.proplayer919.chasmic.CustomPlayer;
-import dev.proplayer919.chasmic.entities.CreatureType;
+import dev.proplayer919.chasmic.Main;
+import dev.proplayer919.chasmic.entities.CreatureFamily;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public class TestZombie extends CustomCreature {
     public TestZombie() {
-        super("test-zombie", "Test Zombie", EntityType.ZOMBIE, 50, CreatureType.UNDEAD, 5.0f, 0f, 0.5f);
+        super(Main.getCreatureTypeRegistry().getCreatureType("test-zombie"));
 
         addAIGroup(
                 List.of(

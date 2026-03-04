@@ -11,8 +11,8 @@ import java.time.Instant;
  * - 1 Chasmic hour = 3,600 real seconds (60 minutes)
  * - 1 Chasmic day = 86,400 real seconds (1440 minutes / 24 hours)
  * - 1 Chasmic year = 8,640,000 real seconds (100 days) split into 4 seasons of 25 days each
- *   Seasons: Spring (days 0-24), Summer (days 25-49), Autumn (days 50-74), Winter (days 75-99)
- *
+ * Seasons: Spring (days 0-24), Summer (days 25-49), Autumn (days 50-74), Winter (days 75-99)
+ * <p>
  * Time is calculated deterministically from a fixed epoch (January 1, 2024 00:00:00 UTC)
  */
 @UtilityClass
@@ -32,6 +32,16 @@ public class ChasmicTime {
     public static long getTotalChasmicMinutes() {
         long currentSeconds = Instant.now().getEpochSecond();
         return currentSeconds - EPOCH_SECONDS; // 1 real second = 1 Chasmic minute
+    }
+
+    /**
+     * Gets the total elapsed Chasmic minutes since epoch with millisecond precision
+     * Returns the value in milliseconds (divide by 1000 to get minutes)
+     */
+    public static long getTotalChasmicMinutesMillis() {
+        long currentNanos = System.nanoTime();
+        long epochNanos = EPOCH_SECONDS * 1_000_000_000L;
+        return (currentNanos - epochNanos) / 1_000_000L; // Convert nanos to millis, 1 real ms = 1 Chasmic ms
     }
 
     /**
@@ -114,6 +124,34 @@ public class ChasmicTime {
         String seasonName = getCurrentSeasonName();
 
         return String.format("%02d:%02d Year %d, %s Day %d", hour, minute, year, seasonName, dayOfSeason + 1);
+    }
+
+    /**
+     * Gets the current Minecraft instance time that smoothly interpolates with millisecond precision
+     * Conversion: 1 Chasmic hour = 1000 Minecraft ticks
+     * 1 Chasmic minute = 16.666... Minecraft ticks
+     * 1 Chasmic millisecond = 0.016666... Minecraft ticks
+     * <p>
+     * Minecraft time is a 24000-tick cycle (0 = midnight, 6000 = noon, 12000 = midnight)
+     * Chasmic time is 0-23 hours, 0-59 minutes, 0-999 milliseconds
+     * <p>
+     * Returns the interpolated Minecraft instance time
+     */
+    public static long getInterpolatedInstanceTime() {
+        long totalChasmicMillis = getTotalChasmicMinutesMillis();
+
+        // Extract hours, minutes, and milliseconds from total Chasmic time
+        long totalChasmicSeconds = totalChasmicMillis / 1000;
+        long chasmicHours = (totalChasmicSeconds / 3600) % 24;
+        long chasmicMinutes = (totalChasmicSeconds / 60) % 60;
+        long chasmicMillis = totalChasmicMillis % 1000;
+
+        // Convert to Minecraft ticks with smooth interpolation
+        // Each hour = 1000 ticks, each minute = 16.666... ticks, each millisecond = 0.016666... ticks
+        double instanceTime = (chasmicHours * 1000.0) + (chasmicMinutes * 16.666666666) + (chasmicMillis * 0.016666666);
+
+        // Clamp to 0-24000 range (24-hour Minecraft day cycle)
+        return Math.round(instanceTime) % 24000;
     }
 
     /**

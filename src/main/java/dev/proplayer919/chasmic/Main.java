@@ -3,6 +3,7 @@ package dev.proplayer919.chasmic;
 import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
+import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
@@ -41,6 +42,9 @@ public class Main {
 
     @Getter
     private static AccessoryRegistry accessoryRegistry;
+
+    @Getter
+    private static CreatureTypeRegistry creatureTypeRegistry;
 
     @Getter
     private static PunishmentManager punishmentManager;
@@ -95,6 +99,7 @@ public class Main {
         itemActionRegistry = new ItemActionRegistry();
         customItemRegistry = new CustomItemRegistry();
         accessoryRegistry = new AccessoryRegistry();
+        creatureTypeRegistry = new CreatureTypeRegistry();
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
@@ -103,12 +108,11 @@ public class Main {
         spawnInstance = createSpawnInstance();
 
         // Schedule a task to continuously sync instance time with Chasmic time
+        // Uses smooth interpolation with millisecond precision for seamless transitions
         MinecraftServer.getSchedulerManager().submitTask(() -> {
-            long chasmic_hours = ChasmicTime.getChasmicHour();
-            long chasmic_minutes = ChasmicTime.getChasmicMinute();
-            long instanceTime = (chasmic_hours * 1000) + (long) (chasmic_minutes * 16.67);
-            spawnInstance.setTime(instanceTime);
-            return TaskSchedule.tick(1); // Update every tick to keep time synchronized
+            long interpolatedTime = ChasmicTime.getInterpolatedInstanceTime();
+            spawnInstance.setTime(interpolatedTime);
+            return TaskSchedule.tick(1); // Update every tick for smooth interpolation
         });
 
         npc = new NPC(UUID.randomUUID(), "NPC_Test_Guy", Objects.requireNonNull(PlayerSkin.fromUsername("jeb_")), 1, false);
@@ -124,21 +128,7 @@ public class Main {
     }
 
     private static @NonNull InstanceContainer createSpawnInstance() {
-        InstanceManager instanceManager = MinecraftServer.getInstanceManager();
-
-        InstanceContainer spawn = instanceManager.createInstanceContainer();
-        spawn.setChunkSupplier(LightingChunk::new);
-
-        spawn.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
-
-        // Set instance time to match Chasmic time
-        // In Minecraft: 0 = midnight, 6000 = noon, 12000 = midnight again
-        // Chasmic time: 0-23 hours, 0-59 minutes per hour
-        long chasmic_hours = ChasmicTime.getChasmicHour();
-        long chasmic_minutes = ChasmicTime.getChasmicMinute();
-        // Convert to Minecraft ticks: (hour * 1000) + (minute * 16.67)
-        long instanceTime = (chasmic_hours * 1000) + (long) (chasmic_minutes * 16.67);
-        spawn.setTime(instanceTime);
+        InstanceContainer spawn = getSpawn();
 
         // Load chunks synchronously before server starts
         var chunks = new ArrayList<CompletableFuture<Chunk>>();
@@ -150,6 +140,23 @@ public class Main {
         // Relight the chunks
         LightingChunk.relight(spawn, spawn.getChunks());
 
+        return spawn;
+    }
+
+    private static @NonNull InstanceContainer getSpawn() {
+        InstanceManager instanceManager = MinecraftServer.getInstanceManager();
+
+        InstanceContainer spawn = instanceManager.createInstanceContainer();
+        spawn.setChunkSupplier(LightingChunk::new);
+
+        spawn.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
+
+        // Set instance time to match Chasmic time
+        // In Minecraft: 0 = midnight, 6000 = noon, 12000 = midnight again
+        // Chasmic time: 0-23 hours, 0-59 minutes, 0-999 milliseconds per minute
+        // Conversion uses smooth interpolation for seamless transitions
+        long interpolatedTime = ChasmicTime.getInterpolatedInstanceTime();
+        spawn.setTime(interpolatedTime);
         return spawn;
     }
 }
