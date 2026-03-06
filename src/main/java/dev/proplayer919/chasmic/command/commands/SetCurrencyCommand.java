@@ -9,6 +9,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
+import net.minestom.server.command.builder.arguments.number.ArgumentLong;
 
 /**
  * /setcurrency command for changing player purse, bank, and other currencies
@@ -25,14 +26,14 @@ public class SetCurrencyCommand extends PermissionCommand {
         ArgumentWord currencyArg = ArgumentType.Word("stat")
                 .from("purse", "bank", "riftGold", "upgradePoints", "shards");
 
-        ArgumentInteger valueArg = (ArgumentInteger) ArgumentType.Integer("value").between(0, Integer.MAX_VALUE);
+        ArgumentLong valueArg = (ArgumentLong) ArgumentType.Long("value").between(0L, Long.MAX_VALUE);
 
         addSyntax((sender, context) -> {
             if (!checkPlayerPermission(sender)) return;
 
             CustomPlayer player = (CustomPlayer) sender;
             String currencyStr = context.get(currencyArg);
-            int value = context.get(valueArg);
+            long value = context.get(valueArg);
 
             switch(currencyStr) {
                 case "purse":

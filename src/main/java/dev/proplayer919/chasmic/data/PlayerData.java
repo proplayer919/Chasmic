@@ -51,20 +51,20 @@ public class PlayerData {
 
     // Currencies
     @BsonProperty("purse")
-    private int purse = 0; // In-game currency
+    private long purse = 0; // In-game currency
 
     @BsonProperty("bank")
-    private int bank = 0; // Banked currency
+    private long bank = 0; // Banked currency
 
     // Other currencies
     @BsonProperty("riftGold")
-    private int riftGold = 0; // Rift Gold currency
+    private long riftGold = 0; // Rift Gold currency
 
     @BsonProperty("upgradePoints")
-    private int upgradePoints = 0; // Upgrade points for character progression
+    private long upgradePoints = 0; // Upgrade points for character progression
 
     @BsonProperty("shards")
-    private int shards = 0; // Shards currency for special purchases
+    private long shards = 0; // Shards currency for special purchases
 
     // Accessory data
     @BsonIgnore
