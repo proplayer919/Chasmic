@@ -73,6 +73,7 @@ public class Main {
 
         // Initialize MongoDB handler
         if (isProd) {
+            System.out.println("Running in production mode. Connecting to MongoDB using URI: " + Env.getMongoUri());
             mongoDBHandler = new MongoDBHandler(Env.getMongoUri(), "chasmic");
         } else {
             mongoDBHandler = new MongoDBHandler();
