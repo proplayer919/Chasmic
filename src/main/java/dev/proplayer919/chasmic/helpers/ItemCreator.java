@@ -84,29 +84,35 @@ public abstract class ItemCreator {
 
     public static List<Component> wrapText(String text, int maxLineLength) {
         List<Component> lines = new ArrayList<>();
-        String[] words = text.split(" ");
-        StringBuilder currentLine = new StringBuilder();
 
-        for (String word : words) {
-            if (currentLine.length() + word.length() + 1 > maxLineLength) {
-                if (!currentLine.isEmpty()) {
-                    lines.add(Component.text(currentLine.toString())
-                            .decoration(TextDecoration.ITALIC, false)
-                            .color(NamedTextColor.GRAY));
-                    currentLine = new StringBuilder();
+        // Split by newlines first
+        String[] paragraphs = text.split("\\n");
+
+        for (String paragraph : paragraphs) {
+            String[] words = paragraph.split(" ");
+            StringBuilder currentLine = new StringBuilder();
+
+            for (String word : words) {
+                if (currentLine.length() + word.length() + 1 > maxLineLength) {
+                    if (!currentLine.isEmpty()) {
+                        lines.add(Component.text(currentLine.toString())
+                                .decoration(TextDecoration.ITALIC, false)
+                                .color(NamedTextColor.GRAY));
+                        currentLine = new StringBuilder();
+                    }
                 }
+
+                if (!currentLine.isEmpty()) {
+                    currentLine.append(" ");
+                }
+                currentLine.append(word);
             }
 
             if (!currentLine.isEmpty()) {
-                currentLine.append(" ");
+                lines.add(Component.text(currentLine.toString())
+                        .decoration(TextDecoration.ITALIC, false)
+                        .color(NamedTextColor.GRAY));
             }
-            currentLine.append(word);
-        }
-
-        if (!currentLine.isEmpty()) {
-            lines.add(Component.text(currentLine.toString())
-                    .decoration(TextDecoration.ITALIC, false)
-                    .color(NamedTextColor.GRAY));
         }
 
         return lines;

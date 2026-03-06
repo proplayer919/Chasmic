@@ -23,6 +23,7 @@ public class CommandRegistry {
         RankCommand.setMongoDBHandler(mongoDBHandler);
         PermsCommand.setMongoDBHandler(mongoDBHandler);
         SetCurrencyCommand.setMongoDBHandler(mongoDBHandler);
+        SetExpCommand.setMongoDBHandler(mongoDBHandler);
 
         // Set punishment manager for punishment commands
         WarnCommand.setPunishmentManager(punishmentManager);
@@ -48,5 +49,6 @@ public class CommandRegistry {
         commandManager.register(new SetMaxCommand());
         commandManager.register(new HealCommand());
         commandManager.register(new SetCurrencyCommand());
+        commandManager.register(new SetExpCommand());
     }
 }

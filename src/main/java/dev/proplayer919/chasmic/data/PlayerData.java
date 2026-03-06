@@ -49,6 +49,10 @@ public class PlayerData {
     @BsonProperty("maxMana")
     private int maxMana = 100;
 
+    // EXP
+    @BsonProperty("currentExp")
+    private long currentExp = 0; // Current EXP points
+
     // Currencies
     @BsonProperty("purse")
     private long purse = 0; // In-game currency

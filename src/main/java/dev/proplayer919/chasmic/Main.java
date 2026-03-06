@@ -90,7 +90,6 @@ public class Main {
                 .register(new PlayerAttackModule())  // Players attacking creatures
                 .register(new ItemActionModule()) // Handle custom item actions
                 .register(new TabListModule()) // Update tab list on player spawn
-                .register(new MenuItemModule()) // Give players the menu item
                 .register(new PlayerSpawnModule()) // Handle player spawning and teleporting to spawn
                 .register(new ItemFoodModule()) // Handle accessories and their effects
                 .register(new WorldProtectModule()); // Prevent block breaking and placing in the spawn area

@@ -4,11 +4,11 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.inventory.InventoryClickEvent;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.trait.InventoryEvent;
 import net.minestom.server.inventory.Inventory;
 import net.minestom.server.inventory.InventoryType;
+import net.minestom.server.inventory.click.Click;
 
 import java.util.Map;
 
@@ -31,14 +31,10 @@ public record GuiScreen(Component title, InventoryType inventoryType, Map<Intege
 
         eventNode.addListener(InventoryPreClickEvent.class, event -> {
             int slot = event.getSlot();
-            if (!items.containsKey(slot)) {
-                event.setCancelled(true);
-            }
-        });
 
-        eventNode.addListener(InventoryClickEvent.class, event -> {
-            int slot = event.getSlot();
-            if (items.containsKey(slot)) {
+            event.setCancelled(true);
+
+            if (items.containsKey(slot) && (event.getClick() instanceof Click.Left(_))) {
                 GuiItem guiItem = items.get(slot);
                 GuiClickAction clickAction = guiItem.clickAction();
                 if (clickAction != null) {

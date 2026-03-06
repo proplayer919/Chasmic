@@ -37,22 +37,26 @@ public class SidebarManager {
      * Sets up the initial scoreboard structure.
      */
     private void setupScoreboard() {
-        sidebar.createLine(new Sidebar.ScoreboardLine("serverInfo", buildServerInfoLine(), 12, Sidebar.NumberFormat.blank()));
-        sidebar.createLine(new Sidebar.ScoreboardLine("topSpace", Component.text(""), 11, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("serverInfo", buildServerInfoLine(), 13, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("topSpace", Component.text(""), 12, Sidebar.NumberFormat.blank()));
 
-        sidebar.createLine(new Sidebar.ScoreboardLine("date", buildDateLine(), 10, Sidebar.NumberFormat.blank()));
-        sidebar.createLine(new Sidebar.ScoreboardLine("time", buildTimeLine(), 9, Sidebar.NumberFormat.blank()));
-        sidebar.createLine(new Sidebar.ScoreboardLine("location", buildLocationLine(), 8, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("date", buildDateLine(), 11, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("time", buildTimeLine(), 10, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("location", buildLocationLine(), 9, Sidebar.NumberFormat.blank()));
 
-        sidebar.createLine(new Sidebar.ScoreboardLine("space1", Component.text(""), 7, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("space1", Component.text(""), 8, Sidebar.NumberFormat.blank()));
 
-        sidebar.createLine(new Sidebar.ScoreboardLine("purse", buildPurseLine(), 6, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("purse", buildPurseLine(), 7, Sidebar.NumberFormat.blank()));
         syncDynamicCurrencyLines();
 
-        sidebar.createLine(new Sidebar.ScoreboardLine("space2", Component.text(""), 3, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("space2", Component.text(""), 4, Sidebar.NumberFormat.blank()));
 
-        sidebar.createLine(new Sidebar.ScoreboardLine("year", buildYearLine(), 2, Sidebar.NumberFormat.blank()));
-        sidebar.createLine(new Sidebar.ScoreboardLine("address", Component.text("play.chasmic.net").color(NamedTextColor.YELLOW), 1, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("exp", buildExpLine(), 3, Sidebar.NumberFormat.blank()));
+
+        sidebar.createLine(new Sidebar.ScoreboardLine("space3", Component.text(""), 2, Sidebar.NumberFormat.blank()));
+
+        sidebar.createLine(new Sidebar.ScoreboardLine("year", buildYearLine(), 1, Sidebar.NumberFormat.blank()));
+        sidebar.createLine(new Sidebar.ScoreboardLine("address", Component.text("play.chasmic.net").color(NamedTextColor.YELLOW), 0, Sidebar.NumberFormat.blank()));
     }
 
     /**
@@ -95,6 +99,7 @@ public class SidebarManager {
         if (shardsLineVisible) {
             sidebar.updateLineContent("shards", buildShardsLine());
         }
+        sidebar.updateLineContent("exp", buildExpLine());
         sidebar.updateLineContent("year", buildYearLine());
     }
 
@@ -141,6 +146,12 @@ public class SidebarManager {
                 .append(Component.text(shardsStr).color(NamedTextColor.AQUA));
     }
 
+    private Component buildExpLine() {
+        int level = player.getExpValue() == null ? 0 : player.getExpValue().getLevel();
+        return Component.text("Level: ").color(NamedTextColor.WHITE)
+                .append(Component.text(level).color(NamedTextColor.LIGHT_PURPLE));
+    }
+
     private Component buildYearLine() {
         return Component.text("Year " + ChasmicTime.getChasmicYear()).color(NamedTextColor.GRAY);
     }
@@ -172,7 +183,7 @@ public class SidebarManager {
         long bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
         boolean shouldShowBank = bank > 0;
         if (shouldShowBank && !bankLineVisible) {
-            sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 5, Sidebar.NumberFormat.blank()));
+            sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 6, Sidebar.NumberFormat.blank()));
             bankLineVisible = true;
         } else if (!shouldShowBank && bankLineVisible) {
             sidebar.removeLine("bank");
@@ -182,7 +193,7 @@ public class SidebarManager {
         long shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
         boolean shouldShowShards = shards > 0;
         if (shouldShowShards && !shardsLineVisible) {
-            sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 4, Sidebar.NumberFormat.blank()));
+            sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 5, Sidebar.NumberFormat.blank()));
             shardsLineVisible = true;
         } else if (!shouldShowShards && shardsLineVisible) {
             sidebar.removeLine("shards");

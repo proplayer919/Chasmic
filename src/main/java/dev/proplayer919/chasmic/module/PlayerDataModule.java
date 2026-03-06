@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic.module;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
+import dev.proplayer919.chasmic.helpers.ExpValue;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
@@ -30,6 +31,7 @@ public class PlayerDataModule implements Module {
                     .thenAccept(playerData -> {
                         // Store the player data in the player object for later use
                         player.setPlayerData(playerData);
+                        player.setExpValue(new ExpValue(playerData.getCurrentExp()));
 
                         player.dataLoadCallback();
 

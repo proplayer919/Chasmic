@@ -4,6 +4,8 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
+import dev.proplayer919.chasmic.helpers.ExpValue;
+import dev.proplayer919.chasmic.module.MenuItemModule;
 import dev.proplayer919.chasmic.sidebar.SidebarManager;
 import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
@@ -48,6 +50,9 @@ public class CustomPlayer extends Player implements HealthCreature {
     @Setter
     private int customMana = 100;
 
+    @Setter
+    private ExpValue expValue;
+
     private final Map<String, Date> itemCooldowns = new HashMap<>();
 
     private final PermissionHolder permissionHolder = new PermissionHolder();
@@ -72,6 +77,8 @@ public class CustomPlayer extends Player implements HealthCreature {
 
     private Date lastDamageTime;
     private CustomCreature lastDamageAttacker;
+
+    private final MenuItemModule menuItemModule = new MenuItemModule(this);
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
@@ -291,6 +298,13 @@ public class CustomPlayer extends Player implements HealthCreature {
             if (sidebarManager != null) {
                 sidebarManager.update();
             }
+
+            if (!menuItemModule.isAttached()) {
+                menuItemModule.attach(MinecraftServer.getGlobalEventHandler());
+            }
+
+            // Update menu items
+            menuItemModule.reloadScreens();
         }
     }
 
