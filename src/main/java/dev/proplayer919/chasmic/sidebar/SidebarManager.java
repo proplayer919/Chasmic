@@ -128,14 +128,14 @@ public class SidebarManager {
     }
 
     private Component buildBankLine() {
-        int bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
+        long bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
         String bankStr = CurrencyFormatter.formatCurrency(bank);
         return Component.text("Bank: ").color(NamedTextColor.WHITE)
                 .append(Component.text(bankStr).color(NamedTextColor.YELLOW));
     }
 
     private Component buildShardsLine() {
-        int shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
+        long shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
         String shardsStr = CurrencyFormatter.formatCurrency(shards);
         return Component.text("Shards: ").color(NamedTextColor.WHITE)
                 .append(Component.text(shardsStr).color(NamedTextColor.AQUA));
@@ -169,7 +169,7 @@ public class SidebarManager {
     }
 
     private void syncDynamicCurrencyLines() {
-        int bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
+        long bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
         boolean shouldShowBank = bank > 0;
         if (shouldShowBank && !bankLineVisible) {
             sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 5, Sidebar.NumberFormat.blank()));
@@ -179,7 +179,7 @@ public class SidebarManager {
             bankLineVisible = false;
         }
 
-        int shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
+        long shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
         boolean shouldShowShards = shards > 0;
         if (shouldShowShards && !shardsLineVisible) {
             sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 4, Sidebar.NumberFormat.blank()));
