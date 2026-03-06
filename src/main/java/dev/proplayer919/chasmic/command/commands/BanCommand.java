@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.Emojis;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
@@ -93,8 +94,8 @@ public class BanCommand extends PermissionCommand {
             customTarget.kick(banMessage);
 
             // Notify sender
-            sender.sendMessage(Component.text("✔ ", NamedTextColor.GREEN)
-                    .append(Component.text("Banned ", NamedTextColor.YELLOW))
+            sender.sendMessage(Component.text(Emojis.CHECKMARK.getEmoji(), NamedTextColor.GREEN)
+                    .append(Component.text(" Banned ", NamedTextColor.YELLOW))
                     .append(Component.text(customTarget.getUsername(), NamedTextColor.GOLD))
                     .append(Component.text(" for ", NamedTextColor.YELLOW))
                     .append(Component.text(durationDisplay, NamedTextColor.RED))

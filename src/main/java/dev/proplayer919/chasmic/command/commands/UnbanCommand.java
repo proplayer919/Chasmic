@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.Emojis;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
@@ -64,8 +65,8 @@ public class UnbanCommand extends PermissionCommand {
             String adminName = sender instanceof Player p ? p.getUsername() : "Console";
 
             // Notify sender
-            sender.sendMessage(Component.text("✔ ", NamedTextColor.GREEN)
-                    .append(Component.text("Unbanned ", NamedTextColor.YELLOW))
+            sender.sendMessage(Component.text(Emojis.CHECKMARK.getEmoji(), NamedTextColor.GREEN)
+                    .append(Component.text(" Unbanned ", NamedTextColor.YELLOW))
                     .append(Component.text(targetName, NamedTextColor.GOLD)));
 
             // Notify all online admins

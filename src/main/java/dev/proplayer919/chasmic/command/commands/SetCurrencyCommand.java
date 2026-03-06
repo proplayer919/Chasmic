@@ -1,0 +1,60 @@
+package dev.proplayer919.chasmic.command.commands;
+
+import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.command.PermissionCommand;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.command.builder.arguments.ArgumentType;
+import net.minestom.server.command.builder.arguments.ArgumentWord;
+import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
+
+/**
+ * /setcurrency command for changing player purse, bank, and other currencies
+ * Permission: admin.command.setcurrency
+ */
+public class SetCurrencyCommand extends PermissionCommand {
+
+    public SetCurrencyCommand() {
+        super("setcurrency", "admin.command.setcurrency");
+
+        // Arguments
+        ArgumentWord currencyArg = ArgumentType.Word("stat")
+                .from("purse", "bank", "riftGold", "upgradePoints", "shards");
+
+        ArgumentInteger valueArg = (ArgumentInteger) ArgumentType.Integer("value").between(0, Integer.MAX_VALUE);
+
+        addSyntax((sender, context) -> {
+            if (!checkPlayerPermission(sender)) return;
+
+            CustomPlayer player = (CustomPlayer) sender;
+            String currencyStr = context.get(currencyArg);
+            int value = context.get(valueArg);
+
+            switch(currencyStr) {
+                case "purse":
+                    player.getPlayerData().setPurse(value);
+                    player.sendMessage(Component.text("Your purse has been set to " + value).color(NamedTextColor.GREEN));
+                    break;
+                case "bank":
+                    player.getPlayerData().setBank(value);
+                    player.sendMessage(Component.text("Your bank has been set to " + value).color(NamedTextColor.GREEN));
+                    break;
+                case "riftGold":
+                    player.getPlayerData().setRiftGold(value);
+                    player.sendMessage(Component.text("Your Rift Gold has been set to " + value).color(NamedTextColor.GREEN));
+                    break;
+                case "upgradePoints":
+                    player.getPlayerData().setUpgradePoints(value);
+                    player.sendMessage(Component.text("Your upgrade points have been set to " + value).color(NamedTextColor.GREEN));
+                    break;
+                case "shards":
+                    player.getPlayerData().setShards(value);
+                    player.sendMessage(Component.text("Your shards have been set to " + value).color(NamedTextColor.GREEN));
+                    break;
+                default:
+                    player.sendMessage(Component.text("Unknown currency type!").color(NamedTextColor.RED));
+            }
+        }, currencyArg, valueArg);
+    }
+}
+

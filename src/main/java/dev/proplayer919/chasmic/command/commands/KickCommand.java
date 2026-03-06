@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.Emojis;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.punishment.Punishment;
@@ -70,8 +71,8 @@ public class KickCommand extends PermissionCommand {
             customTarget.kick(kickMessage);
 
             // Notify sender
-            sender.sendMessage(Component.text("✔ ", NamedTextColor.GREEN)
-                    .append(Component.text("Kicked ", NamedTextColor.YELLOW))
+            sender.sendMessage(Component.text(Emojis.CHECKMARK.getEmoji(), NamedTextColor.GREEN)
+                    .append(Component.text(" Kicked ", NamedTextColor.YELLOW))
                     .append(Component.text(customTarget.getUsername(), NamedTextColor.GOLD))
                     .append(Component.text(" for: ", NamedTextColor.YELLOW))
                     .append(Component.text(reason, NamedTextColor.WHITE)));

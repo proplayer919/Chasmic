@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.sidebar;
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.Emojis;
 import dev.proplayer919.chasmic.helpers.CurrencyFormatter;
 import dev.proplayer919.chasmic.time.ChasmicSeason;
 import dev.proplayer919.chasmic.time.ChasmicTime;
@@ -161,9 +162,9 @@ public class SidebarManager {
         // Use different emojis based on time of day (morning, afternoon, evening, night)
         int hour = ChasmicTime.getChasmicHour();
         if (hour >= 5 && hour < 21) {
-            return Component.text("☀").color(NamedTextColor.YELLOW); // Day
+            return Component.text(Emojis.SUN.getEmoji()).color(NamedTextColor.YELLOW); // Day
         } else {
-            return Component.text("☽").color(NamedTextColor.AQUA); // Night
+            return Component.text(Emojis.MOON.getEmoji()).color(NamedTextColor.AQUA); // Night
         }
     }
 
@@ -171,7 +172,7 @@ public class SidebarManager {
         int bank = player.getPlayerData() != null ? player.getPlayerData().getBank() : 0;
         boolean shouldShowBank = bank > 0;
         if (shouldShowBank && !bankLineVisible) {
-            sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 5));
+            sidebar.createLine(new Sidebar.ScoreboardLine("bank", buildBankLine(), 5, Sidebar.NumberFormat.blank()));
             bankLineVisible = true;
         } else if (!shouldShowBank && bankLineVisible) {
             sidebar.removeLine("bank");
@@ -181,7 +182,7 @@ public class SidebarManager {
         int shards = player.getPlayerData() != null ? player.getPlayerData().getShards() : 0;
         boolean shouldShowShards = shards > 0;
         if (shouldShowShards && !shardsLineVisible) {
-            sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 4));
+            sidebar.createLine(new Sidebar.ScoreboardLine("shards", buildShardsLine(), 4, Sidebar.NumberFormat.blank()));
             shardsLineVisible = true;
         } else if (!shouldShowShards && shardsLineVisible) {
             sidebar.removeLine("shards");

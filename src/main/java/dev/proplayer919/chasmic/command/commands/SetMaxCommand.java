@@ -30,7 +30,6 @@ public class SetMaxCommand extends PermissionCommand {
             String statStr = context.get(statArg);
             int maxValue = context.get(maxArg);
 
-
             if (statStr.equalsIgnoreCase("health")) {
                 player.setMaxHealth(maxValue);
                 player.sendMessage(Component.text("Your maximum health has been set to " + maxValue).color(NamedTextColor.GREEN));
