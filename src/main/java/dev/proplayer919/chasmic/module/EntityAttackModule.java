@@ -33,11 +33,8 @@ public class EntityAttackModule implements Module {
                 return; // Target is not a HealthCreature, ignore
             }
 
-            // Get base damage from creature
-            int baseDamage = 1;
-
             // Apply creature attack stat and check for critical hit
-            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, creature, healthCreature);
+            AttackResult attackResult = CombatUtils.calculateAttack(creature, healthCreature);
 
             // Calculate final damage (rounded)
             int finalDamage = Math.round(attackResult.getDamage());

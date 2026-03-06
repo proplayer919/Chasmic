@@ -31,11 +31,8 @@ public class PlayerAttackModule implements Module {
                 return; // Target is not a custom creature, ignore
             }
 
-            // Get the base damage from the player's held item
-            float baseDamage = player.getAttackStat();
-
             // Apply player stats and check for critical hit
-            AttackResult attackResult = CombatUtils.calculateAttack(baseDamage, player, creature);
+            AttackResult attackResult = CombatUtils.calculateAttack(player, creature);
 
             // Calculate final damage (rounded)
             int finalDamage = Math.round(attackResult.getDamage());
