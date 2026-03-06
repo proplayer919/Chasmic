@@ -161,7 +161,7 @@ public class SidebarManager {
     private Component getTimeEmoji() {
         // Use different emojis based on time of day (morning, afternoon, evening, night)
         int hour = ChasmicTime.getChasmicHour();
-        if (hour >= 5 && hour < 21) {
+        if (hour >= 5 && hour < 19) {
             return Component.text(Emojis.SUN.getEmoji()).color(NamedTextColor.YELLOW); // Day
         } else {
             return Component.text(Emojis.MOON.getEmoji()).color(NamedTextColor.AQUA); // Night

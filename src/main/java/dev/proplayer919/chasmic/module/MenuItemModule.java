@@ -2,12 +2,16 @@ package dev.proplayer919.chasmic.module;
 
 
 import dev.proplayer919.chasmic.Rarity;
+import dev.proplayer919.chasmic.gui.GuiScreen;
 import dev.proplayer919.chasmic.helpers.ItemCreator;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.inventory.InventoryPreClickEvent;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
@@ -22,6 +26,11 @@ public class MenuItemModule implements Module {
     private static final ItemStack blockedSlotItem = ItemCreator.createItem(1, Material.BARRIER, "blocked", "Blocked Slot", "You cannot use this inventory slot in Chasmic!", Rarity.SPECIAL, Collections.emptyList(), null, null, null, false);
     private static final Collection<Integer> blockedSlots = List.of(36, 37, 38, 39, 40);
     private static final int menuSlot = 8;
+    private static final GuiScreen menuScreen = new GuiScreen(
+            Component.text("Chasmic Menu"),
+            InventoryType.CHEST_4_ROW,
+            Collections.emptyMap()
+    );
 
     @Override
     public void attach(@NotNull EventNode<Event> eventNode) {
@@ -41,7 +50,15 @@ public class MenuItemModule implements Module {
                 return;
             }
 
-            if (event.getInventory() instanceof PlayerInventory playerInventory && (blockedSlots.contains(event.getSlot()) || event.getSlot() == menuSlot)) {
+            if (event.getInventory() instanceof PlayerInventory && (blockedSlots.contains(event.getSlot()) || event.getSlot() == menuSlot)) {
+                event.setCancelled(true);
+            }
+        });
+
+        // Register a listener for when the menu item is clicked to open the menu screen
+        eventNode.addListener(PlayerUseItemEvent.class, event -> {
+            if (event.getItemStack().equals(menuItem)) {
+                event.getPlayer().openInventory(menuScreen.getInventory());
                 event.setCancelled(true);
             }
         });
