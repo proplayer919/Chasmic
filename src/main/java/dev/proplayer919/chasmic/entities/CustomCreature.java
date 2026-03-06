@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
+import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.registry.RegistryKey;
 
@@ -44,9 +45,32 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
         return creatureType.criticalChance();
     }
 
+    @Override
+    public float getSpeedStat() {
+        return creatureType.speed();
+    }
+
     public void setLastAttacker(Entity attacker) {
         this.lastAttacker = attacker;
         this.lastDamageTime = new Date();
+    }
+
+    @Override
+    public void tick(long time) {
+        super.tick(time);
+
+        // If the creature has taken damage, and it's been more than 5 seconds since the last damage, reset the health display
+        if (lastDamageTime != null && new Date().getTime() - lastDamageTime.getTime() > 5000) {
+            lastDamageTime = null;
+            lastAttacker = null;
+            updateHealthDisplay();
+        }
+
+        // Update movement speed based on speed stat
+        float speedBonus = getSpeedStat();
+        if (speedBonus != 0) {
+            getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f * (1 + speedBonus / 100)); // Base speed is 0.1, apply bonus
+        }
     }
 
     /**

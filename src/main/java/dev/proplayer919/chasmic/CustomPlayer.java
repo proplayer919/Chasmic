@@ -273,6 +273,11 @@ public class CustomPlayer extends Player implements HealthCreature {
         return getStatFor(PlayerStat.CRITICAL_CHANCE);
     }
 
+    @Override
+    public float getSpeedStat() {
+        return getStatFor(PlayerStat.SPEED);
+    }
+
     public void showSidebar() {
         if (sidebarManager != null) {
             sidebarManager.show();
@@ -305,6 +310,12 @@ public class CustomPlayer extends Player implements HealthCreature {
 
             // Update menu items
             menuItemModule.reloadScreens();
+
+            // Update movement speed based on speed stat
+            float speedBonus = getSpeedStat();
+            if (speedBonus != 0) {
+                getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f * (1 + speedBonus / 100)); // Base speed is 0.1, apply bonus
+            }
         }
     }
 

@@ -71,6 +71,9 @@ public class PlayerData {
     private long shards = 0; // Shards currency for special purchases
 
     // Accessory data
+    @BsonProperty
+    private int accessorySlots = 3; // Number of accessory slots available to the player
+
     @BsonIgnore
     private List<String> accessoryIds = new ArrayList<>(); // List of accessory IDs in the player's bag
 

@@ -12,11 +12,11 @@ public interface HealthCreature {
     void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos);
 
     /**
-     * Get the attack stat for this creature (damage bonus)
-     * Default: 0.0f
+     * Get the attack stat for this creature (damage)
+     * Default: 1.0f
      */
     default float getAttackStat() {
-        return 0.0f;
+        return 1.0f;
     }
 
     /**
@@ -32,6 +32,14 @@ public interface HealthCreature {
      * Default: 0.0f
      */
     default float getCriticalChanceStat() {
+        return 0.0f;
+    }
+
+    /**
+     * Get the speed stat for this creature (10 = 10% faster)
+     * Default: 0.0f
+     */
+    default float getSpeedStat() {
         return 0.0f;
     }
 }

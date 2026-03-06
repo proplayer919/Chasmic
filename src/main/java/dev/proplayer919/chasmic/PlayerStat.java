@@ -9,6 +9,7 @@ public enum PlayerStat {
     ATTACK("Attack", "⚔", NamedTextColor.RED),
     DEFENSE("Defense", "🛡", NamedTextColor.BLUE),
     CRITICAL_CHANCE("Critical Chance", "✴", NamedTextColor.GOLD),
+    SPEED("Speed", "⚡", NamedTextColor.YELLOW),
     FARMING("Farming", "🌾", NamedTextColor.GREEN),;
 
     private final String statName;

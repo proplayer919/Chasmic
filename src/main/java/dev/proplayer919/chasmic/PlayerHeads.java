@@ -11,6 +11,7 @@ public abstract class PlayerHeads {
 
     // Animals
     public static final String FERRET = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvMzYzZTEyMWFiMGQ5MzI4NTVjNTJmYzVkNzJkNmRhNmI0Y2EyM2I4MjAxYTkyNjAwZjlhMWRmYTA5NDk3MjU1ZSJ9fX0=";
+    public static final String BABY_TURTLE = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZTkzN2EzZjQ0MTQ3ZGM3NTJlOGE5YzdlNmUyMzBkN2RiMGFiNzVlMDQ5MGMwMGJmMjc2NTM2OTUxMDM3MjEwNCJ9fX0=";
 
     // Presents
     public static final String PRESENT_RED = "eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6Imh0dHA6Ly90ZXh0dXJlcy5taW5lY3JhZnQubmV0L3RleHR1cmUvZjVjOWQzMTc0M2Y0ZDM2YzVhODkxN2ExODE5ZjJmYWUwYWIwODM4MjJlNGZhYmYxNmU4ODkxMjgxMWU2NzZlMCJ9fX0=";
