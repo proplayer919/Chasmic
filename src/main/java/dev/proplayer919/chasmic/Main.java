@@ -68,8 +68,15 @@ public class Main {
         // Register custom player provider
         MinecraftServer.getConnectionManager().setPlayerProvider(CustomPlayer::new);
 
+        // Get environment
+        boolean isProd = Env.isProd();
+
         // Initialize MongoDB handler
-        mongoDBHandler = new MongoDBHandler(); // Uses default: mongodb://localhost:27017, database "chasmic"
+        if (isProd) {
+            mongoDBHandler = new MongoDBHandler(Env.getMongoUri(), "chasmic");
+        } else {
+            mongoDBHandler = new MongoDBHandler();
+        }
 
         // Initialize punishment manager
         punishmentManager = new PunishmentManager(mongoDBHandler);
