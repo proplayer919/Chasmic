@@ -22,6 +22,7 @@ public class CommandRegistry {
         // Set MongoDB handler for commands that need it
         RankCommand.setMongoDBHandler(mongoDBHandler);
         PermsCommand.setMongoDBHandler(mongoDBHandler);
+        SetCurrencyCommand.setMongoDBHandler(mongoDBHandler);
 
         // Set punishment manager for punishment commands
         WarnCommand.setPunishmentManager(punishmentManager);
