@@ -2,6 +2,8 @@ package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.CustomPlayer;
 import dev.proplayer919.chasmic.command.PermissionCommand;
+import dev.proplayer919.chasmic.data.MongoDBHandler;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -13,6 +15,8 @@ import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
  * Permission: admin.command.setcurrency
  */
 public class SetCurrencyCommand extends PermissionCommand {
+    @Setter
+    private static MongoDBHandler mongoDBHandler;
 
     public SetCurrencyCommand() {
         super("setcurrency", "admin.command.setcurrency");
@@ -53,6 +57,11 @@ public class SetCurrencyCommand extends PermissionCommand {
                     break;
                 default:
                     player.sendMessage(Component.text("Unknown currency type!").color(NamedTextColor.RED));
+            }
+
+            // Save to database
+            if (player.getPlayerData() != null && mongoDBHandler != null) {
+                mongoDBHandler.savePlayerData(player.getPlayerData());
             }
         }, currencyArg, valueArg);
     }
