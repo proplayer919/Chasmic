@@ -10,6 +10,8 @@ public enum Emojis {
     FROWN("☹"),
     SKULL("☠"),
     HEART("❤"),
+    STAR("✦"),
+    SHIELD("🛡"),
     PEACE("✌"),
     HOURGLASS("⌛"),
     CLOCK("⌚"),

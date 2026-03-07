@@ -68,9 +68,8 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
 
         // Update movement speed based on speed stat
         float speedBonus = getSpeedStat();
-        if (speedBonus != 0) {
-            getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f * (1 + speedBonus / 100)); // Base speed is 0.1, apply bonus
-        }
+        float calculatedSpeed = 0.1f * (1 + speedBonus / 100);
+        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedBonus != 0 ? calculatedSpeed : 0.1f);
     }
 
     /**
@@ -78,7 +77,7 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
      * Only calls setCustomName if health actually changed to prevent lag
      */
     private void updateHealthDisplay() {
-        boolean shouldShowHealth = customHealth < customMaxHealth && customHealth > 0;
+        boolean shouldShowHealth = customHealth < customMaxHealth && customHealth > 0 && lastAttacker != null;
 
         // Only update if health display state changed
         if (shouldShowHealth) {

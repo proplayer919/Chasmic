@@ -11,6 +11,6 @@ import java.util.List;
 
 public class TurtleSprite extends Accessory {
     public TurtleSprite() {
-        super("turtle_sprite", "Turtle Sprite", "A speed-increasing accessory.", Rarity.RARE, List.of(new PlayerStatBonus(PlayerStat.SPEED, 10.0f)), Material.PLAYER_HEAD, PlayerHeads.BABY_TURTLE);
+        super("turtle_sprite", "Turtle Sprite", "A speed-increasing accessory.", Rarity.RARE, List.of(new PlayerStatBonus(PlayerStat.SPEED, 25.0f)), Material.PLAYER_HEAD, PlayerHeads.BABY_TURTLE);
     }
 }

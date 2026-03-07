@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic.module;
 
 
 import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.PlayerHeads;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.gui.GuiClickAction;
 import dev.proplayer919.chasmic.gui.GuiClickActionType;
@@ -62,13 +63,26 @@ public class MenuItemModule implements Module {
     private void createMenuScreen() {
         Map<Integer, GuiItem> menuItems = new HashMap<>();
 
-        menuItems.put(11, new GuiItem(Material.PLAYER_HEAD, Component.text("Profile"), "View and manage your Chasmic profile, including stats, achievements, and cosmetics.", new GuiClickAction(GuiClickActionType.OPEN_SCREEN, profileScreen)));
+        menuItems.put(10, new GuiItem(Material.PLAYER_HEAD, Component.text("Profile"), "View and manage your Chasmic profile, including stats, achievements, and cosmetics.", new GuiClickAction(GuiClickActionType.OPEN_SCREEN, profileScreen)));
 
         List<Component> expDescription = new ArrayList<>();
         expDescription.add(Component.text("Current Level: ").color(NamedTextColor.WHITE).append(Component.text(player.getExpValue().getLevel()).color(NamedTextColor.GREEN)).decoration(TextDecoration.ITALIC, false));
         expDescription.add(Component.text("Current EXP: ").color(NamedTextColor.WHITE).append(Component.text(player.getExpValue().getExpToPreviousLevel()).color(NamedTextColor.AQUA).append(Component.text("/").color(NamedTextColor.GRAY).append(Component.text(player.getExpValue().getExpToNextLevel()).color(NamedTextColor.WHITE)))).decoration(TextDecoration.ITALIC, false));
 
-        menuItems.put(12, new GuiItem(Material.EXPERIENCE_BOTTLE, Component.text("Chasmic Level").color(NamedTextColor.GREEN), expDescription, null));
+        menuItems.put(11, new GuiItem(Material.EXPERIENCE_BOTTLE, Component.text("Chasmic Level").color(NamedTextColor.GREEN), expDescription, null));
+
+        // Add Accessory Bag button
+        List<Component> accessoryBagDescription = new ArrayList<>();
+        accessoryBagDescription.add(Component.text("Store and manage your accessories").color(NamedTextColor.WHITE).decoration(TextDecoration.ITALIC, false));
+        accessoryBagDescription.add(Component.empty());
+        accessoryBagDescription.add(Component.text("Slots: ").color(NamedTextColor.GRAY).append(Component.text(player.getPlayerData().getAccessorySlots()).color(NamedTextColor.GREEN)).decoration(TextDecoration.ITALIC, false));
+
+        menuItems.put(12, ItemCreator.createGuiItemWithTexture(
+                PlayerHeads.ACCESSORY_BAG,
+                Component.text("Accessory Bag").color(NamedTextColor.LIGHT_PURPLE),
+                accessoryBagDescription,
+                new GuiClickAction(GuiClickActionType.OPEN_ACCESSORY_BAG)
+        ));
 
         menuScreen = new GuiScreen(
                 Component.text("Chasmic Menu"),

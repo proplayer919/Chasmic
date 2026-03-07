@@ -313,16 +313,13 @@ public class CustomPlayer extends Player implements HealthCreature {
 
             // Update movement speed based on speed stat
             float speedBonus = getSpeedStat();
-            if (speedBonus != 0) {
-                getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f * (1 + speedBonus / 100)); // Base speed is 0.1, apply bonus
-            }
+            float calculatedSpeed = 0.1f * (1 + speedBonus / 100);
+            getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedBonus != 0 ? calculatedSpeed : 0.1f);
         }
     }
 
     private @NonNull Component getActionBarContent() {
-        Component healthDisplay = Component.text("❤ " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
-        Component manaDisplay = Component.text("✦ " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
-        Component actionBarContent = healthDisplay.append(Component.text("   ")).append(manaDisplay);
+        Component actionBarContent = getBarContent();
 
         // Add streaming/recording status if applicable
         if (streaming || recording) {
@@ -338,6 +335,15 @@ public class CustomPlayer extends Player implements HealthCreature {
             }
         }
         return actionBarContent;
+    }
+
+    private @NonNull Component getBarContent() {
+        Component healthDisplay = Component.text(Emojis.HEART.getEmoji() + " " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
+        Component defenseDisplay = Component.text(Emojis.SHIELD.getEmoji() + " " + (int) getDefenseStat()).color(NamedTextColor.GRAY);
+        Component manaDisplay = Component.text(Emojis.STAR.getEmoji() + " " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
+
+        Component spacer = Component.text("   ").color(NamedTextColor.GRAY);
+        return healthDisplay.append(spacer).append(defenseDisplay).append(spacer).append(manaDisplay);
     }
 
     public void setRank(PlayerRank rank) {

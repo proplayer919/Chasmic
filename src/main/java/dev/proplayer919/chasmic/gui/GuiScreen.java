@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.gui;
 
+import dev.proplayer919.chasmic.CustomPlayer;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -49,6 +50,12 @@ public record GuiScreen(Component title, InventoryType inventoryType, Map<Intege
                             if (clickAction.getCommandToExecute() != null) {
                                 CommandManager commandManager = MinecraftServer.getCommandManager();
                                 commandManager.execute(event.getPlayer(), clickAction.getCommandToExecute());
+                            }
+                        }
+                        case GuiClickActionType.OPEN_ACCESSORY_BAG -> {
+                            if (event.getPlayer() instanceof CustomPlayer customPlayer) {
+                                AccessoryBagScreen accessoryBagScreen = new AccessoryBagScreen(customPlayer);
+                                event.getPlayer().openInventory(accessoryBagScreen.getInventory());
                             }
                         }
                     }

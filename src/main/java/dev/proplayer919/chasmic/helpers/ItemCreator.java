@@ -2,6 +2,8 @@ package dev.proplayer919.chasmic.helpers;
 
 import dev.proplayer919.chasmic.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
+import dev.proplayer919.chasmic.gui.GuiClickAction;
+import dev.proplayer919.chasmic.gui.GuiItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -124,5 +126,20 @@ public abstract class ItemCreator {
         } else {
             return String.format("%.1f", value);
         }
+    }
+
+    /**
+     * Creates a GuiItem with a player head texture
+     */
+    public static GuiItem createGuiItemWithTexture(String playerHeadTexture, Component displayName, List<Component> description, GuiClickAction clickAction) {
+        ItemStack.Builder builder = PlayerHeadCreator.getHeadBuilder(playerHeadTexture);
+        builder.set(DataComponents.ITEM_NAME, displayName);
+
+        if (description != null && !description.isEmpty()) {
+            builder.set(DataComponents.LORE, description);
+        }
+
+        ItemStack itemStack = builder.build();
+        return new GuiItem(itemStack, clickAction);
     }
 }
