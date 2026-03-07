@@ -67,7 +67,7 @@ public class MenuItemModule implements Module {
 
         List<Component> expDescription = new ArrayList<>();
         expDescription.add(Component.text("Current Level: ").color(NamedTextColor.GRAY).append(Component.text(player.getExpValue().getLevel()).color(NamedTextColor.GREEN)).decoration(TextDecoration.ITALIC, false));
-        expDescription.add(Component.text("Current EXP: ").color(NamedTextColor.GRAY).append(Component.text(player.getExpValue().getExpToPreviousLevel()).color(NamedTextColor.AQUA).append(Component.text("/").color(NamedTextColor.GRAY).append(Component.text(player.getExpValue().getExpToNextLevel()).color(NamedTextColor.WHITE)))).decoration(TextDecoration.ITALIC, false));
+        expDescription.add(Component.text("Current EXP: ").color(NamedTextColor.GRAY).append(Component.text(player.getExpValue().getExpToPreviousLevel()).color(NamedTextColor.AQUA).append(Component.text("/").color(NamedTextColor.DARK_GRAY).append(Component.text(player.getExpValue().getExpToNextLevel()).color(NamedTextColor.GRAY)))).decoration(TextDecoration.ITALIC, false));
 
         menuItems.put(11, new GuiItem(Material.EXPERIENCE_BOTTLE, Component.text("Chasmic Level").color(NamedTextColor.GREEN), expDescription, null));
 
