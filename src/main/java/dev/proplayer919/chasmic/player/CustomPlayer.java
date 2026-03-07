@@ -5,7 +5,10 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
+import dev.proplayer919.chasmic.events.PlayerEnterLocationEvent;
+import dev.proplayer919.chasmic.events.PlayerExitLocationEvent;
 import dev.proplayer919.chasmic.helpers.ExpValue;
+import dev.proplayer919.chasmic.location.Location;
 import dev.proplayer919.chasmic.module.MenuItemModule;
 import dev.proplayer919.chasmic.sidebar.SidebarManager;
 import dev.proplayer919.chasmic.items.CustomItem;
@@ -83,6 +86,8 @@ public class CustomPlayer extends Player implements HealthCreature {
     private final MenuItemModule menuItemModule = new MenuItemModule(this);
 
     private final Map<String, TempStatBonus> tempStatBonuses = new HashMap<>();
+
+    private Location currentLocation;
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
@@ -223,6 +228,27 @@ public class CustomPlayer extends Player implements HealthCreature {
             tempStatBonuses.remove(uuid);
             sendMessage(Component.text("Your " + stat.name().toLowerCase().replace("_", " ") + " bonus has expired!").color(NamedTextColor.YELLOW));
         }).delay(durationMillis, ChronoUnit.MILLIS).schedule();
+    }
+
+    public void unlockLocation(Location location) {
+        if (playerData != null && !playerData.getUnlockedLocationIds().contains(location.id())) {
+            playerData.getUnlockedLocationIds().add(location.id());
+
+            // Save to database
+            MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+            if (mongoDBHandler != null) {
+                mongoDBHandler.savePlayerData(playerData);
+            }
+        }
+    }
+
+    public void setCurrentLocation(Location location) {
+        Location previousLocation = this.currentLocation;
+        this.currentLocation = location;
+
+        // Fire events for location change
+        MinecraftServer.getGlobalEventHandler().call(new PlayerEnterLocationEvent(this, location));
+        MinecraftServer.getGlobalEventHandler().call(new PlayerExitLocationEvent(this, previousLocation));
     }
 
     private Collection<PlayerStatBonus> getMainHandItemStatBonuses() {

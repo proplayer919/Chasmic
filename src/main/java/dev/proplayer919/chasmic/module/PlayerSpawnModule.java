@@ -19,17 +19,18 @@ public class PlayerSpawnModule implements Module {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> event.setSpawningInstance(Main.getSpawnInstance()));
 
         eventNode.addListener(PlayerSpawnEvent.class, event -> {
-            event.getPlayer().teleport(Main.getSpawnPos());
-            event.getPlayer().setRespawnPoint(Main.getSpawnPos());
+            CustomPlayer player = (CustomPlayer) event.getPlayer();
 
-            if (event.getPlayer() instanceof CustomPlayer customPlayer) {
-                customPlayer.showSidebar();
-            }
+            player.teleport(Main.getSpawnPos());
+            player.setRespawnPoint(Main.getSpawnPos());
+            player.setCurrentLocation(Main.getLocationRegistry().getLocation("chasmic_city"));
+
+            player.showSidebar();
 
             TestZombie zombie = new TestZombie();
             zombie.setInstance(Main.getSpawnInstance(), Main.getSpawnPos());
 
-            Main.getNpc().addPlayerViewer(event.getPlayer());
+            Main.getNpc().addPlayerViewer(player);
         });
     }
 

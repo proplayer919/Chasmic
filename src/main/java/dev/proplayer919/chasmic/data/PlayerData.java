@@ -77,6 +77,10 @@ public class PlayerData {
     @BsonIgnore
     private List<String> accessoryIds = new ArrayList<>(); // List of accessory IDs in the player's bag
 
+    // Locations
+    @BsonProperty("unlockedLocations")
+    private List<String> unlockedLocationIds = new ArrayList<>(); // List of unlocked location IDs
+
     /**
      * Gets the PlayerRank enum from the rank ID
      */

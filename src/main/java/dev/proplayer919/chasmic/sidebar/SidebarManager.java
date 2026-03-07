@@ -122,8 +122,8 @@ public class SidebarManager {
     }
 
     private Component buildLocationLine() {
-        return Component.text(" ◇ ").color(NamedTextColor.WHITE)
-                .append(Component.text("Chasmic City").color(NamedTextColor.AQUA));
+        return Component.text(" ◆ ").color(NamedTextColor.WHITE)
+                .append(Component.text(player.getCurrentLocation() == null ? "Loading..." : player.getCurrentLocation().name()).color(NamedTextColor.AQUA));
     }
 
     private Component buildPurseLine() {

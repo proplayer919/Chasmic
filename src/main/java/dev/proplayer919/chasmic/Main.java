@@ -6,6 +6,7 @@ import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
+import dev.proplayer919.chasmic.location.LocationRegistry;
 import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.time.ChasmicTime;
@@ -46,6 +47,9 @@ public class Main {
 
     @Getter
     private static CreatureTypeRegistry creatureTypeRegistry;
+
+    @Getter
+    private static LocationRegistry locationRegistry;
 
     @Getter
     private static PunishmentManager punishmentManager;
@@ -91,6 +95,7 @@ public class Main {
                 .register(new PlayerAttackModule())  // Players attacking creatures
                 .register(new ItemActionModule()) // Handle custom item actions
                 .register(new TabListModule()) // Update tab list on player spawn
+                .register(new PlayerLocationModule()) // Track player locations and fire events on location enter/exit
                 .register(new PlayerSpawnModule()) // Handle player spawning and teleporting to spawn
                 .register(new ItemFoodModule()) // Handle accessories and their effects
                 .register(new WorldProtectModule()); // Prevent block breaking and placing in the spawn area
@@ -100,6 +105,7 @@ public class Main {
         customItemRegistry = new CustomItemRegistry();
         accessoryRegistry = new AccessoryRegistry();
         creatureTypeRegistry = new CreatureTypeRegistry();
+        locationRegistry = new LocationRegistry();
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
