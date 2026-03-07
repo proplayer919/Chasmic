@@ -1,34 +1,29 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
-import dev.proplayer919.chasmic.player.CustomPlayer;
+import dev.proplayer919.chasmic.ai.AIBuilder;
+import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.CustomCreature;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.ai.goal.MeleeAttackGoal;
-import net.minestom.server.entity.ai.goal.RandomStrollGoal;
-import net.minestom.server.entity.ai.target.ClosestEntityTarget;
-import net.minestom.server.entity.ai.target.LastEntityDamagerTarget;
-import net.minestom.server.utils.time.TimeUnit;
-
-import java.util.List;
 
 public class TestZombie extends CustomCreature {
     public TestZombie() {
         super(Main.getCreatureTypeRegistry().getCreatureType("test-zombie"));
 
-        addAIGroup(
-                List.of(
-                        new MeleeAttackGoal(this, 1.6, 20, TimeUnit.SERVER_TICK), // Attack the target
-                        new RandomStrollGoal(this, 20) // Walk around
-                ),
-                List.of(
-                        new LastEntityDamagerTarget(this, 32), // First target the last entity which attacked you
-                        new ClosestEntityTarget(this, 32, entity ->
-                                entity instanceof CustomPlayer player &&
-                                player.getGameMode() != GameMode.CREATIVE &&
-                                player.getGameMode() != GameMode.SPECTATOR
-                        ) // If there is none, target the nearest player (not in creative/spectator)
-                )
-        );
+        // Create an aggressive AI profile for zombies
+        AIProfile zombieAI = AIProfile.builder()
+                .aggressiveness(0.8f)      // Very aggressive
+                .shyness(0.0f)             // Not shy at all
+                .wanderlust(0.4f)          // Moderate wandering
+                .intelligence(0.3f)        // Basic intelligence
+                .detectionRange(32.0)      // Can detect players from 32 blocks
+                .attackRange(2.0)          // Melee range
+                .combatSpeedMultiplier(1.6)
+                .attackCooldown(20)        // 1 second between attacks
+                .build();
+
+        setAiProfile(zombieAI);
+
+        // Use the new AI builder to set up the zombie's behavior
+        AIBuilder.setupStandardAI(this, zombieAI);
     }
 }

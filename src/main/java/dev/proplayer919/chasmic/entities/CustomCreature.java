@@ -1,5 +1,7 @@
 package dev.proplayer919.chasmic.entities;
 
+import dev.proplayer919.chasmic.ai.AIEngine;
+import dev.proplayer919.chasmic.ai.AIProfile;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
@@ -23,6 +25,12 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
     private Entity lastAttacker;
     private Date lastDamageTime;
     private int lastDisplayedHealth = -1; // Cache for health display to prevent unnecessary updates
+
+    @Setter
+    private AIProfile aiProfile; // AI profile for this creature
+
+    @Setter
+    private AIEngine aiEngine; // AI engine that runs the AI system
 
     public CustomCreature(CreatureType creatureType) {
         super(creatureType.entityType());
@@ -58,6 +66,11 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
     @Override
     public void tick(long time) {
         super.tick(time);
+
+        // Tick the AI engine if present
+        if (aiEngine != null) {
+            aiEngine.tick();
+        }
 
         // If the creature has taken damage, and it's been more than 5 seconds since the last damage, reset the health display
         if (lastDamageTime != null && new Date().getTime() - lastDamageTime.getTime() > 5000) {

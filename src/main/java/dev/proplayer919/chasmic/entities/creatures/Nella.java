@@ -1,19 +1,13 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
-import dev.proplayer919.chasmic.player.CustomPlayer;
+import dev.proplayer919.chasmic.ai.AIBuilder;
+import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.CustomCreature;
-import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.ai.goal.MeleeAttackGoal;
-import net.minestom.server.entity.ai.goal.RandomStrollGoal;
-import net.minestom.server.entity.ai.target.ClosestEntityTarget;
-import net.minestom.server.entity.ai.target.LastEntityDamagerTarget;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
-import net.minestom.server.utils.time.TimeUnit;
 
-import java.util.List;
 import java.util.UUID;
 
 public class Nella extends CustomCreature {
@@ -22,19 +16,23 @@ public class Nella extends CustomCreature {
 
         getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(UUID.randomUUID().toString(), 5.0, AttributeOperation.ADD_VALUE));
 
-        addAIGroup(
-                List.of(
-                        new MeleeAttackGoal(this, 1.6, 20, TimeUnit.SERVER_TICK), // Attack the target
-                        new RandomStrollGoal(this, 20) // Walk around
-                ),
-                List.of(
-                        new LastEntityDamagerTarget(this, 32), // First target the last entity which attacked you
-                        new ClosestEntityTarget(this, 32, entity ->
-                                entity instanceof CustomPlayer player &&
-                                player.getGameMode() != GameMode.CREATIVE &&
-                                player.getGameMode() != GameMode.SPECTATOR
-                        ) // If there is none, target the nearest player (not in creative/spectator)
-                )
-        );
+        // Create a boss AI profile for Nella
+        AIProfile nellaAI = AIProfile.builder()
+                .aggressiveness(0.95f)      // Extremely aggressive
+                .shyness(0.0f)              // Fearless
+                .intelligence(1.0f)         // Highly intelligent
+                .loyalty(1.0f)              // Loyal to volcanic allies
+                .territoriality(1.0f)       // Highly territorial
+                .wanderlust(0.3f)           // Doesn't wander much
+                .detectionRange(64.0)       // Can detect players from very far
+                .attackRange(3.0)           // Larger attack range due to size
+                .combatSpeedMultiplier(2.0) // Fast in combat
+                .attackCooldown(15)         // Attacks faster than normal
+                .build();
+
+        setAiProfile(nellaAI);
+
+        // Use the new AI builder to set up boss behavior
+        AIBuilder.setupStandardAI(this, nellaAI);
     }
 }
