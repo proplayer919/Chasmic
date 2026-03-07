@@ -1,12 +1,11 @@
 package dev.proplayer919.chasmic.module;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.combat.AttackResult;
 import dev.proplayer919.chasmic.combat.CombatUtils;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
 import net.kyori.adventure.sound.Sound;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;

@@ -2,37 +2,33 @@ package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
+import dev.proplayer919.chasmic.accessories.Accessory;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
-import dev.proplayer919.chasmic.items.CustomItem;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.command.builder.arguments.ArgumentType;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
-import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
 import net.minestom.server.entity.Player;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 
 /**
- * /cgive command for giving custom items to players
- * Permission: admin.command.cgive
+ * /agive command for giving accessories to players
+ * Permission: admin.command.agive
  */
-public class CustomGiveCommand extends PermissionCommand {
+public class AccessoryGiveCommand extends PermissionCommand {
 
-    public CustomGiveCommand() {
-        super("cgive", "admin.command.cgive");
+    public AccessoryGiveCommand() {
+        super("agive", "admin.command.agive");
 
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
-        String[] allItems = Main.getCustomItemRegistry().getAllItems().stream().map(CustomItem::getId).toArray(String[]::new);
-        ArgumentWord itemArg = new ArgumentWord("item").from(allItems);
+        String[] allAccessories = Main.getAccessoryRegistry().getAllAccessories().stream().map(Accessory::getId).toArray(String[]::new);
+        ArgumentWord accessoryArg = new ArgumentWord("accessory").from(allAccessories);
 
-        ArgumentInteger amountArg = (ArgumentInteger) ArgumentType.Integer("amount").setDefaultValue(1);
-
-        // /cgive <player> <item> [amount] - Give item to player
+        // /agive <player> <accessory> - Give accessory to player
         addSyntax((sender, context) -> {
             if (!checkPermission(sender)) return;
 
@@ -44,22 +40,20 @@ public class CustomGiveCommand extends PermissionCommand {
                 return;
             }
 
-            CustomItem customItem = Main.getCustomItemRegistry().getItem(context.get(itemArg));
+            Accessory accessory = Main.getAccessoryRegistry().getAccessoryById(context.get(accessoryArg));
 
-            if (customItem == null) {
-                sender.sendMessage(Component.text("Item not found!", NamedTextColor.RED));
+            if (accessory == null) {
+                sender.sendMessage(Component.text("Accessory not found!", NamedTextColor.RED));
                 return;
             }
 
-            int amount = Math.min(64, Math.max(1, context.get(amountArg)));
-
             // Create and give the item
             PlayerInventory inventory = target.getInventory();
-            ItemStack itemStack = customItem.getItemStack(amount);
+            ItemStack itemStack = accessory.getItemStack();
             inventory.addItemStack(itemStack);
 
-            sender.sendMessage(Component.text("Gave " + amount + "x " + customItem.getDisplayName() + " to " + target.getUsername(), NamedTextColor.GREEN));
-        }, playerArg, itemArg, amountArg);
+            sender.sendMessage(Component.text("Gave a " + accessory.getName() + " to " + targetName, NamedTextColor.GREEN));
+        }, playerArg, accessoryArg);
     }
 }
 

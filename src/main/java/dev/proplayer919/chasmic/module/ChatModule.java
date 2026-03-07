@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.module;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
@@ -31,4 +31,3 @@ public class ChatModule implements Module {
         return "ChatModule";
     }
 }
-

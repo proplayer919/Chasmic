@@ -1,44 +1,62 @@
 package dev.proplayer919.chasmic.module;
 
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import dev.proplayer919.chasmic.items.ItemActionResult;
+import dev.proplayer919.chasmic.items.ItemActionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ItemActionModule implements Module {
     @Override
     public void attach(@NotNull EventNode<Event> eventNode) {
         // Register a right click listener to handle item actions
-        eventNode.addListener(PlayerUseItemEvent .class, event -> {
+        eventNode.addListener(PlayerUseItemEvent.class, event -> {
             if (!(event.getPlayer() instanceof CustomPlayer player)) {
                 return;
             }
 
             // Check if the item has an action
-            String actionId = event.getItemStack().getTag(CustomItem.itemActionTag);
+            String itemActions = event.getItemStack().getTag(CustomItem.itemActionsTag);
 
-            if (actionId == null) {
+            if (itemActions == null) {
                 return;
             }
 
-            ItemAction itemAction = Main.getItemActionRegistry().getItemAction(actionId);
+            List<ItemAction> actions = new ArrayList<>();
+            for (String actionId : itemActions.split(",")) {
+                ItemAction action = Main.getItemActionRegistry().getItemAction(actionId);
+                if (action != null) {
+                    actions.add(action);
+                }
+            }
+
+            ItemActionType actionType = event.getPlayer().isSneaking() ? ItemActionType.SHIFT_RIGHT_CLICK : ItemActionType.RIGHT_CLICK;
+
+            // Find the first action that matches the click type
+            ItemAction itemAction = actions.stream()
+                    .filter(action -> action.actionType() == actionType)
+                    .findFirst()
+                    .orElse(null);
 
             if (itemAction == null) {
-                return;
+                return; // No action for this click type
             }
 
             // Check cooldown
-            Date lastUsed = player.getItemCooldowns().get(actionId);
+            Date lastUsed = player.getItemCooldowns().get(itemAction.id());
             if (lastUsed != null) {
                 long timeSinceLastUse = new Date().getTime() - lastUsed.getTime();
                 if (timeSinceLastUse < itemAction.cooldownSeconds() * 1000) {
@@ -62,7 +80,14 @@ public class ItemActionModule implements Module {
                 player.setCustomMana(playerMana - itemAction.manaCost());
 
                 // Set cooldown
-                player.usedItem(actionId);
+                player.usedItem(itemAction.id());
+            }
+        });
+
+        // Stop players from dropping items
+        eventNode.addListener(ItemDropEvent.class, event -> {
+            if (event.getPlayer() instanceof CustomPlayer) {
+                event.setCancelled(true);
             }
         });
     }

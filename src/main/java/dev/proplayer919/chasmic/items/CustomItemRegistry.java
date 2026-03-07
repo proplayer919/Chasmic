@@ -1,6 +1,8 @@
 package dev.proplayer919.chasmic.items;
 
 import dev.proplayer919.chasmic.*;
+import dev.proplayer919.chasmic.player.PlayerStat;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import net.minestom.server.color.Color;
 import net.minestom.server.color.DyeColor;
 import net.minestom.server.item.Material;
@@ -15,11 +17,11 @@ public class CustomItemRegistry {
         registerItem(new CustomItem("aspect_of_the_shallows",
                 "Aspect of the Shallows",
                 Material.GOLDEN_SWORD,
-                "A powerful magical weapon that can teleport the wielder quickly away from danger.",
+                "A powerful magical item that harnesses the rhythmic power of the Shallows.",
                 ItemType.WEAPON_MELEE,
                 Rarity.LEGENDARY,
                 new ArrayList<>(List.of(new PlayerStatBonus(PlayerStat.ATTACK, 5.0f))),
-                Main.getItemActionRegistry().getItemAction("warp")));
+                List.of(Main.getItemActionRegistry().getItemAction("shallow_leap"), Main.getItemActionRegistry().getItemAction("immaterial_boost"))));
 
         registerItem(new CustomItem("bane_of_nella",
                 "Bane of Nella",

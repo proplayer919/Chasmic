@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.command;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import lombok.Getter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

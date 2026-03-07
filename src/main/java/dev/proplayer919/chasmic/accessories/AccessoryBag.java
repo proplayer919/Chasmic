@@ -1,8 +1,8 @@
 package dev.proplayer919.chasmic.accessories;
 
-import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Main;
-import dev.proplayer919.chasmic.PlayerStat;
+import dev.proplayer919.chasmic.player.PlayerStat;
 
 import java.util.*;
 

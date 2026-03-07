@@ -1,7 +1,7 @@
 package dev.proplayer919.chasmic.command.commands;
 
-import dev.proplayer919.chasmic.CustomPlayer;
-import dev.proplayer919.chasmic.PlayerRank;
+import dev.proplayer919.chasmic.player.CustomPlayer;
+import dev.proplayer919.chasmic.player.PlayerRank;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.data.MongoDBHandler;

@@ -7,6 +7,7 @@ import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.module.*;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.time.ChasmicTime;
 import dev.proplayer919.chasmic.npc.NPC;
 import dev.proplayer919.chasmic.punishment.PunishmentManager;

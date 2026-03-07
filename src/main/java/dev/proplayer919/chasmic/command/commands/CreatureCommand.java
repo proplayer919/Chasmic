@@ -1,12 +1,10 @@
 package dev.proplayer919.chasmic.command.commands;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.entities.CreatureType;
 import dev.proplayer919.chasmic.entities.CustomCreature;
-import dev.proplayer919.chasmic.entities.creatures.Nella;
-import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentWord;

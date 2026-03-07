@@ -1,7 +1,7 @@
 package dev.proplayer919.chasmic.items;
 
 import dev.proplayer919.chasmic.Main;
-import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.helpers.ItemCreator;
 import lombok.Getter;
@@ -11,6 +11,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.tag.Tag;
 
 import java.util.Collection;
+import java.util.List;
 
 @Getter
 public class CustomItem {
@@ -22,11 +23,11 @@ public class CustomItem {
     private final Rarity rarity;
     private final Collection<PlayerStatBonus> statBonuses;
     private int healthRestoration; // Amount of health restored if edible
-    private ItemAction action;
+    private List<ItemAction> actions; // List of actions that can be performed with this item
     private String playerHeadTexture; // Optional field for player head items
     private Color leatherColor; // Optional field for leather armor items
 
-    public static final Tag<String> itemActionTag = Tag.String("custom_item_action");
+    public static final Tag<String> itemActionsTag = Tag.String("custom_item_action");
     public static final Tag<String> itemIdTag = Tag.String("custom_item_id");
 
     public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Rarity rarity, Collection<PlayerStatBonus> statBonuses) {
@@ -39,9 +40,9 @@ public class CustomItem {
         this.statBonuses = statBonuses;
     }
 
-    public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Rarity rarity, Collection<PlayerStatBonus> statBonuses, ItemAction action) {
+    public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Rarity rarity, Collection<PlayerStatBonus> statBonuses, List<ItemAction> actions) {
         this(id, displayName, material, description, itemType, rarity, statBonuses);
-        this.action = action;
+        this.actions = actions;
     }
 
     public CustomItem withPlayerHeadTexture(String texture) {
@@ -60,7 +61,7 @@ public class CustomItem {
     }
 
     public ItemStack getItemStack(int amount) {
-        return ItemCreator.createItem(amount, material, id, displayName, description, rarity, statBonuses, playerHeadTexture, leatherColor, action, itemType == ItemType.FOOD);
+        return ItemCreator.createItem(amount, material, id, displayName, description, rarity, statBonuses, playerHeadTexture, leatherColor, actions, itemType == ItemType.FOOD);
     }
 
     public ItemStack getItemStack() {

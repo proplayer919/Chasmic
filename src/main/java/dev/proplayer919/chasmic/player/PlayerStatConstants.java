@@ -1,4 +1,4 @@
-package dev.proplayer919.chasmic;
+package dev.proplayer919.chasmic.player;
 
 public abstract class PlayerStatConstants {
     private final static float BASE_ATTACK = 1.0f; // Base attack bonus

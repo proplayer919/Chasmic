@@ -1,12 +1,7 @@
 package dev.proplayer919.chasmic.module;
 
 
-import dev.proplayer919.chasmic.CustomPlayer;
-import dev.proplayer919.chasmic.Main;
-import dev.proplayer919.chasmic.items.CustomItem;
-import dev.proplayer919.chasmic.items.ItemType;
-import net.kyori.adventure.key.Key;
-import net.kyori.adventure.sound.Sound;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.GameMode;
@@ -14,7 +9,6 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import net.minestom.server.event.player.PlayerUseItemEvent;
 import org.jetbrains.annotations.NotNull;
 
 public class WorldProtectModule implements Module {

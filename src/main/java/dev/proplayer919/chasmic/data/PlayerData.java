@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.data;
 
-import dev.proplayer919.chasmic.PlayerRank;
+import dev.proplayer919.chasmic.player.PlayerRank;
 import dev.proplayer919.chasmic.accessories.AccessoryBag;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

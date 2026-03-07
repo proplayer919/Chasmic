@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.gui;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.accessories.Accessory;
 import dev.proplayer919.chasmic.accessories.AccessoryBag;

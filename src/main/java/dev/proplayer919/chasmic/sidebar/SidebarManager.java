@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.sidebar;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Emojis;
 import dev.proplayer919.chasmic.helpers.CurrencyFormatter;
 import dev.proplayer919.chasmic.time.ChasmicSeason;

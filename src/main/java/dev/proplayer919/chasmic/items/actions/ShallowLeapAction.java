@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.items.actions;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.helpers.BlockTraceResult;
 import dev.proplayer919.chasmic.helpers.BlockTracer;
 import dev.proplayer919.chasmic.items.ItemActionHandler;
@@ -11,7 +11,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 
-public class ItemWarpAction implements ItemActionHandler {
+public class ShallowLeapAction implements ItemActionHandler {
     @Override
     public ItemActionResult handleAction(CustomPlayer customPlayer) {
         Pos position = customPlayer.getPosition();

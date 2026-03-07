@@ -1,5 +1,6 @@
-package dev.proplayer919.chasmic;
+package dev.proplayer919.chasmic.player;
 
+import dev.proplayer919.chasmic.*;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.entities.CustomCreature;
@@ -35,6 +36,7 @@ import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.timer.TaskSchedule;
 import org.jspecify.annotations.NonNull;
 
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Getter
@@ -79,6 +81,8 @@ public class CustomPlayer extends Player implements HealthCreature {
     private CustomCreature lastDamageAttacker;
 
     private final MenuItemModule menuItemModule = new MenuItemModule(this);
+
+    private final Map<String, TempStatBonus> tempStatBonuses = new HashMap<>();
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
@@ -209,6 +213,18 @@ public class CustomPlayer extends Player implements HealthCreature {
         }
     }
 
+    public void addTemporaryStatBonus(PlayerStat stat, float bonusAmount, long durationMillis) {
+        String uuid = UUID.randomUUID().toString();
+        TempStatBonus tempBonus = new TempStatBonus(stat, bonusAmount);
+        tempStatBonuses.put(uuid, tempBonus);
+
+        // Schedule a task to remove the temporary item after the duration
+        MinecraftServer.getSchedulerManager().buildTask(() -> {
+            tempStatBonuses.remove(uuid);
+            sendMessage(Component.text("Your " + stat.name().toLowerCase().replace("_", " ") + " bonus has expired!").color(NamedTextColor.YELLOW));
+        }).delay(durationMillis, ChronoUnit.MILLIS).schedule();
+    }
+
     private Collection<PlayerStatBonus> getMainHandItemStatBonuses() {
         ItemStack mainHandItem = getItemInMainHand();
         if (!mainHandItem.isAir()) {
@@ -252,6 +268,13 @@ public class CustomPlayer extends Player implements HealthCreature {
         for (PlayerStatBonus statBonus : armorBonuses) {
             if (statBonus.stat() == stat) {
                 bonus += statBonus.bonusAmount();
+            }
+        }
+
+        // Add temporary bonuses
+        for (TempStatBonus tempBonus : tempStatBonuses.values()) {
+            if (tempBonus.stat() == stat) {
+                bonus += tempBonus.bonus();
             }
         }
 

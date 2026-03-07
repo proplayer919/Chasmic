@@ -1,8 +1,8 @@
 package dev.proplayer919.chasmic.accessories.types;
 
 import dev.proplayer919.chasmic.PlayerHeads;
-import dev.proplayer919.chasmic.PlayerStat;
-import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.player.PlayerStat;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.accessories.Accessory;
 import net.minestom.server.item.Material;

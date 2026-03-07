@@ -1,26 +1,18 @@
 package dev.proplayer919.chasmic.module;
 
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
-import dev.proplayer919.chasmic.helpers.ItemCreator;
 import dev.proplayer919.chasmic.items.CustomItem;
-import dev.proplayer919.chasmic.items.ItemAction;
-import dev.proplayer919.chasmic.items.ItemActionResult;
 import dev.proplayer919.chasmic.items.ItemType;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import net.minestom.server.event.item.PlayerBeginItemUseEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Date;
 
 public class ItemFoodModule implements Module {
     @Override

@@ -1,4 +1,4 @@
-package dev.proplayer919.chasmic;
+package dev.proplayer919.chasmic.player;
 
 import lombok.Getter;
 import net.kyori.adventure.text.Component;

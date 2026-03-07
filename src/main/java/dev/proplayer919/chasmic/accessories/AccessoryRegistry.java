@@ -1,7 +1,9 @@
 package dev.proplayer919.chasmic.accessories;
 
+import dev.proplayer919.chasmic.accessories.types.DolphinAmulet;
 import dev.proplayer919.chasmic.accessories.types.ImmaterialBand;
 import dev.proplayer919.chasmic.accessories.types.TurtleSprite;
+import dev.proplayer919.chasmic.accessories.types.WheatSacrifice;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -13,6 +15,8 @@ public class AccessoryRegistry {
     public AccessoryRegistry() {
         registerAccessory(new ImmaterialBand());
         registerAccessory(new TurtleSprite());
+        registerAccessory(new DolphinAmulet());
+        registerAccessory(new WheatSacrifice());
     }
 
     public Accessory getAccessoryById(String id) {

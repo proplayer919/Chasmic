@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.module;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.creatures.TestZombie;
 import net.minestom.server.event.Event;

@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.module;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.helpers.ExpValue;
 import net.minestom.server.event.Event;

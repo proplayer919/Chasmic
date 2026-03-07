@@ -1,9 +1,10 @@
 package dev.proplayer919.chasmic.helpers;
 
-import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.gui.GuiClickAction;
 import dev.proplayer919.chasmic.gui.GuiItem;
+import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -20,13 +21,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import static dev.proplayer919.chasmic.items.CustomItem.itemActionTag;
-import static dev.proplayer919.chasmic.items.CustomItem.itemIdTag;
-
 public abstract class ItemCreator {
     public static final Tag<String> itemUuidTag = Tag.String("custom_item_uuid");
 
-    public static ItemStack createItem(int amount, Material material, String id, String name, String description, Rarity rarity, Collection<PlayerStatBonus> statBonuses, String playerHeadTexture, Color leatherColor, ItemAction action, boolean edible) {
+    public static ItemStack createItem(int amount, Material material, String id, String name, String description, Rarity rarity, Collection<PlayerStatBonus> statBonuses, String playerHeadTexture, Color leatherColor, List<ItemAction> actions, boolean edible) {
         ItemStack.Builder builder;
         if (playerHeadTexture != null) {
             builder = PlayerHeadCreator.getHeadBuilder(playerHeadTexture);
@@ -41,6 +39,8 @@ public abstract class ItemCreator {
         if (edible) {
             builder.set(DataComponents.FOOD, new Food(0, 0f, true));
         }
+
+        List<ItemAction> validActions = actions == null ? List.of() : actions.stream().filter(action -> action != null && action.id() != null).toList();
 
         // Build lore
         List<Component> lore = new ArrayList<>(wrapText(description, 40));
@@ -59,6 +59,41 @@ public abstract class ItemCreator {
             lore.add(bonusLine);
         }
 
+        if (!validActions.isEmpty()) {
+            lore.add(Component.empty());
+        }
+
+        for (int i = 0; i < validActions.size(); i++) {
+            ItemAction action = validActions.get(i);
+
+            Component header = Component.text(action.actionType().getDisplayName())
+                    .decoration(TextDecoration.ITALIC, false)
+                    .decoration(TextDecoration.BOLD, true)
+                    .color(NamedTextColor.GOLD);
+            lore.add(header);
+
+            Component actionNameLine = Component.text(action.name())
+                    .color(NamedTextColor.WHITE)
+                    .decoration(TextDecoration.ITALIC, false);
+            lore.add(actionNameLine);
+
+            lore.addAll(wrapText(action.description(), 40));
+
+            Component cooldownLine = Component.text("Cooldown: " + formatDouble(action.cooldownSeconds()) + "s")
+                    .decoration(TextDecoration.ITALIC, false)
+                    .color(NamedTextColor.DARK_GRAY);
+            lore.add(cooldownLine);
+
+            Component manaLine = Component.text("Mana Cost: " + action.manaCost())
+                    .decoration(TextDecoration.ITALIC, false)
+                    .color(NamedTextColor.DARK_AQUA);
+            lore.add(manaLine);
+
+            if (i < validActions.size() - 1) {
+                lore.add(Component.empty());
+            }
+        }
+
         // Add blank line before rarity
         lore.add(Component.empty());
 
@@ -71,12 +106,13 @@ public abstract class ItemCreator {
 
         builder.set(DataComponents.ITEM_NAME, Component.text(name).color(rarity.getColor()))
                 .lore(lore)
-                .set(itemIdTag, id);
+                .set(CustomItem.itemIdTag, id);
 
         builder.set(itemUuidTag, UUID.randomUUID().toString());
 
-        if (action != null) {
-            builder.set(itemActionTag, action.id());
+        if (!validActions.isEmpty()) {
+            String actionsString = String.join(",", validActions.stream().map(ItemAction::id).toList());
+            builder.set(CustomItem.itemActionsTag, actionsString);
         }
 
         builder.amount(amount);
@@ -126,6 +162,13 @@ public abstract class ItemCreator {
         } else {
             return String.format("%.1f", value);
         }
+    }
+
+    private static String formatDouble(double value) {
+        if (value == (long) value) {
+            return String.format("%d", (long) value);
+        }
+        return String.format("%.1f", value);
     }
 
     /**

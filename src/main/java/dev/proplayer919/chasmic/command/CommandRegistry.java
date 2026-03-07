@@ -33,19 +33,27 @@ public class CommandRegistry {
 
         // Register commands
         commandManager.register(new MediaCommand());
+
         commandManager.register(new RankCommand());
         commandManager.register(new PermsCommand());
+
         commandManager.register(new FlyCommand());
         commandManager.register(new GamemodeCommand());
+
         commandManager.register(new GiveCommand());
         commandManager.register(new CustomGiveCommand());
+        commandManager.register(new AccessoryGiveCommand());
+
         commandManager.register(new CreatureCommand());
+
         commandManager.register(new WarnCommand());
         commandManager.register(new KickCommand());
         commandManager.register(new BanCommand());
         commandManager.register(new UnbanCommand());
+
         commandManager.register(new PerformanceCommand());
         commandManager.register(new KillAllCommand());
+
         commandManager.register(new SetMaxCommand());
         commandManager.register(new HealCommand());
         commandManager.register(new SetCurrencyCommand());

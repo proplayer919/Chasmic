@@ -1,6 +1,6 @@
 package dev.proplayer919.chasmic.accessories;
 
-import dev.proplayer919.chasmic.PlayerStatBonus;
+import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.helpers.ItemCreator;
 import lombok.Getter;

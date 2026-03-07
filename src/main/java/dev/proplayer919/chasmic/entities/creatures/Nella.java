@@ -1,10 +1,8 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
-import dev.proplayer919.chasmic.CustomPlayer;
+import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
-import dev.proplayer919.chasmic.entities.CreatureFamily;
 import dev.proplayer919.chasmic.entities.CustomCreature;
-import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.entity.ai.goal.MeleeAttackGoal;
 import net.minestom.server.entity.ai.goal.RandomStrollGoal;
