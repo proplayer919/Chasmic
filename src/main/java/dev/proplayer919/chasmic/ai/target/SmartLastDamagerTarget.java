@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.ai.target;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.Entity;
@@ -19,24 +20,27 @@ public class SmartLastDamagerTarget implements AITarget {
 
     @Override
     public Entity findTarget() {
-        // Check if creature is too shy to fight back
-        if (profile.getShyness() > 0.7f) {
-            float healthPercent = (float) creature.getCustomHealth() / creature.getCreatureType().maxHealth();
-            if (healthPercent < profile.getFleeHealthThreshold()) {
-                return null; // Too scared, will flee instead
-            }
+        if (AIBehaviorRules.shouldAvoidCombat(creature, profile)) {
+            return null;
         }
 
-        // Get the last attacker
         Entity lastAttacker = creature.getLastAttacker();
-        if (lastAttacker != null && !lastAttacker.isRemoved()) {
-            double distance = creature.getPosition().distance(lastAttacker.getPosition());
-            if (distance <= profile.getDetectionRange()) {
-                return lastAttacker;
-            }
+        if (!isValidTarget(lastAttacker)) {
+            return null;
         }
 
-        return null;
+        double distance = creature.getPosition().distance(lastAttacker.getPosition());
+        return distance <= profile.getDetectionRange() ? lastAttacker : null;
+    }
+
+    @Override
+    public boolean isValidTarget(Entity entity) {
+        if (!AITargetingRules.isCommonlyValidTarget(creature, entity)) {
+            return false;
+        }
+
+        double distance = creature.getPosition().distance(entity.getPosition());
+        return distance <= profile.getDetectionRange();
     }
 
     @Override
@@ -44,5 +48,3 @@ public class SmartLastDamagerTarget implements AITarget {
         return 1; // Highest priority - self-defense
     }
 }
-
-

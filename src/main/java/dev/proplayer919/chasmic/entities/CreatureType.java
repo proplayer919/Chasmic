@@ -8,6 +8,6 @@ import net.minestom.server.entity.EntityType;
  * @param criticalChance Critical chance (0-1, where 0.1 = 10% chance)
  * @param speed          Movement speed bonus (10 = 10% faster)
  */
-public record CreatureType(String id, String name, EntityType entityType, int maxHealth, CreatureFamily creatureFamily,
+public record CreatureType(String id, String name, EntityType entityType, int maxHealth, boolean isBoss, CreatureFamily creatureFamily,
                            float attack, float defense, float criticalChance, float speed, Class<? extends CustomCreature> creatureClass) {
 }

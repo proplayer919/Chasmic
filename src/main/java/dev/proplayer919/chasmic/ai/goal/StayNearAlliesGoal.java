@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.ai.goal;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.pathfinding.Navigator;
@@ -16,6 +17,7 @@ public class StayNearAlliesGoal implements AIGoal {
     private static final double DESIRED_DISTANCE = 5.0;
     private static final double MAX_DISTANCE = 15.0;
     private static final double SEARCH_RANGE = 25.0;
+    private static final double SOCIALIZE_BASE_CHANCE_PER_TICK = 0.05; // 0-5% per tick based on sociability
     private boolean active = false;
 
     public StayNearAlliesGoal(CustomCreature creature, AIProfile profile) {
@@ -31,8 +33,7 @@ public class StayNearAlliesGoal implements AIGoal {
             return false;
         }
 
-        // Only social creatures group up
-        if (profile.getSociability() < 0.3f) {
+        if (!AIBehaviorRules.isTraitActive(profile.getSociability())) {
             return false;
         }
 
@@ -41,8 +42,7 @@ public class StayNearAlliesGoal implements AIGoal {
             return false;
         }
 
-        // Random chance based on sociability
-        if (Math.random() > profile.getSociability() * 0.05) {
+        if (!AIBehaviorRules.rollTraitChance(profile.getSociability(), SOCIALIZE_BASE_CHANCE_PER_TICK)) {
             return false;
         }
 

@@ -1,129 +1,178 @@
 package dev.proplayer919.chasmic.ai;
 
-import lombok.Builder;
 import lombok.Getter;
 
 /**
  * Defines the AI personality and behavior traits for a creature.
- * All values range from 0.0 to 1.0 unless otherwise specified.
+ * All trait values must be in the inclusive range [0.0, 1.0].
  */
 @Getter
-@Builder
 public class AIProfile {
-    /**
-     * How aggressive the creature is toward players and other entities.
-     * 0.0 = Passive (never attacks unless provoked)
-     * 0.5 = Neutral (attacks when nearby or provoked)
-     * 1.0 = Aggressive (actively hunts players)
-     */
-    @Builder.Default
-    private final float aggressiveness = 0.5f;
+    public static final float MIN_TRAIT_VALUE = 0.0f;
+    public static final float MAX_TRAIT_VALUE = 1.0f;
+    public static final float MIN_ACTIVE_TRAIT = 0.0001f;
 
-    /**
-     * How shy/timid the creature is.
-     * 0.0 = Fearless (never runs away)
-     * 0.5 = Cautious (runs when low health)
-     * 1.0 = Extremely shy (runs from any threat)
-     */
-    @Builder.Default
-    private final float shyness = 0.0f;
+    public static final float FLEE_HEALTH_RECOVERY_BUFFER = 0.2f;
+    public static final double TARGET_STICKINESS_RANGE_MULTIPLIER = 1.15d;
 
-    /**
-     * How curious the creature is about players and items.
-     * 0.0 = Not curious at all
-     * 0.5 = Moderately curious
-     * 1.0 = Extremely curious (investigates everything)
-     */
-    @Builder.Default
-    private final float curiosity = 0.0f;
+    private final float aggressiveness;
+    private final float shyness;
+    private final float curiosity;
+    private final float sociability;
+    private final float territoriality;
+    private final float wanderlust;
+    private final float intelligence;
+    private final float loyalty;
+    private final double detectionRange;
+    private final double attackRange;
+    private final double combatSpeedMultiplier;
+    private final int attackCooldown;
+    private final float fleeHealthThreshold;
+    private final boolean targetCreativePlayers;
+    private final boolean preferRangedCombat;
 
-    /**
-     * How social the creature is (tendency to group with similar creatures).
-     * 0.0 = Solitary
-     * 0.5 = Sometimes groups
-     * 1.0 = Always stays in groups
-     */
-    @Builder.Default
-    private final float sociability = 0.0f;
+    private AIProfile(AIProfileBuilder builder) {
+        this.aggressiveness = validateTrait("aggressiveness", builder.aggressiveness);
+        this.shyness = validateTrait("shyness", builder.shyness);
+        this.curiosity = validateTrait("curiosity", builder.curiosity);
+        this.sociability = validateTrait("sociability", builder.sociability);
+        this.territoriality = validateTrait("territoriality", builder.territoriality);
+        this.wanderlust = validateTrait("wanderlust", builder.wanderlust);
+        this.intelligence = validateTrait("intelligence", builder.intelligence);
+        this.loyalty = validateTrait("loyalty", builder.loyalty);
+        this.fleeHealthThreshold = validateTrait("fleeHealthThreshold", builder.fleeHealthThreshold);
 
-    /**
-     * How territorial the creature is.
-     * 0.0 = Not territorial
-     * 0.5 = Defends territory when threatened
-     * 1.0 = Aggressively defends territory
-     */
-    @Builder.Default
-    private final float territoriality = 0.0f;
+        if (builder.detectionRange <= 0) {
+            throw new IllegalArgumentException("detectionRange must be > 0");
+        }
+        if (builder.attackRange <= 0) {
+            throw new IllegalArgumentException("attackRange must be > 0");
+        }
+        if (builder.attackRange > builder.detectionRange) {
+            throw new IllegalArgumentException("attackRange cannot be greater than detectionRange");
+        }
+        if (builder.combatSpeedMultiplier <= 0) {
+            throw new IllegalArgumentException("combatSpeedMultiplier must be > 0");
+        }
+        if (builder.attackCooldown < 1) {
+            throw new IllegalArgumentException("attackCooldown must be >= 1 tick");
+        }
 
-    /**
-     * How much the creature wanders around.
-     * 0.0 = Stays in one place
-     * 0.5 = Moderate wandering
-     * 1.0 = Constantly roaming
-     */
-    @Builder.Default
-    private final float wanderlust = 0.5f;
+        this.detectionRange = builder.detectionRange;
+        this.attackRange = builder.attackRange;
+        this.combatSpeedMultiplier = builder.combatSpeedMultiplier;
+        this.attackCooldown = builder.attackCooldown;
+        this.targetCreativePlayers = builder.targetCreativePlayers;
+        this.preferRangedCombat = builder.preferRangedCombat;
+    }
 
-    /**
-     * The creature's intelligence level (affects pathfinding complexity and awareness).
-     * 0.0 = Simple AI
-     * 0.5 = Average intelligence
-     * 1.0 = Highly intelligent
-     */
-    @Builder.Default
-    private final float intelligence = 0.5f;
+    public static AIProfileBuilder builder() {
+        return new AIProfileBuilder();
+    }
 
-    /**
-     * How loyal the creature is to its allies/friends.
-     * 0.0 = No loyalty
-     * 0.5 = Moderately loyal
-     * 1.0 = Extremely loyal (helps allies in combat)
-     */
-    @Builder.Default
-    private final float loyalty = 0.0f;
+    private static float validateTrait(String name, float value) {
+        if (value < MIN_TRAIT_VALUE || value > MAX_TRAIT_VALUE) {
+            throw new IllegalArgumentException(name + " must be within [0.0, 1.0], got " + value);
+        }
+        return value;
+    }
 
-    /**
-     * Detection range for targeting enemies (in blocks).
-     */
-    @Builder.Default
-    private final double detectionRange = 32.0;
+    public static class AIProfileBuilder {
+        private float aggressiveness = 0.5f;
+        private float shyness = 0.0f;
+        private float curiosity = 0.0f;
+        private float sociability = 0.0f;
+        private float territoriality = 0.0f;
+        private float wanderlust = 0.5f;
+        private float intelligence = 0.5f;
+        private float loyalty = 0.0f;
+        private double detectionRange = 32.0;
+        private double attackRange = 2.0;
+        private double combatSpeedMultiplier = 1.6;
+        private int attackCooldown = 20;
+        private float fleeHealthThreshold = 0.3f;
+        private boolean targetCreativePlayers = false;
+        private boolean preferRangedCombat = false;
 
-    /**
-     * Attack range for melee attacks (in blocks).
-     */
-    @Builder.Default
-    private final double attackRange = 2.0;
+        public AIProfileBuilder aggressiveness(float aggressiveness) {
+            this.aggressiveness = aggressiveness;
+            return this;
+        }
 
-    /**
-     * Movement speed multiplier when in combat.
-     */
-    @Builder.Default
-    private final double combatSpeedMultiplier = 1.6;
+        public AIProfileBuilder shyness(float shyness) {
+            this.shyness = shyness;
+            return this;
+        }
 
-    /**
-     * Cooldown between attacks (in server ticks).
-     */
-    @Builder.Default
-    private final int attackCooldown = 20;
+        public AIProfileBuilder curiosity(float curiosity) {
+            this.curiosity = curiosity;
+            return this;
+        }
 
-    /**
-     * Health percentage below which the creature might flee (if shy).
-     * 0.3 = 30% health
-     */
-    @Builder.Default
-    private final float fleeHealthThreshold = 0.3f;
+        public AIProfileBuilder sociability(float sociability) {
+            this.sociability = sociability;
+            return this;
+        }
 
-    /**
-     * Whether the creature can attack players in creative/spectator mode.
-     */
-    @Builder.Default
-    private final boolean targetCreativePlayers = false;
+        public AIProfileBuilder territoriality(float territoriality) {
+            this.territoriality = territoriality;
+            return this;
+        }
 
-    /**
-     * Whether the creature prefers to attack from a distance if possible.
-     */
-    @Builder.Default
-    private final boolean preferRangedCombat = false;
+        public AIProfileBuilder wanderlust(float wanderlust) {
+            this.wanderlust = wanderlust;
+            return this;
+        }
+
+        public AIProfileBuilder intelligence(float intelligence) {
+            this.intelligence = intelligence;
+            return this;
+        }
+
+        public AIProfileBuilder loyalty(float loyalty) {
+            this.loyalty = loyalty;
+            return this;
+        }
+
+        public AIProfileBuilder detectionRange(double detectionRange) {
+            this.detectionRange = detectionRange;
+            return this;
+        }
+
+        public AIProfileBuilder attackRange(double attackRange) {
+            this.attackRange = attackRange;
+            return this;
+        }
+
+        public AIProfileBuilder combatSpeedMultiplier(double combatSpeedMultiplier) {
+            this.combatSpeedMultiplier = combatSpeedMultiplier;
+            return this;
+        }
+
+        public AIProfileBuilder attackCooldown(int attackCooldown) {
+            this.attackCooldown = attackCooldown;
+            return this;
+        }
+
+        public AIProfileBuilder fleeHealthThreshold(float fleeHealthThreshold) {
+            this.fleeHealthThreshold = fleeHealthThreshold;
+            return this;
+        }
+
+        public AIProfileBuilder targetCreativePlayers(boolean targetCreativePlayers) {
+            this.targetCreativePlayers = targetCreativePlayers;
+            return this;
+        }
+
+        public AIProfileBuilder preferRangedCombat(boolean preferRangedCombat) {
+            this.preferRangedCombat = preferRangedCombat;
+            return this;
+        }
+
+        public AIProfile build() {
+            return new AIProfile(this);
+        }
+    }
 
     /**
      * Creates a passive AI profile (won't attack unless provoked).
@@ -199,4 +248,3 @@ public class AIProfile {
                 .build();
     }
 }
-

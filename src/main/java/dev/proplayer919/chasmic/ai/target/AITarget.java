@@ -14,6 +14,13 @@ public interface AITarget {
     Entity findTarget();
 
     /**
+     * Returns whether an existing target is still valid for this selector.
+     */
+    default boolean isValidTarget(Entity entity) {
+        return entity != null && !entity.isRemoved();
+    }
+
+    /**
      * Get the priority of this target selector. Higher priority targets are evaluated first.
      * Priority levels:
      * - 1: Highest (last attacker, self-defense)
@@ -25,4 +32,3 @@ public interface AITarget {
      */
     int getPriority();
 }
-

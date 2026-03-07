@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.minestom.server.component.DataComponents;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
@@ -36,6 +38,8 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
         super(creatureType.entityType());
         this.creatureType = creatureType;
         this.customHealth = creatureType.maxHealth();
+
+        updateHealthDisplay();
     }
 
     @Override
@@ -73,7 +77,7 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
         }
 
         // If the creature has taken damage, and it's been more than 5 seconds since the last damage, reset the health display
-        if (lastDamageTime != null && new Date().getTime() - lastDamageTime.getTime() > 5000) {
+        if ((lastDamageTime != null && new Date().getTime() - lastDamageTime.getTime() > 5000) && !creatureType.isBoss()) {
             lastDamageTime = null;
             lastAttacker = null;
             updateHealthDisplay();
@@ -90,6 +94,17 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
      * Only calls setCustomName if health actually changed to prevent lag
      */
     private void updateHealthDisplay() {
+        if (creatureType.isBoss()) {
+            // Bosses always show name and health, so we skip the check for max health
+            Component nameDisplay = Component.text(creatureType.name()).color(NamedTextColor.GOLD).decoration(TextDecoration.BOLD, true);
+            Component healthDisplay = Component.text("❤ " + customHealth + "/" + creatureType.maxHealth())
+                    .color(NamedTextColor.RED).decoration(TextDecoration.BOLD, false);
+            Component combinedDisplay = nameDisplay.append(Component.text("    ").append(healthDisplay));
+            set(DataComponents.CUSTOM_NAME, combinedDisplay);
+            setCustomNameVisible(true);
+            return;
+        }
+
         boolean shouldShowHealth = customHealth < customMaxHealth && customHealth > 0 && lastAttacker != null;
 
         // Only update if health display state changed
@@ -98,7 +113,7 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
             if (lastDisplayedHealth != customHealth) {
                 Component healthDisplay = Component.text("❤ " + customHealth + "/" + customMaxHealth)
                         .color(NamedTextColor.RED);
-                setCustomName(healthDisplay);
+                set(DataComponents.CUSTOM_NAME, healthDisplay);
                 setCustomNameVisible(true);
                 lastDisplayedHealth = customHealth;
             }
@@ -109,7 +124,7 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
 
     @Override
     public void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos) {
-        this.customHealth -= amount;
+        this.customHealth = Math.max(0, this.customHealth - amount);
         if (attacker != null) {
             setLastAttacker(attacker);
         }
@@ -117,8 +132,7 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
         // Update the health display
         updateHealthDisplay();
 
-        if (this.customHealth <= 0) {
-            this.customHealth = 0;
+        if (this.customHealth == 0) {
             this.kill();
         }
     }

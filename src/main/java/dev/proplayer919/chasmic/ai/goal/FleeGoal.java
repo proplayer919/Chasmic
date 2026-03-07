@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.ai.goal;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.Entity;
@@ -24,20 +25,17 @@ public class FleeGoal implements AIGoal {
 
     @Override
     public boolean canStart() {
-        // Check if creature is shy enough to flee
-        if (profile.getShyness() < 0.3f) {
-            return false; // Not shy enough to flee
-        }
-
-        Entity target = creature.getTarget();
-        if (target == null) {
+        if (!AIBehaviorRules.isTraitActive(profile.getShyness())) {
             return false;
         }
 
-        // Check health threshold
-        float healthPercent = (float) creature.getCustomHealth() / creature.getCreatureType().maxHealth();
-        if (healthPercent > profile.getFleeHealthThreshold()) {
-            return false; // Health is still okay
+        Entity target = creature.getTarget();
+        if (target == null || target.isRemoved()) {
+            return false;
+        }
+
+        if (!AIBehaviorRules.shouldAvoidCombat(creature, profile)) {
+            return false;
         }
 
         // Check distance - only flee if enemy is close
@@ -92,8 +90,8 @@ public class FleeGoal implements AIGoal {
         }
 
         // Stop fleeing if health is restored above threshold
-        float healthPercent = (float) creature.getCustomHealth() / creature.getCreatureType().maxHealth();
-        return healthPercent > (profile.getFleeHealthThreshold() + 0.2f);
+        float healthPercent = AIBehaviorRules.healthPercent(creature);
+        return healthPercent > (profile.getFleeHealthThreshold() + AIProfile.FLEE_HEALTH_RECOVERY_BUFFER);
     }
 
     @Override
@@ -111,6 +109,3 @@ public class FleeGoal implements AIGoal {
         return active;
     }
 }
-
-
-

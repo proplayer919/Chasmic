@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.ai.goal;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.Entity;
@@ -28,30 +29,24 @@ public class SmartMeleeAttackGoal implements AIGoal {
 
     @Override
     public boolean canStart() {
+        if (!AIBehaviorRules.isTraitActive(profile.getAggressiveness())) {
+            return false;
+        }
+
         Entity target = creature.getTarget();
         if (target == null || target.isRemoved()) {
             return false;
         }
 
-        // Check if creature is too shy to attack (based on health)
-        if (profile.getShyness() > 0.5f) {
-            float healthPercent = (float) creature.getCustomHealth() / creature.getCreatureType().maxHealth();
-            if (healthPercent < profile.getFleeHealthThreshold()) {
-                return false; // Too scared to attack
-            }
+        if (AIBehaviorRules.shouldAvoidCombat(creature, profile)) {
+            return false; // Too scared to attack
         }
 
-        // Check if creature is aggressive enough to attack
-        if (profile.getAggressiveness() < 0.3f) {
-            // Only attack if damaged recently (defensive behavior)
-            if (creature.getLastAttacker() == null) {
-                return false;
-            }
-        }
-
-        // Start if target is within detection range (not just attack range)
+        // Low-aggression creatures engage only when target is closer.
+        double aggressionFactor = 0.4 + (profile.getAggressiveness() * 0.6);
+        double engageRange = profile.getDetectionRange() * aggressionFactor;
         double distance = creature.getPosition().distance(target.getPosition());
-        return distance <= profile.getDetectionRange();
+        return distance <= engageRange;
     }
 
     @Override
@@ -109,12 +104,8 @@ public class SmartMeleeAttackGoal implements AIGoal {
             return true;
         }
 
-        // Check shyness - flee if health is low
-        if (profile.getShyness() > 0.3f) {
-            float healthPercent = (float) creature.getCustomHealth() / creature.getCreatureType().maxHealth();
-            if (healthPercent < profile.getFleeHealthThreshold()) {
-                return true; // Stop attacking and flee
-            }
+        if (AIBehaviorRules.shouldAvoidCombat(creature, profile)) {
+            return true; // Stop attacking and flee
         }
 
         double distance = creature.getPosition().distance(target.getPosition());
@@ -149,5 +140,4 @@ public class SmartMeleeAttackGoal implements AIGoal {
         return active;
     }
 }
-
 

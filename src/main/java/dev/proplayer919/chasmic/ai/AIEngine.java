@@ -64,22 +64,41 @@ public class AIEngine {
     private void updateTarget() {
         Entity currentTarget = creature.getTarget();
 
-        // Always check for higher priority targets
-        for (AITarget targetSelector : targets) {
-            Entity newTarget = targetSelector.findTarget();
-            if (newTarget != null) {
-                // If we don't have a target or found a new one, set it
-                if (currentTarget == null || currentTarget.isRemoved() || newTarget != currentTarget) {
-                    creature.setTarget(newTarget);
-                    return;
-                }
-            }
+        // Eagerly clear stale/invalid targets before any new selection happens.
+        if (currentTarget != null && !isValidForAnySelector(currentTarget)) {
+            creature.setTarget(null);
+            currentTarget = null;
         }
 
-        // No target found - clear if current is invalid
-        if (currentTarget != null && currentTarget.isRemoved()) {
-            creature.setTarget(null);
+        // Select from highest-priority selector first.
+        for (AITarget targetSelector : targets) {
+            Entity newTarget = targetSelector.findTarget();
+            if (newTarget == null) {
+                continue;
+            }
+
+            if (currentTarget == null) {
+                creature.setTarget(newTarget);
+                return;
+            }
+
+            // Keep stable target when already valid for this selector.
+            if (newTarget == currentTarget || targetSelector.isValidTarget(currentTarget)) {
+                return;
+            }
+
+            creature.setTarget(newTarget);
+            return;
         }
+    }
+
+    private boolean isValidForAnySelector(Entity target) {
+        for (AITarget selector : targets) {
+            if (selector.isValidTarget(target)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

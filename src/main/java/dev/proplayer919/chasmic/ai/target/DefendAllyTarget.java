@@ -1,8 +1,11 @@
 package dev.proplayer919.chasmic.ai.target;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.Entity;
+
+import java.util.Comparator;
 
 /**
  * Targets enemies that are attacking allies.
@@ -19,39 +22,46 @@ public class DefendAllyTarget implements AITarget {
 
     @Override
     public Entity findTarget() {
-        // Safety check - don't run if not in an instance
         if (creature.getInstance() == null) {
             return null;
         }
-
-        // Only loyal creatures defend allies
-        if (profile.getLoyalty() < 0.5f) {
+        if (!AIBehaviorRules.isTraitActive(profile.getLoyalty())) {
+            return null;
+        }
+        if (AIBehaviorRules.shouldAvoidCombat(creature, profile)) {
             return null;
         }
 
-        // Don't help allies if too shy
-        if (profile.getShyness() > 0.5f) {
-            return null;
-        }
-
-        // Find nearby allies of the same type
         return creature.getInstance()
                 .getNearbyEntities(creature.getPosition(), profile.getDetectionRange())
                 .stream()
                 .filter(e -> e instanceof CustomCreature)
-                .filter(e -> e != creature)
-                .filter(e -> {
-                    CustomCreature ally = (CustomCreature) e;
-                    // Check if same type
-                    if (!ally.getCreatureType().id().equals(creature.getCreatureType().id())) {
-                        return false;
-                    }
-                    // Check if ally has an attacker
-                    return ally.getLastAttacker() != null && !ally.getLastAttacker().isRemoved();
-                })
-                .map(e -> ((CustomCreature) e).getLastAttacker())
-                .findFirst()
+                .map(CustomCreature.class::cast)
+                .filter(ally -> ally != creature)
+                .filter(this::isSameCreatureType)
+                .map(CustomCreature::getLastAttacker)
+                .filter(this::isValidTarget)
+                .min(Comparator
+                        .comparingDouble(this::distanceToCreature)
+                        .thenComparingInt(Entity::getEntityId))
                 .orElse(null);
+    }
+
+    private boolean isSameCreatureType(CustomCreature other) {
+        return other.getCreatureType().id().equals(creature.getCreatureType().id());
+    }
+
+    private double distanceToCreature(Entity entity) {
+        return creature.getPosition().distance(entity.getPosition());
+    }
+
+    @Override
+    public boolean isValidTarget(Entity entity) {
+        if (!AITargetingRules.isCommonlyValidTarget(creature, entity)) {
+            return false;
+        }
+
+        return distanceToCreature(entity) <= profile.getDetectionRange();
     }
 
     @Override
@@ -59,5 +69,3 @@ public class DefendAllyTarget implements AITarget {
         return 2; // High priority - defending allies
     }
 }
-
-

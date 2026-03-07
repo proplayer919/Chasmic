@@ -210,10 +210,9 @@ public class CustomPlayer extends Player implements HealthCreature {
             lastDamageAttacker = null;
         }
 
-        this.customHealth -= amount;
+        this.customHealth = Math.max(0, this.customHealth - amount);
 
-        if (this.customHealth <= 0) {
-            this.customHealth = 0;
+        if (this.customHealth == 0) {
             this.kill();
         }
     }

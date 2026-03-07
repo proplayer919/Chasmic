@@ -30,28 +30,23 @@ public class AIBuilder {
      * This includes combat, movement, fleeing, and social behaviors.
      */
     public AIBuilder withStandardGoals() {
-        // Flee goal (highest priority for shy creatures)
-        if (profile.getShyness() > 0.3f) {
+        if (profile.getShyness() >= AIProfile.MIN_ACTIVE_TRAIT) {
             goals.add(new FleeGoal(creature, profile));
         }
 
-        // Combat goal
-        if (profile.getAggressiveness() > 0.0f) {
+        if (profile.getAggressiveness() >= AIProfile.MIN_ACTIVE_TRAIT) {
             goals.add(new SmartMeleeAttackGoal(creature, profile));
         }
 
-        // Social goals
-        if (profile.getSociability() > 0.3f) {
+        if (profile.getSociability() >= AIProfile.MIN_ACTIVE_TRAIT) {
             goals.add(new StayNearAlliesGoal(creature, profile));
         }
 
-        // Investigation goal for curious creatures
-        if (profile.getCuriosity() > 0.3f) {
+        if (profile.getCuriosity() >= AIProfile.MIN_ACTIVE_TRAIT) {
             goals.add(new InvestigateGoal(creature, profile));
         }
 
-        // Wandering goal (lowest priority)
-        if (profile.getWanderlust() > 0.0f) {
+        if (profile.getWanderlust() >= AIProfile.MIN_ACTIVE_TRAIT) {
             goals.add(new SmartWanderGoal(creature, profile));
         }
 
@@ -65,13 +60,11 @@ public class AIBuilder {
         // Always prioritize last damager (self-defense)
         targets.add(new SmartLastDamagerTarget(creature, profile));
 
-        // Defend allies if loyal
-        if (profile.getLoyalty() > 0.5f) {
+        if (profile.getLoyalty() >= AIProfile.MIN_ACTIVE_TRAIT) {
             targets.add(new DefendAllyTarget(creature, profile));
         }
 
-        // Aggressive hunting
-        if (profile.getAggressiveness() > 0.5f) {
+        if (profile.getAggressiveness() >= AIProfile.MIN_ACTIVE_TRAIT) {
             targets.add(new AggressivePlayerTarget(creature, profile));
         }
 
@@ -114,4 +107,3 @@ public class AIBuilder {
                 .apply();
     }
 }
-

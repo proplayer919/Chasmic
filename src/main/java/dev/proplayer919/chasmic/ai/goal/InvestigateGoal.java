@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.ai.goal;
 
+import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.Entity;
@@ -19,6 +20,7 @@ public class InvestigateGoal implements AIGoal {
     private static final long MAX_INVESTIGATION_TIME = 10000; // 10 seconds
     private static final double INVESTIGATION_RANGE = 16.0;
     private static final double APPROACH_DISTANCE = 3.0;
+    private static final double INVESTIGATE_BASE_CHANCE_PER_TICK = 0.01; // 0-1% per tick based on curiosity
     private boolean active = false;
 
     public InvestigateGoal(CustomCreature creature, AIProfile profile) {
@@ -34,8 +36,8 @@ public class InvestigateGoal implements AIGoal {
             return false;
         }
 
-        // Only curious creatures investigate
-        if (profile.getCuriosity() < 0.3f) {
+        // Only active when trait is enabled
+        if (!AIBehaviorRules.isTraitActive(profile.getCuriosity())) {
             return false;
         }
 
@@ -44,8 +46,7 @@ public class InvestigateGoal implements AIGoal {
             return false;
         }
 
-        // Low chance to start investigating
-        if (Math.random() > profile.getCuriosity() * 0.01) {
+        if (!AIBehaviorRules.rollTraitChance(profile.getCuriosity(), INVESTIGATE_BASE_CHANCE_PER_TICK)) {
             return false;
         }
 
@@ -128,5 +129,4 @@ public class InvestigateGoal implements AIGoal {
         return active;
     }
 }
-
 
