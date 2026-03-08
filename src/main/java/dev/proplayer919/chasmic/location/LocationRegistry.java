@@ -8,7 +8,7 @@ public class LocationRegistry {
     private final Map<String, Location> locations = new HashMap<>();
 
     public LocationRegistry() {
-        registerLocation(new Location(null, "chasmic_city", "Chasmic City"));
+        registerLocation(new Location("chasmic_city", "Chasmic City"));
     }
 
     public void registerLocation(Location location) {

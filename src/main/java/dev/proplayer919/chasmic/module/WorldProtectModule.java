@@ -9,11 +9,11 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerBlockBreakEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class WorldProtectModule implements Module {
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerBlockBreakEvent.class, event -> {
             if (!(event.getPlayer() instanceof CustomPlayer player)) {
                 return;

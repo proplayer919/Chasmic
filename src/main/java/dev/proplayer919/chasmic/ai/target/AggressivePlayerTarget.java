@@ -3,6 +3,7 @@ package dev.proplayer919.chasmic.ai.target;
 import dev.proplayer919.chasmic.ai.AIBehaviorRules;
 import dev.proplayer919.chasmic.ai.AIProfile;
 import dev.proplayer919.chasmic.entities.CustomCreature;
+import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 
 import java.util.Comparator;
@@ -34,28 +35,26 @@ public class AggressivePlayerTarget implements AITarget {
 
         double searchRange = profile.getDetectionRange() * profile.getAggressiveness();
         Entity currentTarget = creature.getTarget();
+        Pos creaturePos = creature.getPosition();
 
         // Stick to the current target while still valid and reasonably close.
         if (isValidTarget(currentTarget) && currentTarget != null) {
             double stickyRange = searchRange * AIProfile.TARGET_STICKINESS_RANGE_MULTIPLIER;
-            double distance = creature.getPosition().distance(currentTarget.getPosition());
+            double distance = creaturePos.distance(currentTarget.getPosition());
             if (distance <= stickyRange) {
                 return currentTarget;
             }
         }
 
+        // Cache creature position to avoid multiple calls
         return creature.getInstance()
-                .getNearbyEntities(creature.getPosition(), searchRange)
+                .getNearbyEntities(creaturePos, searchRange)
                 .stream()
                 .filter(this::isValidTarget)
                 .min(Comparator
-                        .comparingDouble(this::distanceToCreature)
+                        .<Entity>comparingDouble(entity -> creaturePos.distance(entity.getPosition()))
                         .thenComparingInt(Entity::getEntityId))
                 .orElse(null);
-    }
-
-    private double distanceToCreature(Entity entity) {
-        return creature.getPosition().distance(entity.getPosition());
     }
 
     @Override
@@ -65,7 +64,8 @@ public class AggressivePlayerTarget implements AITarget {
         }
 
         double searchRange = profile.getDetectionRange() * profile.getAggressiveness();
-        return distanceToCreature(entity) <= searchRange * AIProfile.TARGET_STICKINESS_RANGE_MULTIPLIER;
+        double distance = creature.getPosition().distance(entity.getPosition());
+        return distance <= searchRange * AIProfile.TARGET_STICKINESS_RANGE_MULTIPLIER;
     }
 
     @Override

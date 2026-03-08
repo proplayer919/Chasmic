@@ -10,7 +10,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.title.Title;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Module that handles player location unlock
@@ -18,9 +18,14 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerLocationModule implements Module {
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerEnterLocationEvent.class, event -> {
             CustomPlayer player = (CustomPlayer) event.getPlayer();
+
+            // Ensure player data is loaded
+            if (player.getPlayerData() == null) {
+                return;
+            }
 
             if (player.getPlayerData().getUnlockedLocationIds().contains(event.getLocation().id())) {
                 // Player has already unlocked this location, do nothing

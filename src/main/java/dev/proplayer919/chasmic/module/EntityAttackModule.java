@@ -11,7 +11,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Module that handles entities attacking players and applying custom damage logic with critical hits
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class EntityAttackModule implements Module {
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(EntityAttackEvent.class, event -> {
             Entity entity = event.getEntity();
             Entity target = event.getTarget();
@@ -30,6 +30,10 @@ public class EntityAttackModule implements Module {
 
             if (!(target instanceof HealthCreature healthCreature)) {
                 return; // Target is not a HealthCreature, ignore
+            }
+
+            if (creature.isDead() || healthCreature.isDead()) {
+                return; // Either attacker or target is already dead, ignore
             }
 
             // Apply creature attack stat and check for critical hit

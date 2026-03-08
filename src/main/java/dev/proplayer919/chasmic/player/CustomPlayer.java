@@ -9,9 +9,6 @@ import dev.proplayer919.chasmic.events.PlayerEnterLocationEvent;
 import dev.proplayer919.chasmic.events.PlayerExitLocationEvent;
 import dev.proplayer919.chasmic.helpers.ExpValue;
 import dev.proplayer919.chasmic.location.Location;
-import dev.proplayer919.chasmic.module.MenuItemModule;
-import dev.proplayer919.chasmic.sidebar.SidebarManager;
-import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,34 +23,33 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.entity.attribute.AttributeModifier;
 import net.minestom.server.entity.attribute.AttributeOperation;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerRespawnEvent;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
-import net.minestom.server.item.ItemStack;
+import net.minestom.server.network.packet.server.play.DamageEventPacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
 import net.minestom.server.network.player.GameProfile;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.registry.RegistryKey;
 import net.minestom.server.timer.TaskSchedule;
-import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 @Getter
 public class CustomPlayer extends Player implements HealthCreature {
+    private static final long HEALTH_REGEN_BASE_MILLIS = 50000;
+    private static final long MANA_REGEN_BASE_MILLIS = 25000;
+    private static final long MIN_REGEN_INTERVAL_MILLIS = 10;
+    private static final long COMBAT_REGEN_DELAY_MILLIS = 5000;
+
     private PlayerRank rank = PlayerRank.DEFAULT;
 
     @Setter
     private PlayerData playerData;
-
-    @Setter
-    private int customHealth = 100;
-
-    @Setter
-    private int customMana = 100;
 
     @Setter
     private ExpValue expValue;
@@ -63,34 +59,47 @@ public class CustomPlayer extends Player implements HealthCreature {
     private final PermissionHolder permissionHolder = new PermissionHolder();
     private boolean permissionsLoaded = false;
 
-    @Setter
     private boolean recording = false;
-
-    @Setter
     private boolean streaming = false;
-
-    @Setter
-    private boolean showMsptBossbar = false;
-
-    private SidebarManager sidebarManager;
-
-    private final BossBar msptBossBar = BossBar.bossBar(Component.text("MSPT: 0 ms").color(NamedTextColor.GREEN), 0f, BossBar.Color.GREEN, BossBar.Overlay.PROGRESS);
-
-    private float mspt;
-    private float smoothedMspt = 0f;
-    private static final float MSPT_SMOOTHING_FACTOR = 0.2f; // Exponential smoothing factor
 
     private Date lastDamageTime;
     private CustomCreature lastDamageAttacker;
 
-    private final MenuItemModule menuItemModule = new MenuItemModule(this);
-
-    private final Map<String, TempStatBonus> tempStatBonuses = new HashMap<>();
-
     private Location currentLocation;
+
+    // Managers for separated concerns
+    @Getter
+    private final PlayerStatsManager statsManager;
+
+    @Getter
+    private final PlayerUIManager uiManager;
+
+    public void setRecording(boolean recording) {
+        this.recording = recording;
+        uiManager.markActionBarDirty();
+    }
+
+    public void setStreaming(boolean streaming) {
+        this.streaming = streaming;
+        uiManager.markActionBarDirty();
+    }
+
+    public void setShowMsptBossbar(boolean show) {
+        uiManager.setShowMsptBossbar(show);
+    }
+
+    public boolean isShowMsptBossbar() {
+        return uiManager.isShowMsptBossbar();
+    }
+
+    public BossBar getMsptBossBar() {
+        return uiManager.getMsptBossBar();
+    }
 
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
+        this.statsManager = new PlayerStatsManager(this);
+        this.uiManager = new PlayerUIManager(this);
         updatePermissionLevel();
         setupRegenSchedule();
         setupPlayerAttributes();
@@ -103,29 +112,46 @@ public class CustomPlayer extends Player implements HealthCreature {
     }
 
     public int getMaxCustomHealth() {
-        return playerData.getMaxHealth();
+        return statsManager.getMaxCustomHealth();
     }
 
     public int getMaxCustomMana() {
-        return playerData.getMaxMana();
+        return statsManager.getMaxCustomMana();
+    }
+
+    public int getCustomHealth() {
+        return statsManager.getCustomHealth();
+    }
+
+    public void setCustomHealth(int health) {
+        statsManager.setCustomHealth(health);
+        uiManager.markActionBarDirty();
+    }
+
+    public int getCustomMana() {
+        return statsManager.getCustomMana();
+    }
+
+    public void setCustomMana(int mana) {
+        statsManager.setCustomMana(mana);
+        uiManager.markActionBarDirty();
     }
 
     public void dataLoadCallback() {
         // Called after player data is loaded to set initial health/mana
         if (playerData != null) {
-            this.customHealth = playerData.getMaxHealth();
-            this.customMana = playerData.getMaxMana();
+            this.statsManager.setCustomHealth(playerData.getMaxHealth());
+            this.statsManager.setCustomMana(playerData.getMaxMana());
 
-            // Initialize scoreboard manager after player data is loaded.
-            // Sidebar packets are sent later from PlayerSpawnEvent via showSidebar().
-            if (sidebarManager == null) {
-                sidebarManager = new SidebarManager(this);
-            }
+            // Initialize UI manager after player data is loaded
+            uiManager.initializeSidebar();
         }
     }
 
+    private static final int ATTACK_SPEED_BONUS = 1000;
+
     private void setupPlayerAttributes() {
-        getAttribute(Attribute.ATTACK_SPEED).addModifier(new AttributeModifier(UUID.randomUUID().toString(), 1000, AttributeOperation.ADD_VALUE));
+        getAttribute(Attribute.ATTACK_SPEED).addModifier(new AttributeModifier(UUID.randomUUID().toString(), ATTACK_SPEED_BONUS, AttributeOperation.ADD_VALUE));
     }
 
     private void setupEventListeners() {
@@ -146,33 +172,30 @@ public class CustomPlayer extends Player implements HealthCreature {
         globalEventHandler.addListener(PlayerRespawnEvent.class, event -> {
             if (event.getPlayer().getUuid().equals(getUuid())) {
                 // Reset health and mana on respawn
-                customHealth = playerData != null ? playerData.getMaxHealth() : 100;
-                customMana = playerData != null ? playerData.getMaxMana() : 100;
+                statsManager.setCustomHealth(playerData != null ? playerData.getMaxHealth() : 100);
+                statsManager.setCustomMana(playerData != null ? playerData.getMaxMana() : 100);
+                uiManager.markActionBarDirty();
             }
         });
 
-        globalEventHandler.addListener(ServerTickMonitorEvent.class, event -> {
-            mspt = (float) event.getTickMonitor().getTickTime();
-
-            // Apply exponential smoothing to MSPT
-            smoothedMspt = smoothedMspt * (1 - MSPT_SMOOTHING_FACTOR) + mspt * MSPT_SMOOTHING_FACTOR;
-        });
+        globalEventHandler.addListener(ServerTickMonitorEvent.class, event -> uiManager.updateMspt((float) event.getTickMonitor().getTickTime()));
     }
 
     private void setupRegenSchedule() {
         // Schedule health regeneration with interval dependent on max health
         MinecraftServer.getSchedulerManager().submitTask(() -> {
             // Only regenerate if player is online, has player data loaded, and it's been at least 5 seconds since last damage
-            if (isOnline() && playerData != null && (lastDamageTime == null || new Date().getTime() - lastDamageTime.getTime() >= 5000)) {
+            if (isOnline() && playerData != null && (lastDamageTime == null || new Date().getTime() - lastDamageTime.getTime() >= COMBAT_REGEN_DELAY_MILLIS)) {
                 // Regenerate health
-                if (customHealth < playerData.getMaxHealth()) {
-                    customHealth = Math.min(customHealth + 1, playerData.getMaxHealth());
+                if (statsManager.getCustomHealth() < playerData.getMaxHealth()) {
+                    statsManager.setCustomHealth(Math.min(statsManager.getCustomHealth() + 1, playerData.getMaxHealth()));
+                    uiManager.markActionBarDirty();
                 }
             }
 
             // Calculate interval: 50000 / maxHealth milliseconds (for 100 max = 500ms)
             if (playerData != null) {
-                long healthInterval = Math.max(50000 / playerData.getMaxHealth(), 10);
+                long healthInterval = Math.max(HEALTH_REGEN_BASE_MILLIS / playerData.getMaxHealth(), MIN_REGEN_INTERVAL_MILLIS);
                 return TaskSchedule.millis(healthInterval);
             }
             return TaskSchedule.millis(500);
@@ -182,14 +205,15 @@ public class CustomPlayer extends Player implements HealthCreature {
         MinecraftServer.getSchedulerManager().submitTask(() -> {
             if (isOnline() && playerData != null) {
                 // Regenerate mana
-                if (customMana < playerData.getMaxMana()) {
-                    customMana = Math.min(customMana + 1, playerData.getMaxMana());
+                if (statsManager.getCustomMana() < playerData.getMaxMana()) {
+                    statsManager.setCustomMana(Math.min(statsManager.getCustomMana() + 1, playerData.getMaxMana()));
+                    uiManager.markActionBarDirty();
                 }
             }
 
             // Calculate interval: 25000 / maxMana milliseconds (for 100 max = 250ms)
             if (playerData != null) {
-                long manaInterval = Math.max(25000 / playerData.getMaxMana(), 10);
+                long manaInterval = Math.max(MANA_REGEN_BASE_MILLIS / playerData.getMaxMana(), MIN_REGEN_INTERVAL_MILLIS);
                 return TaskSchedule.millis(manaInterval);
             }
             return TaskSchedule.millis(250);
@@ -197,7 +221,7 @@ public class CustomPlayer extends Player implements HealthCreature {
     }
 
     @Override
-    public void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos) {
+    public void damage(int amount, RegistryKey<DamageType> damageType, @Nullable Entity attacker, Pos damageSourcePos) {
         if (getGameMode() == GameMode.CREATIVE || getGameMode() == GameMode.SPECTATOR) {
             return; // No damage in creative or spectator mode
         }
@@ -210,23 +234,38 @@ public class CustomPlayer extends Player implements HealthCreature {
             lastDamageAttacker = null;
         }
 
-        this.customHealth = Math.max(0, this.customHealth - amount);
+        statsManager.setCustomHealth(Math.max(0, statsManager.getCustomHealth() - amount));
+        uiManager.markActionBarDirty();
 
-        if (this.customHealth == 0) {
+        // Send a damage packet to animate a damage tick
+        if (attacker == null) {
+            attacker = this; // Use self as attacker if null to prevent issues with null references in the packet
+        }
+
+        DamageEventPacket damagePacket = new DamageEventPacket(getEntityId(), new Damage(damageType, attacker, attacker, damageSourcePos, 0.1f).getTypeId(), attacker.getEntityId(), attacker.getEntityId(), damageSourcePos);
+        sendPacketToViewersAndSelf(damagePacket);
+
+        if (statsManager.getCustomHealth() == 0) {
             this.kill();
         }
     }
 
     public void addTemporaryStatBonus(PlayerStat stat, float bonusAmount, long durationMillis) {
-        String uuid = UUID.randomUUID().toString();
-        TempStatBonus tempBonus = new TempStatBonus(stat, bonusAmount);
-        tempStatBonuses.put(uuid, tempBonus);
-
-        // Schedule a task to remove the temporary item after the duration
-        MinecraftServer.getSchedulerManager().buildTask(() -> {
-            tempStatBonuses.remove(uuid);
+        // Create callback that includes marking speed stat dirty on expiry
+        Runnable onExpire = () -> {
             sendMessage(Component.text("Your " + stat.name().toLowerCase().replace("_", " ") + " bonus has expired!").color(NamedTextColor.YELLOW));
-        }).delay(durationMillis, ChronoUnit.MILLIS).schedule();
+            // Mark speed stat dirty if this was a speed bonus
+            if (stat == PlayerStat.SPEED) {
+                markSpeedStatDirty();
+            }
+        };
+
+        statsManager.addTemporaryStatBonus(stat, bonusAmount, durationMillis, onExpire);
+
+        // Mark speed stat dirty when bonus is added
+        if (stat == PlayerStat.SPEED) {
+            markSpeedStatDirty();
+        }
     }
 
     public void unlockLocation(Location location) {
@@ -243,155 +282,76 @@ public class CustomPlayer extends Player implements HealthCreature {
 
     public void setCurrentLocation(Location location) {
         Location previousLocation = this.currentLocation;
+
+        // Fire exit event before state change
+        if (previousLocation != null) {
+            MinecraftServer.getGlobalEventHandler().call(new PlayerExitLocationEvent(this, previousLocation));
+        }
+
         this.currentLocation = location;
 
-        // Fire events for location change
-        MinecraftServer.getGlobalEventHandler().call(new PlayerEnterLocationEvent(this, location));
-        MinecraftServer.getGlobalEventHandler().call(new PlayerExitLocationEvent(this, previousLocation));
-    }
-
-    private Collection<PlayerStatBonus> getMainHandItemStatBonuses() {
-        ItemStack mainHandItem = getItemInMainHand();
-        if (!mainHandItem.isAir()) {
-            CustomItem customItem = CustomItem.getCustomItemFromItemStack(mainHandItem);
-            if (customItem != null) {
-                return customItem.getStatBonuses();
-            }
+        // Fire enter event after state change
+        if (location != null) {
+            MinecraftServer.getGlobalEventHandler().call(new PlayerEnterLocationEvent(this, location));
         }
-        return Collections.emptyList();
-    }
-
-    private Collection<PlayerStatBonus> getArmorStatBonuses() {
-        List<PlayerStatBonus> statBonuses = new ArrayList<>();
-        List<ItemStack> armorItems = List.of(getHelmet(), getChestplate(), getLeggings(), getBoots());
-        for (ItemStack armorItem : armorItems) {
-            if (!armorItem.isAir()) {
-                CustomItem customItem = CustomItem.getCustomItemFromItemStack(armorItem);
-                if (customItem != null) {
-                    statBonuses.addAll(customItem.getStatBonuses());
-                }
-            }
-        }
-        return statBonuses;
-    }
-
-    private float getStatFor(PlayerStat stat) {
-        float baseValue = PlayerStatConstants.getBaseValue(stat);
-        if (playerData == null) {
-            return baseValue;
-        }
-        float bonus = playerData.getAccessoryBagObject().sumStats().getOrDefault(stat, 0f);
-
-        Collection<PlayerStatBonus> mainHandBonuses = getMainHandItemStatBonuses();
-        for (PlayerStatBonus statBonus : mainHandBonuses) {
-            if (statBonus.stat() == stat) {
-                bonus += statBonus.bonusAmount();
-            }
-        }
-
-        Collection<PlayerStatBonus> armorBonuses = getArmorStatBonuses();
-        for (PlayerStatBonus statBonus : armorBonuses) {
-            if (statBonus.stat() == stat) {
-                bonus += statBonus.bonusAmount();
-            }
-        }
-
-        // Add temporary bonuses
-        for (TempStatBonus tempBonus : tempStatBonuses.values()) {
-            if (tempBonus.stat() == stat) {
-                bonus += tempBonus.bonus();
-            }
-        }
-
-        return baseValue + bonus;
     }
 
     @Override
     public float getAttackStat() {
-        return getStatFor(PlayerStat.ATTACK);
+        return statsManager.getStatFor(PlayerStat.ATTACK);
     }
 
     @Override
     public float getDefenseStat() {
-        return getStatFor(PlayerStat.DEFENSE);
+        return statsManager.getStatFor(PlayerStat.DEFENSE);
     }
 
     @Override
     public float getCriticalChanceStat() {
-        return getStatFor(PlayerStat.CRITICAL_CHANCE);
+        return statsManager.getStatFor(PlayerStat.CRITICAL_CHANCE);
     }
 
     @Override
     public float getSpeedStat() {
-        return getStatFor(PlayerStat.SPEED);
+        return statsManager.getStatFor(PlayerStat.SPEED);
     }
 
     public void showSidebar() {
-        if (sidebarManager != null) {
-            sidebarManager.show();
-        }
+        uiManager.showSidebar();
     }
+
+    // Cached speed stat with dirty flag
+    private float cachedSpeedStat = 0f;
+    private boolean speedStatDirty = true;
 
     @Override
     public void tick(long time) {
         super.tick(time);
 
         if (isOnline() && playerData != null) {
-            // Show action bar with health and mana
-            Component actionBarContent = getActionBarContent();
+            // Delegate UI updates to UI manager (already throttled)
+            uiManager.tick(time);
 
-            sendActionBar(actionBarContent);
-
-            // Update MSPT bossbar if enabled
-            if (showMsptBossbar) {
-                updateMsptBossbar();
+            // Update movement speed based on speed stat (cached, only recalculate when dirty)
+            if (speedStatDirty) {
+                cachedSpeedStat = getSpeedStat();
+                speedStatDirty = false;
             }
 
-            // Update scoreboard
-            if (sidebarManager != null) {
-                sidebarManager.update();
+            if (cachedSpeedStat != 0) {
+                float calculatedSpeed = 0.1f * (1 + cachedSpeedStat / 100);
+                getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(calculatedSpeed);
+            } else {
+                getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
             }
-
-            if (!menuItemModule.isAttached()) {
-                menuItemModule.attach(MinecraftServer.getGlobalEventHandler());
-            }
-
-            // Update menu items
-            menuItemModule.reloadScreens();
-
-            // Update movement speed based on speed stat
-            float speedBonus = getSpeedStat();
-            float calculatedSpeed = 0.1f * (1 + speedBonus / 100);
-            getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(speedBonus != 0 ? calculatedSpeed : 0.1f);
         }
     }
 
-    private @NonNull Component getActionBarContent() {
-        Component actionBarContent = getBarContent();
-
-        // Add streaming/recording status if applicable
-        if (streaming || recording) {
-            actionBarContent = actionBarContent.append(Component.text("   |   ").color(NamedTextColor.GRAY));
-            if (recording) {
-                actionBarContent = actionBarContent.append(Component.text("● Recording").color(NamedTextColor.RED));
-            }
-            if (streaming) {
-                if (recording) {
-                    actionBarContent = actionBarContent.append(Component.text(" "));
-                }
-                actionBarContent = actionBarContent.append(Component.text("● Streaming").color(NamedTextColor.LIGHT_PURPLE));
-            }
-        }
-        return actionBarContent;
-    }
-
-    private @NonNull Component getBarContent() {
-        Component healthDisplay = Component.text(Emojis.HEART.getEmoji() + " " + customHealth + "/" + playerData.getMaxHealth()).color(NamedTextColor.RED);
-        Component defenseDisplay = Component.text(Emojis.SHIELD.getEmoji() + " " + (int) getDefenseStat()).color(NamedTextColor.GRAY);
-        Component manaDisplay = Component.text(Emojis.STAR.getEmoji() + " " + customMana + "/" + playerData.getMaxMana()).color(NamedTextColor.AQUA);
-
-        Component spacer = Component.text("   ").color(NamedTextColor.GRAY);
-        return healthDisplay.append(spacer).append(defenseDisplay).append(spacer).append(manaDisplay);
+    /**
+     * Mark speed stat as dirty to trigger recalculation on next tick
+     */
+    public void markSpeedStatDirty() {
+        speedStatDirty = true;
     }
 
     public void setRank(PlayerRank rank) {
@@ -552,9 +512,11 @@ public class CustomPlayer extends Player implements HealthCreature {
     }
 
     public void setMaxHealth(int maxHealth) {
-        if (customHealth > maxHealth) {
-            customHealth = maxHealth;
+        if (statsManager.getCustomHealth() > maxHealth) {
+            statsManager.setCustomHealth(maxHealth);
         }
+
+        uiManager.markActionBarDirty();
 
         // Save to database
         MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
@@ -565,9 +527,11 @@ public class CustomPlayer extends Player implements HealthCreature {
     }
 
     public void setMaxMana(int maxMana) {
-        if (customMana > maxMana) {
-            customMana = maxMana;
+        if (statsManager.getCustomMana() > maxMana) {
+            statsManager.setCustomMana(maxMana);
         }
+
+        uiManager.markActionBarDirty();
 
         // Save to database
         MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
@@ -575,44 +539,6 @@ public class CustomPlayer extends Player implements HealthCreature {
             playerData.setMaxMana(maxMana);
             mongoDBHandler.savePlayerData(playerData);
         }
-    }
-
-    private void updateMsptBossbar() {
-        // Get memory info
-        Component title = getMsptBossbarTitle(smoothedMspt);
-
-        // Update bossbar progress (MSPT as progress, 50ms as max for 20 TPS)
-        // Max MSPT for 20 TPS is 50ms (1 tick = 50ms)
-        float maxMsptFor20Tps = 50.0f;
-        float progress = Math.min(smoothedMspt / maxMsptFor20Tps, 1.0f);
-
-        BossBar.Color barColor;
-        if (smoothedMspt > maxMsptFor20Tps) {
-            barColor = BossBar.Color.PURPLE;
-        } else if (progress < 0.5f) {
-            barColor = BossBar.Color.GREEN;
-        } else if (progress < 0.8f) {
-            barColor = BossBar.Color.YELLOW;
-        } else {
-            barColor = BossBar.Color.RED;
-        }
-
-        msptBossBar.name(title).progress(progress).color(barColor).overlay(BossBar.Overlay.PROGRESS);
-    }
-
-    private static @NonNull Component getMsptBossbarTitle(double mspt) {
-        Runtime runtime = Runtime.getRuntime();
-        long maxMemory = runtime.maxMemory() / 1024 / 1024; // Convert to MB
-        long totalMemory = runtime.totalMemory() / 1024 / 1024; // Convert to MB
-        long freeMemory = runtime.freeMemory() / 1024 / 1024; // Convert to MB
-        long usedMemory = totalMemory - freeMemory; // Calculate used memory
-
-        // Create bossbar title with MSPT and RAM info
-        Component msptComponent = Component.text(String.format("MSPT: %.2f ms", mspt)).color(NamedTextColor.GREEN);
-        Component separator = Component.text("  |  ").color(NamedTextColor.GRAY);
-        Component memoryComponent = Component.text(String.format("RAM: %d/%d MB", usedMemory, maxMemory)).color(NamedTextColor.AQUA);
-
-        return msptComponent.append(separator).append(memoryComponent);
     }
 }
 

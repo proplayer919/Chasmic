@@ -13,6 +13,8 @@ import org.bson.UuidRepresentation;
 import org.bson.codecs.configuration.CodecRegistries;
 import org.bson.codecs.configuration.CodecRegistry;
 import org.bson.codecs.pojo.PojoCodecProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
@@ -22,6 +24,8 @@ import java.util.concurrent.CompletableFuture;
  */
 @Getter
 public class MongoDBHandler {
+    private static final Logger logger = LoggerFactory.getLogger(MongoDBHandler.class);
+
     private final MongoClient mongoClient;
     private final MongoDatabase database;
     private final MongoCollection<PlayerData> playerCollection;
@@ -106,18 +110,23 @@ public class MongoDBHandler {
      * @return CompletableFuture with PlayerData (existing or newly created)
      */
     public CompletableFuture<PlayerData> loadOrCreatePlayerData(UUID uuid, String username) {
-        return loadPlayerData(uuid).thenApply(data -> {
+        return loadPlayerData(uuid).thenCompose(data -> {
             if (data == null) {
                 // Player doesn't exist, create new entry
                 PlayerData newData = createNewPlayer(uuid, username);
-                savePlayerData(newData).join(); // Wait for save to complete
-                return newData;
+                // Save synchronously for new players to ensure data exists before spawn
+                return savePlayerData(newData).thenApply(v -> newData);
             } else {
                 // Player exists, update last join and mark as not new
                 data.setLastJoinTimestamp(System.currentTimeMillis());
                 data.setNew(false);
-                savePlayerData(data); // Save asynchronously
-                return data;
+                // Save asynchronously and handle errors
+                return savePlayerData(data)
+                        .thenApply(v -> data)
+                        .exceptionally(throwable -> {
+                            logger.error("Failed to save player data for {}", username, throwable);
+                            return data; // Return data anyway, just log the error
+                        });
             }
         });
     }

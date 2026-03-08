@@ -8,7 +8,9 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.ping.Status;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -19,6 +21,8 @@ import java.io.InputStream;
  * Module that handles server list ping (MOTD and player info)
  */
 public class ServerListPingModule implements Module {
+    private static final Logger logger = LoggerFactory.getLogger(ServerListPingModule.class);
+
     private final Component description;
     private final int maxPlayers;
     private final byte[] favicon;
@@ -53,7 +57,7 @@ public class ServerListPingModule implements Module {
     private static byte[] loadFavicon() {
         try (InputStream inputStream = ServerListPingModule.class.getResourceAsStream("/logo.png")) {
             if (inputStream == null) {
-                System.err.println("Failed to load logo.png from resources");
+                logger.error("Failed to load logo.png from resources");
                 return null;
             }
 
@@ -62,13 +66,13 @@ public class ServerListPingModule implements Module {
             ImageIO.write(image, "png", outputStream);
             return outputStream.toByteArray();
         } catch (Exception e) {
-            System.err.println("Error loading favicon: " + e.getMessage());
+            logger.error("Error loading favicon", e);
             return null;
         }
     }
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(ServerListPingEvent.class, event -> {
             int onlinePlayers = MinecraftServer.getConnectionManager().getOnlinePlayerCount();
 

@@ -10,7 +10,7 @@ import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Module that handles players attacking custom creatures with custom damage logic.
@@ -19,7 +19,7 @@ import org.jetbrains.annotations.NotNull;
 public class PlayerAttackModule implements Module {
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(EntityAttackEvent.class, event -> {
             // Only handle CustomPlayer attacking CustomCreature
             if (!(event.getEntity() instanceof CustomPlayer player)) {

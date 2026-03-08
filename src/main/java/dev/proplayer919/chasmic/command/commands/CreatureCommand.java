@@ -9,12 +9,15 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentWord;
 import net.minestom.server.command.builder.arguments.number.ArgumentInteger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * /mpb command for spawning a creature at the player's location
  * Permission: admin.command.creature
  */
 public class CreatureCommand extends PermissionCommand {
+    private static final Logger logger = LoggerFactory.getLogger(CreatureCommand.class);
 
     public CreatureCommand() {
         super("creature", "admin.command.creature");
@@ -57,7 +60,7 @@ public class CreatureCommand extends PermissionCommand {
                 sender.sendMessage(Component.text("Spawned " + amount + "x " + creatureType.name(), NamedTextColor.GREEN));
             } catch (Exception e) {
                 sender.sendMessage(Component.text("Failed to spawn creature: " + e.getMessage(), NamedTextColor.RED));
-                e.printStackTrace();
+                logger.error("Failed to spawn creature {} for player {}", mobType, player.getUsername(), e);
             }
         }, creatureTypeArg, amountArg);
     }

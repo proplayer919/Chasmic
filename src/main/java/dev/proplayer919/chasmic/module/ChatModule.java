@@ -6,7 +6,7 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerChatEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Module that handles chat formatting with rank-based display
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.NotNull;
 public class ChatModule implements Module {
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(PlayerChatEvent.class, event -> {
             CustomPlayer player = (CustomPlayer) event.getPlayer();
             Component chatMessage = player.buildMessage(event.getRawMessage());

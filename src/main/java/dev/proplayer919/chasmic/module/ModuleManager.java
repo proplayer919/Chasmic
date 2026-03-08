@@ -2,7 +2,7 @@ package dev.proplayer919.chasmic.module;
 
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +18,7 @@ public class ModuleManager {
      * @param module The module to register
      * @return This manager for chaining
      */
-    public ModuleManager register(@NotNull Module module) {
+    public ModuleManager register(@NonNull Module module) {
         modules.add(module);
         return this;
     }
@@ -27,7 +27,7 @@ public class ModuleManager {
      * Attaches all registered modules to the given event node
      * @param eventNode The event node to attach modules to
      */
-    public void attachAll(@NotNull EventNode<Event> eventNode) {
+    public void attachAll(@NonNull EventNode<Event> eventNode) {
         for (Module module : modules) {
             module.attach(eventNode);
         }

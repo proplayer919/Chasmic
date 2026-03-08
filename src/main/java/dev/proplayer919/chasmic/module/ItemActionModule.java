@@ -13,7 +13,7 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,7 +21,7 @@ import java.util.List;
 
 public class ItemActionModule implements Module {
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         // Register a right click listener to handle item actions
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             if (!(event.getPlayer() instanceof CustomPlayer player)) {

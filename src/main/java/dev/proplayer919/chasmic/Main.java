@@ -26,6 +26,8 @@ import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.timer.TaskSchedule;
 import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -33,6 +35,11 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 public class Main {
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
+
+    // Service container for dependency injection
+    private static ServiceContainer services;
+
     @Getter
     private static MongoDBHandler mongoDBHandler;
 
@@ -79,9 +86,22 @@ public class Main {
         // Initialize punishment manager
         punishmentManager = new PunishmentManager(mongoDBHandler);
 
+        // Initialize ItemActionRegistry FIRST - it has no dependencies
+        // Other registries depend on it
+        itemActionRegistry = new ItemActionRegistry();
+
+        // Initialize service container
+        services = new ServiceContainer(mongoDBHandler, punishmentManager);
+
+        // Set static references from service container for backward compatibility
+        customItemRegistry = services.getCustomItemRegistry();
+        accessoryRegistry = services.getAccessoryRegistry();
+        creatureTypeRegistry = services.getCreatureTypeRegistry();
+        locationRegistry = services.getLocationRegistry();
+
         // Add shutdown hook to close MongoDB connection
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("Closing MongoDB connection...");
+            logger.info("Closing MongoDB connection...");
             mongoDBHandler.close();
         }));
 
@@ -97,15 +117,11 @@ public class Main {
                 .register(new TabListModule()) // Update tab list on player spawn
                 .register(new PlayerLocationModule()) // Track player locations and fire events on location enter/exit
                 .register(new PlayerSpawnModule()) // Handle player spawning and teleporting to spawn
+                .register(new PlayerEquipmentModule()) // Monitor equipment changes and invalidate stat caches
+                .register(new MenuItemModule()) // Handle menu items for all players
                 .register(new ItemFoodModule()) // Handle accessories and their effects
                 .register(new WorldProtectModule()); // Prevent block breaking and placing in the spawn area
 
-        // Initialize registries
-        itemActionRegistry = new ItemActionRegistry();
-        customItemRegistry = new CustomItemRegistry();
-        accessoryRegistry = new AccessoryRegistry();
-        creatureTypeRegistry = new CreatureTypeRegistry();
-        locationRegistry = new LocationRegistry();
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);

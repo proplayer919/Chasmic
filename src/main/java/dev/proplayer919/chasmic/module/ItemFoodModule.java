@@ -12,11 +12,11 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.PlayerUseItemEvent;
 import net.minestom.server.inventory.PlayerInventory;
 import net.minestom.server.item.ItemStack;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 public class ItemFoodModule implements Module {
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         // Register a right click listener to handle item actions
         eventNode.addListener(PlayerUseItemEvent.class, event -> {
             if (!(event.getPlayer() instanceof CustomPlayer player)) {

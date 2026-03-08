@@ -7,7 +7,7 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * Module that checks if a player is banned before they join
@@ -20,7 +20,7 @@ public class BanCheckModule implements Module {
     }
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, this::onPlayerConfiguration);
     }
 

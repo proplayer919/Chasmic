@@ -8,12 +8,15 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.tag.Tag;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Module that handles loading player data from MongoDB when players join
  */
 public class PlayerDataModule implements Module {
+    private static final Logger logger = LoggerFactory.getLogger(PlayerDataModule.class);
     private static final Tag<Boolean> NEEDS_RANK_LOAD = Tag.Boolean("needsRankLoad").defaultValue(false);
     private final MongoDBHandler mongoDBHandler;
 
@@ -22,7 +25,7 @@ public class PlayerDataModule implements Module {
     }
 
     @Override
-    public void attach(@NotNull EventNode<Event> eventNode) {
+    public void attach(@NonNull EventNode<Event> eventNode) {
         eventNode.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             CustomPlayer player = (CustomPlayer) event.getPlayer();
 
@@ -40,8 +43,7 @@ public class PlayerDataModule implements Module {
                     })
                     .exceptionally(throwable -> {
                         // Log error and use default rank
-                        System.err.println("Failed to load player data for " + player.getUsername() + ": " + throwable.getMessage());
-                        throwable.printStackTrace();
+                        logger.error("Failed to load player data for {}", player.getUsername(), throwable);
                         return null;
                     });
         });

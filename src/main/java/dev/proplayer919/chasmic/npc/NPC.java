@@ -15,7 +15,6 @@ import net.minestom.server.instance.block.Block;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoRemovePacket;
 import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 
 import java.util.*;
@@ -31,7 +30,7 @@ public class NPC extends LivingEntity {
     private final PlayerInfoUpdatePacket playerViewBotPacket;
     private final PlayerInfoRemovePacket playerRemoveBotPacket;
 
-    private final EventNode<@NotNull Event> botEventNode;
+    private final EventNode<@NonNull Event> botEventNode;
 
     private final boolean canDie;
 

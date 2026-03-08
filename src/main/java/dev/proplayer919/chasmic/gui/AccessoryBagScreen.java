@@ -167,6 +167,15 @@ public class AccessoryBagScreen {
         // Update the player data
         playerData.setAccessoryBag(accessoryIds);
 
+        // Mark all stats as dirty since accessories have changed
+        player.getStatsManager().markAllStatsDirty();
+
+        // Mark speed stat dirty in CustomPlayer's cache
+        player.markSpeedStatDirty();
+
+        // Mark action bar dirty to update displayed stats
+        player.getUiManager().markActionBarDirty();
+
         // Save to database
         Main.getMongoDBHandler().savePlayerData(playerData);
     }

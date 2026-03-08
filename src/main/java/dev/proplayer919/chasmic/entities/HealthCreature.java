@@ -11,6 +11,8 @@ public interface HealthCreature {
 
     void damage(int amount, RegistryKey<DamageType> damageType, Entity attacker, Pos damageSourcePos);
 
+    boolean isDead();
+
     /**
      * Get the attack stat for this creature (damage)
      * Default: 1.0f

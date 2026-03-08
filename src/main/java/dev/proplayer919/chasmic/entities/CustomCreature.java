@@ -12,7 +12,9 @@ import net.minestom.server.coordinate.Pos;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
 import net.minestom.server.entity.attribute.Attribute;
+import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.entity.damage.DamageType;
+import net.minestom.server.network.packet.server.play.DamageEventPacket;
 import net.minestom.server.registry.RegistryKey;
 
 import java.util.Date;
@@ -131,6 +133,14 @@ public class CustomCreature extends EntityCreature implements HealthCreature {
 
         // Update the health display
         updateHealthDisplay();
+
+        // Send a damage packet to animate a damage tick
+        if (attacker == null) {
+            attacker = this; // Use self as attacker if null to prevent issues with null references in the packet
+        }
+
+        DamageEventPacket damagePacket = new DamageEventPacket(getEntityId(), new Damage(damageType, attacker, attacker, damageSourcePos, 0.1f).getTypeId(), attacker.getEntityId(), attacker.getEntityId(), damageSourcePos);
+        sendPacketToViewersAndSelf(damagePacket);
 
         if (this.customHealth == 0) {
             this.kill();
