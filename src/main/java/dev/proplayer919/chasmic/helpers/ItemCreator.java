@@ -2,8 +2,8 @@ package dev.proplayer919.chasmic.helpers;
 
 import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
-import dev.proplayer919.chasmic.gui.GuiClickAction;
-import dev.proplayer919.chasmic.gui.GuiItem;
+import dev.proplayer919.chasmic.player.gui.GuiClickAction;
+import dev.proplayer919.chasmic.player.gui.GuiItem;
 import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import net.kyori.adventure.text.Component;

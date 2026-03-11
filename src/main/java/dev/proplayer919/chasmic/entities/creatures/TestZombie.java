@@ -1,13 +1,13 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
-import dev.proplayer919.chasmic.ai.AIBuilder;
-import dev.proplayer919.chasmic.ai.AIProfile;
+import dev.proplayer919.chasmic.entities.ai.AIBuilder;
+import dev.proplayer919.chasmic.entities.ai.AIProfile;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 
 public class TestZombie extends CustomCreature {
     public TestZombie() {
-        super(Main.getCreatureTypeRegistry().getCreatureType("test-zombie"));
+        super(Main.getServiceContainer().getCreatureTypeRegistry().getCreatureType("test-zombie"));
 
         // Create an aggressive AI profile for zombies
         AIProfile zombieAI = AIProfile.builder()

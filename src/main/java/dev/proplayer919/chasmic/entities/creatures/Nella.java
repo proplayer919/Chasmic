@@ -1,7 +1,7 @@
 package dev.proplayer919.chasmic.entities.creatures;
 
-import dev.proplayer919.chasmic.ai.AIBuilder;
-import dev.proplayer919.chasmic.ai.AIProfile;
+import dev.proplayer919.chasmic.entities.ai.AIBuilder;
+import dev.proplayer919.chasmic.entities.ai.AIProfile;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.entities.CustomCreature;
 import net.minestom.server.entity.attribute.Attribute;
@@ -12,7 +12,7 @@ import java.util.UUID;
 
 public class Nella extends CustomCreature {
     public Nella() {
-        super(Main.getCreatureTypeRegistry().getCreatureType("nella"));
+        super(Main.getServiceContainer().getCreatureTypeRegistry().getCreatureType("nella"));
 
         getAttribute(Attribute.SCALE).addModifier(new AttributeModifier(UUID.randomUUID().toString(), 5.0, AttributeOperation.ADD_VALUE));
 

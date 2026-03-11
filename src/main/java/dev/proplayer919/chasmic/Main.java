@@ -3,15 +3,18 @@ package dev.proplayer919.chasmic;
 import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.CommandRegistry;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
-import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
-import dev.proplayer919.chasmic.location.LocationRegistry;
-import dev.proplayer919.chasmic.module.*;
 import dev.proplayer919.chasmic.player.CustomPlayer;
+import dev.proplayer919.chasmic.service.module.*;
+import dev.proplayer919.chasmic.service.module.*;
+import dev.proplayer919.chasmic.service.ModuleManager;
+import dev.proplayer919.chasmic.service.ServiceContainer;
+import dev.proplayer919.chasmic.service.ServiceInitializationException;
+import dev.proplayer919.chasmic.service.module.*;
 import dev.proplayer919.chasmic.time.ChasmicTime;
 import dev.proplayer919.chasmic.npc.NPC;
-import dev.proplayer919.chasmic.punishment.PunishmentManager;
+import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import lombok.Getter;
 import net.minestom.server.Auth;
 import net.minestom.server.MinecraftServer;
@@ -37,30 +40,6 @@ import java.util.concurrent.CompletableFuture;
 public class Main {
     private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
-    // Service container for dependency injection
-    private static ServiceContainer services;
-
-    @Getter
-    private static MongoDBHandler mongoDBHandler;
-
-    @Getter
-    private static ItemActionRegistry itemActionRegistry;
-
-    @Getter
-    private static CustomItemRegistry customItemRegistry;
-
-    @Getter
-    private static AccessoryRegistry accessoryRegistry;
-
-    @Getter
-    private static CreatureTypeRegistry creatureTypeRegistry;
-
-    @Getter
-    private static LocationRegistry locationRegistry;
-
-    @Getter
-    private static PunishmentManager punishmentManager;
-
     @Getter
     private static final Pos spawnPos = new Pos(0.5, 41, 0.5);
 
@@ -70,6 +49,8 @@ public class Main {
     @Getter
     private static NPC npc;
 
+    @Getter
+    private static ServiceContainer serviceContainer;
 
     static void main() {
         // Initialize the server
@@ -81,23 +62,17 @@ public class Main {
         MinecraftServer.getConnectionManager().setPlayerProvider(CustomPlayer::new);
 
         // Initialize MongoDB handler
-        mongoDBHandler = new MongoDBHandler();
+        MongoDBHandler mongoDBHandler = new MongoDBHandler();
 
-        // Initialize punishment manager
-        punishmentManager = new PunishmentManager(mongoDBHandler);
-
-        // Initialize ItemActionRegistry FIRST - it has no dependencies
-        // Other registries depend on it
-        itemActionRegistry = new ItemActionRegistry();
-
-        // Initialize service container
-        services = new ServiceContainer(mongoDBHandler, punishmentManager);
-
-        // Set static references from service container for backward compatibility
-        customItemRegistry = services.getCustomItemRegistry();
-        accessoryRegistry = services.getAccessoryRegistry();
-        creatureTypeRegistry = services.getCreatureTypeRegistry();
-        locationRegistry = services.getLocationRegistry();
+        // Initialize service container with dependency-based ordering
+        try {
+            serviceContainer = new ServiceContainer(mongoDBHandler);
+        } catch (ServiceInitializationException e) {
+            logger.error("Service initialization failed. Shutting down server startup.", e);
+            mongoDBHandler.close();
+            System.exit(1);
+            return;
+        }
 
         // Add shutdown hook to close MongoDB connection
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -105,7 +80,13 @@ public class Main {
             mongoDBHandler.close();
         }));
 
-        // Initialize modules
+        // Get service references for module initialization
+        ItemActionRegistry itemActionRegistry = serviceContainer.getItemActionRegistry();
+        PunishmentManager punishmentManager = serviceContainer.getPunishmentManager();
+        CustomItemRegistry customItemRegistry = serviceContainer.getCustomItemRegistry();
+        AccessoryRegistry accessoryRegistry = serviceContainer.getAccessoryRegistry();
+
+        // Initialize modules with proper dependency injection
         ModuleManager moduleManager = new ModuleManager()
                 .register(new BanCheckModule(punishmentManager)) // Check for bans on login
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
@@ -113,18 +94,19 @@ public class Main {
                 .register(new ServerListPingModule()) // Custom MOTD and player count
                 .register(new EntityAttackModule())  // Creatures attacking players
                 .register(new PlayerAttackModule())  // Players attacking creatures
-                .register(new ItemActionModule()) // Handle custom item actions
+                .register(new ItemActionModule(itemActionRegistry)) // Handle custom item actions
                 .register(new TabListModule()) // Update tab list on player spawn
                 .register(new PlayerLocationModule()) // Track player locations and fire events on location enter/exit
                 .register(new PlayerSpawnModule()) // Handle player spawning and teleporting to spawn
                 .register(new PlayerEquipmentModule()) // Monitor equipment changes and invalidate stat caches
-                .register(new MenuItemModule()) // Handle menu items for all players
+                .register(new MenuItemModule(mongoDBHandler, accessoryRegistry)) // Handle menu items for all players
                 .register(new ItemFoodModule()) // Handle accessories and their effects
                 .register(new WorldProtectModule()); // Prevent block breaking and placing in the spawn area
 
 
         // Register commands
-        CommandRegistry.registerCommands(mongoDBHandler, punishmentManager);
+        CommandRegistry.registerCommands(mongoDBHandler, punishmentManager,
+            customItemRegistry, accessoryRegistry);
 
         // Create spawn instance and preload chunks
         spawnInstance = createSpawnInstance();

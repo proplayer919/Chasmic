@@ -1,7 +1,7 @@
 package dev.proplayer919.chasmic.entities;
 
-import dev.proplayer919.chasmic.ai.AIEngine;
-import dev.proplayer919.chasmic.ai.AIProfile;
+import dev.proplayer919.chasmic.entities.ai.AIEngine;
+import dev.proplayer919.chasmic.entities.ai.AIProfile;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;

@@ -21,7 +21,7 @@ public record AccessoryBag(Collection<Accessory> accessories) {
 
     public void deserialize(List<String> accessoryIds) {
         for (String id : accessoryIds) {
-            Accessory accessory = Main.getAccessoryRegistry().getAccessoryById(id);
+            Accessory accessory = Main.getServiceContainer().getAccessoryRegistry().getAccessoryById(id);
             if (accessory != null) {
                 accessories.add(accessory);
             }

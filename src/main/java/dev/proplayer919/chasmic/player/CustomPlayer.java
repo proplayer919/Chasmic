@@ -9,10 +9,9 @@ import dev.proplayer919.chasmic.events.PlayerEnterLocationEvent;
 import dev.proplayer919.chasmic.events.PlayerExitLocationEvent;
 import dev.proplayer919.chasmic.helpers.ExpValue;
 import dev.proplayer919.chasmic.location.Location;
-import dev.proplayer919.chasmic.permission.PermissionHolder;
+import dev.proplayer919.chasmic.player.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
-import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -74,6 +73,9 @@ public class CustomPlayer extends Player implements HealthCreature {
     @Getter
     private final PlayerUIManager uiManager;
 
+    @Getter
+    private final PlayerProfileInventoryManager profileInventoryManager;
+
     public void setRecording(boolean recording) {
         this.recording = recording;
         uiManager.markActionBarDirty();
@@ -84,22 +86,11 @@ public class CustomPlayer extends Player implements HealthCreature {
         uiManager.markActionBarDirty();
     }
 
-    public void setShowMsptBossbar(boolean show) {
-        uiManager.setShowMsptBossbar(show);
-    }
-
-    public boolean isShowMsptBossbar() {
-        return uiManager.isShowMsptBossbar();
-    }
-
-    public BossBar getMsptBossBar() {
-        return uiManager.getMsptBossBar();
-    }
-
     public CustomPlayer(PlayerConnection playerConnection, GameProfile gameProfile) {
         super(playerConnection, gameProfile);
         this.statsManager = new PlayerStatsManager(this);
         this.uiManager = new PlayerUIManager(this);
+        this.profileInventoryManager = new PlayerProfileInventoryManager(this);
         updatePermissionLevel();
         setupRegenSchedule();
         setupPlayerAttributes();
@@ -140,12 +131,53 @@ public class CustomPlayer extends Player implements HealthCreature {
     public void dataLoadCallback() {
         // Called after player data is loaded to set initial health/mana
         if (playerData != null) {
-            this.statsManager.setCustomHealth(playerData.getMaxHealth());
-            this.statsManager.setCustomMana(playerData.getMaxMana());
+            refreshFromActiveProfile();
+            profileInventoryManager.loadActiveProfileInventory();
 
             // Initialize UI manager after player data is loaded
             uiManager.initializeSidebar();
         }
+    }
+
+    public void refreshFromActiveProfile() {
+        if (playerData == null) {
+            return;
+        }
+
+        this.expValue = new ExpValue(playerData.getCurrentExp());
+        this.statsManager.setCustomHealth(playerData.getMaxHealth());
+        this.statsManager.setCustomMana(playerData.getMaxMana());
+        this.statsManager.markAllStatsDirty();
+        markSpeedStatDirty();
+        uiManager.markActionBarDirty();
+    }
+
+    public boolean switchToProfile(String profileId) {
+        if (playerData == null) {
+            return false;
+        }
+
+        profileInventoryManager.saveActiveProfileInventory();
+
+        if (!playerData.switchActiveProfile(profileId)) {
+            return false;
+        }
+
+        profileInventoryManager.loadActiveProfileInventory();
+        refreshFromActiveProfile();
+        return true;
+    }
+
+    public boolean saveActiveProfileInventory() {
+        return profileInventoryManager.saveActiveProfileInventory();
+    }
+
+    public void loadActiveProfileInventory() {
+        profileInventoryManager.loadActiveProfileInventory();
+    }
+
+    public void persistActiveProfileInventoryIfChanged() {
+        profileInventoryManager.persistActiveProfileInventoryIfChanged();
     }
 
     private static final int ATTACK_SPEED_BONUS = 1000;
@@ -273,7 +305,7 @@ public class CustomPlayer extends Player implements HealthCreature {
             playerData.getUnlockedLocationIds().add(location.id());
 
             // Save to database
-            MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+            MongoDBHandler mongoDBHandler = Main.getServiceContainer().getMongoDBHandler();
             if (mongoDBHandler != null) {
                 mongoDBHandler.savePlayerData(playerData);
             }
@@ -519,7 +551,7 @@ public class CustomPlayer extends Player implements HealthCreature {
         uiManager.markActionBarDirty();
 
         // Save to database
-        MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+        MongoDBHandler mongoDBHandler = Main.getServiceContainer().getMongoDBHandler();
         if (playerData != null && mongoDBHandler != null) {
             playerData.setMaxHealth(maxHealth);
             mongoDBHandler.savePlayerData(playerData);
@@ -534,7 +566,7 @@ public class CustomPlayer extends Player implements HealthCreature {
         uiManager.markActionBarDirty();
 
         // Save to database
-        MongoDBHandler mongoDBHandler = Main.getMongoDBHandler();
+        MongoDBHandler mongoDBHandler = Main.getServiceContainer().getMongoDBHandler();
         if (playerData != null && mongoDBHandler != null) {
             playerData.setMaxMana(maxMana);
             mongoDBHandler.savePlayerData(playerData);

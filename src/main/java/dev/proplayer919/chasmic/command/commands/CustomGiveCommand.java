@@ -1,10 +1,11 @@
 package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.player.CustomPlayer;
-import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.items.CustomItem;
+import dev.proplayer919.chasmic.items.CustomItemRegistry;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -20,6 +21,8 @@ import net.minestom.server.item.ItemStack;
  * Permission: admin.command.cgive
  */
 public class CustomGiveCommand extends PermissionCommand {
+    @Setter
+    private static CustomItemRegistry customItemRegistry;
 
     public CustomGiveCommand() {
         super("cgive", "admin.command.cgive");
@@ -27,7 +30,7 @@ public class CustomGiveCommand extends PermissionCommand {
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
-        String[] allItems = Main.getCustomItemRegistry().getAllItems().stream().map(CustomItem::getId).toArray(String[]::new);
+        String[] allItems = customItemRegistry.getAllItems().stream().map(CustomItem::getId).toArray(String[]::new);
         ArgumentWord itemArg = new ArgumentWord("item").from(allItems);
 
         ArgumentInteger amountArg = (ArgumentInteger) ArgumentType.Integer("amount").setDefaultValue(1);
@@ -44,7 +47,7 @@ public class CustomGiveCommand extends PermissionCommand {
                 return;
             }
 
-            CustomItem customItem = Main.getCustomItemRegistry().getItem(context.get(itemArg));
+            CustomItem customItem = customItemRegistry.getItem(context.get(itemArg));
 
             if (customItem == null) {
                 sender.sendMessage(Component.text("Item not found!", NamedTextColor.RED));
@@ -62,5 +65,4 @@ public class CustomGiveCommand extends PermissionCommand {
         }, playerArg, itemArg, amountArg);
     }
 }
-
 

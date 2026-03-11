@@ -1,7 +1,7 @@
 package dev.proplayer919.chasmic.player;
 
 import dev.proplayer919.chasmic.Emojis;
-import dev.proplayer919.chasmic.sidebar.SidebarManager;
+import dev.proplayer919.chasmic.player.sidebar.SidebarManager;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.bossbar.BossBar;

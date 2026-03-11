@@ -80,6 +80,7 @@
               <version>edge-SNAPSHOT</version>
             </path>
           </annotationProcessorPaths>
+          <fork>true</fork>
         </configuration>
       </plugin>
 

@@ -1,8 +1,10 @@
 package dev.proplayer919.chasmic.command;
 
+import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.commands.*;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
-import dev.proplayer919.chasmic.punishment.PunishmentManager;
+import dev.proplayer919.chasmic.items.CustomItemRegistry;
+import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
 
@@ -16,14 +18,19 @@ public class CommandRegistry {
      * @param mongoDBHandler The MongoDB handler for database operations
      * @param punishmentManager The punishment manager for handling punishments
      */
-    public static void registerCommands(MongoDBHandler mongoDBHandler, PunishmentManager punishmentManager) {
+    public static void registerCommands(MongoDBHandler mongoDBHandler, PunishmentManager punishmentManager,
+                                       CustomItemRegistry customItemRegistry, AccessoryRegistry accessoryRegistry) {
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
         // Set MongoDB handler for commands that need it
         RankCommand.setMongoDBHandler(mongoDBHandler);
         PermsCommand.setMongoDBHandler(mongoDBHandler);
         SetCurrencyCommand.setMongoDBHandler(mongoDBHandler);
-        SetExpCommand.setMongoDBHandler(mongoDBHandler);
+        SetLvlCommand.setMongoDBHandler(mongoDBHandler);
+
+        // Set registries for commands that need them
+        CustomGiveCommand.setCustomItemRegistry(customItemRegistry);
+        AccessoryGiveCommand.setAccessoryRegistry(accessoryRegistry);
 
         // Set punishment manager for punishment commands
         WarnCommand.setPunishmentManager(punishmentManager);
@@ -57,6 +64,6 @@ public class CommandRegistry {
         commandManager.register(new SetMaxCommand());
         commandManager.register(new HealCommand());
         commandManager.register(new SetCurrencyCommand());
-        commandManager.register(new SetExpCommand());
+        commandManager.register(new SetLvlCommand());
     }
 }

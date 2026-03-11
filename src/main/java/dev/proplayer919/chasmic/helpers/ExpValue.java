@@ -2,16 +2,20 @@ package dev.proplayer919.chasmic.helpers;
 
 import lombok.Getter;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
+
 @Getter
 public class ExpValue {
-    private final long exp;
+    private final BigInteger exp;
     private final int level;
-    private final long expToNextLevel;
-    private final long expToPreviousLevel;
+    private final BigInteger expToNextLevel;
+    private final BigInteger expToPreviousLevel;
 
-    public static final int MAX_LEVEL = 500;
+    public static final int MAX_LEVEL = 250;
 
-    public ExpValue(long exp) {
+    public ExpValue(BigInteger exp) {
         this.exp = exp;
 
         // Calculate level based on EXP
@@ -22,30 +26,37 @@ public class ExpValue {
         this.expToPreviousLevel = calculateExpToPreviousLevel(level);
     }
 
-    private long calculateTotalExpForLevel(int level) {
-        long totalExp = 0;
+    public static BigInteger calculateTotalExpForLevel(int level) {
+        BigInteger total = BigInteger.ZERO;
+
+        BigDecimal base = new BigDecimal("1.05"); // 5% increase per level
+        BigDecimal expForThisLevel = new BigDecimal("100"); // i=1 term
+
         for (int i = 1; i < level; i++) {
-            totalExp += (long) (100 * Math.pow(1.15, i - 1)); // Total EXP required to reach the given level
+            BigInteger term = expForThisLevel.setScale(0, RoundingMode.DOWN).toBigIntegerExact();
+            total = total.add(term);
+
+            expForThisLevel = expForThisLevel.multiply(base); // next level term
         }
-        return totalExp;
+        return total;
     }
 
-    private int calculateLevel(long exp) {
+    private int calculateLevel(BigInteger exp) {
         int level = 1;
-        while (level < MAX_LEVEL && exp >= calculateTotalExpForLevel(level + 1)) {
+        while (level < MAX_LEVEL && exp.compareTo(calculateTotalExpForLevel(level + 1)) >= 0) {
             level++;
         }
         return level;
     }
 
-    private long calculateExpToNextLevel(int currentLevel) {
-        if (currentLevel == 0) return 100; // Level 1 requires 100 EXP
-        if (currentLevel >= MAX_LEVEL) return 0; // Max level reached, no next level
-        return calculateTotalExpForLevel(currentLevel + 1) - calculateTotalExpForLevel(currentLevel); // EXP needed to reach the next level
+    private BigInteger calculateExpToNextLevel(int currentLevel) {
+        if (currentLevel == 0) return new BigInteger("100"); // Level 1 requires 100 EXP
+        if (currentLevel >= MAX_LEVEL) return BigInteger.ZERO; // Max level reached, no next level
+        return calculateTotalExpForLevel(currentLevel + 1).subtract(calculateTotalExpForLevel(currentLevel)); // EXP needed to reach the next level
     }
 
-    private long calculateExpToPreviousLevel(int currentLevel) {
-        if (currentLevel <= 1) return 0; // Level 1 has no previous level
-        return calculateTotalExpForLevel(currentLevel) - calculateTotalExpForLevel(currentLevel - 1); // EXP needed to reach the previous level
+    private BigInteger calculateExpToPreviousLevel(int currentLevel) {
+        if (currentLevel <= 1) return BigInteger.ZERO; // Level 1 has no previous level
+        return calculateTotalExpForLevel(currentLevel).subtract(calculateTotalExpForLevel(currentLevel - 1)); // EXP needed to reach the previous level
     }
 }

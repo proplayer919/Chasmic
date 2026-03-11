@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.items;
 
 import dev.proplayer919.chasmic.*;
+import dev.proplayer919.chasmic.service.ServiceDependencies;
 import dev.proplayer919.chasmic.player.PlayerStat;
 import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import net.minestom.server.color.Color;
@@ -9,10 +10,11 @@ import net.minestom.server.item.Material;
 
 import java.util.*;
 
+@ServiceDependencies({ItemActionRegistry.class})
 public class CustomItemRegistry {
     private final Map<String, CustomItem> items = new HashMap<>();
 
-    public CustomItemRegistry() {
+    public CustomItemRegistry(ItemActionRegistry itemActionRegistry) {
         // Register items here
         registerItem(new CustomItem("aspect_of_the_shallows",
                 "Aspect of the Shallows",
@@ -21,7 +23,7 @@ public class CustomItemRegistry {
                 ItemType.WEAPON_MELEE,
                 Rarity.LEGENDARY,
                 new ArrayList<>(List.of(new PlayerStatBonus(PlayerStat.ATTACK, 5.0f))),
-                List.of(Main.getItemActionRegistry().getItemAction("shallow_leap"), Main.getItemActionRegistry().getItemAction("immaterial_boost"))));
+                List.of(itemActionRegistry.getItemAction("shallow_leap"), itemActionRegistry.getItemAction("immaterial_boost"))));
 
         registerItem(new CustomItem("bane_of_nella",
                 "Bane of Nella",

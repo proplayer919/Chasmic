@@ -1,10 +1,11 @@
 package dev.proplayer919.chasmic.command.commands;
 
 import dev.proplayer919.chasmic.player.CustomPlayer;
-import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.accessories.Accessory;
+import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
+import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -18,6 +19,8 @@ import net.minestom.server.item.ItemStack;
  * Permission: admin.command.agive
  */
 public class AccessoryGiveCommand extends PermissionCommand {
+    @Setter
+    private static AccessoryRegistry accessoryRegistry;
 
     public AccessoryGiveCommand() {
         super("agive", "admin.command.agive");
@@ -25,7 +28,7 @@ public class AccessoryGiveCommand extends PermissionCommand {
         // Arguments
         PlayerNameArgument playerArg = PlayerNameArgument.playerName("player");
 
-        String[] allAccessories = Main.getAccessoryRegistry().getAllAccessories().stream().map(Accessory::getId).toArray(String[]::new);
+        String[] allAccessories = accessoryRegistry.getAllAccessories().stream().map(Accessory::getId).toArray(String[]::new);
         ArgumentWord accessoryArg = new ArgumentWord("accessory").from(allAccessories);
 
         // /agive <player> <accessory> - Give accessory to player
@@ -40,7 +43,7 @@ public class AccessoryGiveCommand extends PermissionCommand {
                 return;
             }
 
-            Accessory accessory = Main.getAccessoryRegistry().getAccessoryById(context.get(accessoryArg));
+            Accessory accessory = accessoryRegistry.getAccessoryById(context.get(accessoryArg));
 
             if (accessory == null) {
                 sender.sendMessage(Component.text("Accessory not found!", NamedTextColor.RED));

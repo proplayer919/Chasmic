@@ -18,13 +18,13 @@ public class PerformanceCommand extends PermissionCommand {
             if (!checkPlayerPermission(sender)) return;
 
             CustomPlayer player = (CustomPlayer) sender;
-            boolean newState = !player.isShowMsptBossbar();
-            player.setShowMsptBossbar(newState);
+            boolean newState = !player.getUiManager().isShowMsptBossbar();
+            player.getUiManager().setShowMsptBossbar(newState);
 
             if (newState) {
-                player.getMsptBossBar().addViewer(player);
+                player.getUiManager().getMsptBossBar().addViewer(player);
             } else {
-                player.getMsptBossBar().removeViewer(player);
+                player.getUiManager().getMsptBossBar().removeViewer(player);
             }
 
             sender.sendMessage(Component.text("Performance overlay " + (newState ? "enabled" : "disabled") + ".", NamedTextColor.GREEN));

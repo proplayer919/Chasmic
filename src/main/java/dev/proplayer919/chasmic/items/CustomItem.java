@@ -73,7 +73,7 @@ public class CustomItem {
         if (itemId == null) {
             return null;
         }
-        return Main.getCustomItemRegistry().getItem(itemId);
+        return Main.getServiceContainer().getCustomItemRegistry().getItem(itemId);
     }
 
     public static String getItemId(ItemStack itemStack) {

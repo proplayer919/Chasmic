@@ -1,5 +1,6 @@
 package dev.proplayer919.chasmic.command.commands;
 
+import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.command.PermissionCommand;
@@ -22,8 +23,10 @@ public class CreatureCommand extends PermissionCommand {
     public CreatureCommand() {
         super("creature", "admin.command.creature");
 
+        CreatureTypeRegistry creatureTypeRegistry = Main.getServiceContainer().getCreatureTypeRegistry();
+
         // Arguments
-        String[] allCreatureTypes = Main.getCreatureTypeRegistry().getAllCreatureTypes().stream().map(CreatureType::id).toArray(String[]::new);
+        String[] allCreatureTypes = creatureTypeRegistry.getAllCreatureTypes().stream().map(CreatureType::id).toArray(String[]::new);
         ArgumentWord creatureTypeArg = new ArgumentWord("type").from(allCreatureTypes);
 
         ArgumentInteger amountArg = (ArgumentInteger) new ArgumentInteger("amount").setDefaultValue(1);
@@ -42,7 +45,7 @@ public class CreatureCommand extends PermissionCommand {
                 return;
             }
 
-            CreatureType creatureType = Main.getCreatureTypeRegistry().getCreatureType(mobType);
+            CreatureType creatureType = creatureTypeRegistry.getCreatureType(mobType);
 
             if (creatureType == null) {
                 sender.sendMessage(Component.text("Unknown creature type: " + mobType, NamedTextColor.RED));

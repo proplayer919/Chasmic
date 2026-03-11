@@ -16,6 +16,8 @@ import org.bson.codecs.pojo.PojoCodecProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
@@ -39,6 +41,7 @@ public class MongoDBHandler {
         // Configure codec registry for POJO support
         CodecRegistry pojoCodecRegistry = CodecRegistries.fromRegistries(
                 MongoClientSettings.getDefaultCodecRegistry(),
+                CodecRegistries.fromCodecs(new BigIntegerCodec()),
                 CodecRegistries.fromProviders(PojoCodecProvider.builder().automatic(true).build())
         );
 
@@ -99,6 +102,10 @@ public class MongoDBHandler {
         playerData.setFirstJoinTimestamp(currentTime);
         playerData.setLastJoinTimestamp(currentTime);
         playerData.setNew(true);
+        playerData.setSchemaVersion(2);
+
+        PlayerProfileData initialProfile = playerData.createProfileForSlot(1);
+        playerData.setActiveProfileId(initialProfile.getProfileId());
 
         return playerData;
     }
@@ -120,15 +127,50 @@ public class MongoDBHandler {
                 // Player exists, update last join and mark as not new
                 data.setLastJoinTimestamp(System.currentTimeMillis());
                 data.setNew(false);
+                boolean migrated = migrateLegacySchemaIfNeeded(data);
+
                 // Save asynchronously and handle errors
                 return savePlayerData(data)
                         .thenApply(v -> data)
                         .exceptionally(throwable -> {
-                            logger.error("Failed to save player data for {}", username, throwable);
+                            if (migrated) {
+                                logger.error("Failed to save migrated player data for {}", username, throwable);
+                            } else {
+                                logger.error("Failed to save player data for {}", username, throwable);
+                            }
                             return data; // Return data anyway, just log the error
                         });
             }
         });
+    }
+
+    private boolean migrateLegacySchemaIfNeeded(PlayerData data) {
+        boolean hasProfiles = data.getProfiles() != null && !data.getProfiles().isEmpty();
+        boolean changed = false;
+
+        if (!hasProfiles || data.getSchemaVersion() < 2) {
+            // Create fresh profile for all users (reset everyone)
+            PlayerProfileData newProfile = new PlayerProfileData(PlayerProfileData.buildIdForSlot(1));
+
+            List<PlayerProfileData> migratedProfiles = new ArrayList<>();
+            migratedProfiles.add(newProfile);
+            data.setProfiles(migratedProfiles);
+            data.setActiveProfileId(newProfile.getProfileId());
+            changed = true;
+        }
+
+        String beforeActiveProfile = data.getActiveProfileId();
+        data.ensureProfileIntegrity();
+        if (beforeActiveProfile == null || !beforeActiveProfile.equals(data.getActiveProfileId())) {
+            changed = true;
+        }
+
+        if (data.getSchemaVersion() < 2) {
+            data.setSchemaVersion(2);
+            changed = true;
+        }
+
+        return changed;
     }
 
     /**
@@ -191,4 +233,3 @@ public class MongoDBHandler {
     }
 
 }
-
