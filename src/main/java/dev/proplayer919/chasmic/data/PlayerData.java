@@ -50,7 +50,7 @@ public class PlayerData {
     private boolean isNew;
 
     @BsonProperty("schemaVersion")
-    private int schemaVersion = 3;
+    private int schemaVersion = 4;
 
     @BsonProperty("friends")
     private List<UUID> friends = new ArrayList<>();
@@ -204,26 +204,6 @@ public class PlayerData {
         }
 
         return true;
-    }
-
-    @BsonIgnore
-    public int getMaxHealth() {
-        return getActiveProfile().getMaxHealth();
-    }
-
-    @BsonIgnore
-    public void setMaxHealth(int maxHealth) {
-        getActiveProfile().setMaxHealth(maxHealth);
-    }
-
-    @BsonIgnore
-    public int getMaxMana() {
-        return getActiveProfile().getMaxMana();
-    }
-
-    @BsonIgnore
-    public void setMaxMana(int maxMana) {
-        getActiveProfile().setMaxMana(maxMana);
     }
 
     @BsonIgnore

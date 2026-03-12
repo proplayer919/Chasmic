@@ -6,6 +6,8 @@ public abstract class PlayerStatConstants {
     private final static float BASE_CRITICAL_CHANCE = 1.0f; // Base critical chance (1%)
     private final static float BASE_SPEED = 0.0f; // Base speed bonus
     private final static float BASE_FARMING = 1.0f; // Base farming multiplier
+    private final static float BASE_INTELLIGENCE = 100.0f; // Base intelligence (max mana)
+    private final static float BASE_HEALTH = 100.0f; // Base max health
 
     public static float getBaseValue(PlayerStat stat) {
         return switch (stat) {
@@ -14,6 +16,8 @@ public abstract class PlayerStatConstants {
             case CRITICAL_CHANCE -> BASE_CRITICAL_CHANCE;
             case SPEED -> BASE_SPEED;
             case FARMING -> BASE_FARMING;
+            case INTELLIGENCE -> BASE_INTELLIGENCE;
+            case HEALTH -> BASE_HEALTH;
         };
     }
 }

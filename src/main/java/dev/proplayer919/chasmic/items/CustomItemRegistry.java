@@ -50,36 +50,44 @@ public class CustomItemRegistry {
                 List.of(
                         new RarityVariant(Rarity.COMMON, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 1.0f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 5.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 5.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 5.0f)
                         ), PlayerHeads.HARVESTER_COMMON),
                         new RarityVariant(Rarity.UNCOMMON, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 2.5f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 10.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 10.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 15.0f)
                         ), PlayerHeads.HARVESTER_UNCOMMON),
                         new RarityVariant(Rarity.RARE, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 5.0f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 20.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 20.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 35.0f)
                         ), PlayerHeads.HARVESTER_RARE),
                         new RarityVariant(Rarity.EPIC, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 10.0f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 35.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 35.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 50.0f)
                         ), PlayerHeads.HARVESTER_EPIC),
                         new RarityVariant(Rarity.LEGENDARY, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 20.0f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 55.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 55.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 100.0f)
                         ), PlayerHeads.HARVESTER_LEGENDARY),
                         new RarityVariant(Rarity.MYTHIC, List.of(
                                 new PlayerStatBonus(PlayerStat.FARMING, 35.0f),
-                                new PlayerStatBonus(PlayerStat.DEFENSE, 80.0f)
+                                new PlayerStatBonus(PlayerStat.DEFENSE, 80.0f),
+                                new PlayerStatBonus(PlayerStat.HEALTH, 200.0f)
                         ), PlayerHeads.HARVESTER_MYTHIC)
                 ));
 
         registerArmorSet("volcanic", "Crimson armor that provides a significant boost to defense.", Rarity.RARE, new ArrayList<>(List.of(
-                new PlayerStatBonus(PlayerStat.DEFENSE, 25.0f)
+                new PlayerStatBonus(PlayerStat.DEFENSE, 25.0f),
+                new PlayerStatBonus(PlayerStat.HEALTH, 10.0f)
         )), ArmorTier.LEATHER, DyeColor.RED.color());
 
         registerArmorSet("abyssal", "Abyssal armor that provides a significant boost to defense.", Rarity.EPIC, new ArrayList<>(List.of(
-                new PlayerStatBonus(PlayerStat.DEFENSE, 35.0f)
+                new PlayerStatBonus(PlayerStat.DEFENSE, 35.0f),
+                new PlayerStatBonus(PlayerStat.HEALTH, 25.0f)
         )), ArmorTier.LEATHER, DyeColor.BLUE.color());
     }
 

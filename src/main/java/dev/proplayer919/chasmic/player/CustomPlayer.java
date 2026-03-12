@@ -148,8 +148,6 @@ public class CustomPlayer extends Player implements HealthCreature {
         }
 
         this.expValue = new ExpValue(playerData.getCurrentExp());
-        this.statsManager.setCustomHealth(playerData.getMaxHealth());
-        this.statsManager.setCustomMana(playerData.getMaxMana());
         this.statsManager.markAllStatsDirty();
         markSpeedStatDirty();
         uiManager.markActionBarDirty();
@@ -207,8 +205,8 @@ public class CustomPlayer extends Player implements HealthCreature {
         globalEventHandler.addListener(PlayerRespawnEvent.class, event -> {
             if (event.getPlayer().getUuid().equals(getUuid())) {
                 // Reset health and mana on respawn
-                statsManager.setCustomHealth(playerData != null ? playerData.getMaxHealth() : 100);
-                statsManager.setCustomMana(playerData != null ? playerData.getMaxMana() : 100);
+                statsManager.setCustomHealth(playerData != null ? (int) statsManager.getStatFor(PlayerStat.HEALTH) : 100);
+                statsManager.setCustomMana(playerData != null ? (int) statsManager.getStatFor(PlayerStat.INTELLIGENCE) : 100);
                 uiManager.markActionBarDirty();
             }
         });
@@ -222,15 +220,15 @@ public class CustomPlayer extends Player implements HealthCreature {
             // Only regenerate if player is online, has player data loaded, and it's been at least 5 seconds since last damage
             if (isOnline() && playerData != null && (lastDamageTime == null || new Date().getTime() - lastDamageTime.getTime() >= COMBAT_REGEN_DELAY_MILLIS)) {
                 // Regenerate health
-                if (statsManager.getCustomHealth() < playerData.getMaxHealth()) {
-                    statsManager.setCustomHealth(Math.min(statsManager.getCustomHealth() + 1, playerData.getMaxHealth()));
+                if (statsManager.getCustomHealth() < statsManager.getStatFor(PlayerStat.HEALTH)) {
+                    statsManager.setCustomHealth((int) Math.min(statsManager.getCustomHealth() + 1, statsManager.getStatFor(PlayerStat.HEALTH)));
                     uiManager.markActionBarDirty();
                 }
             }
 
             // Calculate interval: 50000 / maxHealth milliseconds (for 100 max = 500ms)
             if (playerData != null) {
-                long healthInterval = Math.max(HEALTH_REGEN_BASE_MILLIS / playerData.getMaxHealth(), MIN_REGEN_INTERVAL_MILLIS);
+                long healthInterval = (long) Math.max(HEALTH_REGEN_BASE_MILLIS / statsManager.getStatFor(PlayerStat.HEALTH), MIN_REGEN_INTERVAL_MILLIS);
                 return TaskSchedule.millis(healthInterval);
             }
             return TaskSchedule.millis(500);
@@ -240,15 +238,15 @@ public class CustomPlayer extends Player implements HealthCreature {
         MinecraftServer.getSchedulerManager().submitTask(() -> {
             if (isOnline() && playerData != null) {
                 // Regenerate mana
-                if (statsManager.getCustomMana() < playerData.getMaxMana()) {
-                    statsManager.setCustomMana(Math.min(statsManager.getCustomMana() + 1, playerData.getMaxMana()));
+                if (statsManager.getCustomMana() < statsManager.getStatFor(PlayerStat.INTELLIGENCE)) {
+                    statsManager.setCustomMana((int) Math.min(statsManager.getCustomMana() + 1, statsManager.getStatFor(PlayerStat.INTELLIGENCE)));
                     uiManager.markActionBarDirty();
                 }
             }
 
             // Calculate interval: 25000 / maxMana milliseconds (for 100 max = 250ms)
             if (playerData != null) {
-                long manaInterval = Math.max(MANA_REGEN_BASE_MILLIS / playerData.getMaxMana(), MIN_REGEN_INTERVAL_MILLIS);
+                long manaInterval = (long) Math.max(MANA_REGEN_BASE_MILLIS / statsManager.getStatFor(PlayerStat.INTELLIGENCE), MIN_REGEN_INTERVAL_MILLIS);
                 return TaskSchedule.millis(manaInterval);
             }
             return TaskSchedule.millis(250);
@@ -286,7 +284,7 @@ public class CustomPlayer extends Player implements HealthCreature {
     }
 
     private void broadcastDeathMessage(String deathCause) {
-        Component message = Component.text("☠ ", NamedTextColor.RED)
+        Component message = Component.text(Emojis.SKULL.getEmoji() + " ", NamedTextColor.RED)
                 .append(buildDisplayName())
                 .append(Component.text(" was killed by " + deathCause + ".", NamedTextColor.RED));
 
@@ -610,36 +608,6 @@ public class CustomPlayer extends Player implements HealthCreature {
                         false
                 )
         ));
-    }
-
-    public void setMaxHealth(int maxHealth) {
-        if (statsManager.getCustomHealth() > maxHealth) {
-            statsManager.setCustomHealth(maxHealth);
-        }
-
-        uiManager.markActionBarDirty();
-
-        // Save to database
-        MongoDBHandler mongoDBHandler = Main.getServiceContainer().getMongoDBHandler();
-        if (playerData != null && mongoDBHandler != null) {
-            playerData.setMaxHealth(maxHealth);
-            mongoDBHandler.savePlayerData(playerData);
-        }
-    }
-
-    public void setMaxMana(int maxMana) {
-        if (statsManager.getCustomMana() > maxMana) {
-            statsManager.setCustomMana(maxMana);
-        }
-
-        uiManager.markActionBarDirty();
-
-        // Save to database
-        MongoDBHandler mongoDBHandler = Main.getServiceContainer().getMongoDBHandler();
-        if (playerData != null && mongoDBHandler != null) {
-            playerData.setMaxMana(maxMana);
-            mongoDBHandler.savePlayerData(playerData);
-        }
     }
 }
 

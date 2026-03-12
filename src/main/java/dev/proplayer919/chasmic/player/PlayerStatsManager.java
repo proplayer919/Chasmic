@@ -36,11 +36,11 @@ public class PlayerStatsManager {
     }
 
     public int getMaxCustomHealth() {
-        return player.getPlayerData() != null ? player.getPlayerData().getMaxHealth() : 100;
+        return player.getPlayerData() != null ? (int) player.getStatsManager().getStatFor(PlayerStat.HEALTH) : 100;
     }
 
     public int getMaxCustomMana() {
-        return player.getPlayerData() != null ? player.getPlayerData().getMaxMana() : 100;
+        return player.getPlayerData() != null ? (int) player.getStatsManager().getStatFor(PlayerStat.INTELLIGENCE) : 100;
     }
 
     public void addTemporaryStatBonus(PlayerStat stat, float bonusAmount, long durationMillis, Runnable onExpire) {

@@ -97,7 +97,7 @@ public class PlayerUIManager {
         }
 
         Component healthDisplay = Component.text(
-                Emojis.HEART.getEmoji() + " " + player.getStatsManager().getCustomHealth() + "/" + player.getPlayerData().getMaxHealth()
+                Emojis.HEART.getEmoji() + " " + player.getStatsManager().getCustomHealth() + "/" + (int) player.getStatsManager().getStatFor(PlayerStat.HEALTH)
         ).color(NamedTextColor.RED);
 
         Component defenseDisplay = Component.text(
@@ -105,7 +105,7 @@ public class PlayerUIManager {
         ).color(NamedTextColor.GRAY);
 
         Component manaDisplay = Component.text(
-                Emojis.STAR.getEmoji() + " " + player.getStatsManager().getCustomMana() + "/" + player.getPlayerData().getMaxMana()
+                Emojis.STAR.getEmoji() + " " + player.getStatsManager().getCustomMana() + "/" + (int) player.getStatsManager().getStatFor(PlayerStat.INTELLIGENCE)
         ).color(NamedTextColor.AQUA);
 
         Component spacer = Component.text("   ").color(NamedTextColor.GRAY);

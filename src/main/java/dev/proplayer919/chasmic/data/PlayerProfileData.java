@@ -26,12 +26,6 @@ public class PlayerProfileData {
     @BsonProperty("id")
     private String profileId;
 
-    @BsonProperty("maxHealth")
-    private int maxHealth = 100;
-
-    @BsonProperty("maxMana")
-    private int maxMana = 100;
-
     @BsonProperty("currentExp")
     private BigInteger currentExp = BigInteger.ZERO;
 

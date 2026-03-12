@@ -11,15 +11,19 @@ public enum Emojis {
     SKULL("☠"),
     HEART("❤"),
     STAR("✦"),
+    STAR_2("✴"),
     SHIELD("🛡"),
     PEACE("✌"),
     HOURGLASS("⌛"),
     CLOCK("⌚"),
     CLOUD("☁"),
+    FARMING("🌾"),
+    BOLT("⚡"),
     UMBRELLA("☂"),
     SNOWFLAKE("❄"),
     PENCIL("✏"),
     CHECKMARK("✔"),
+    SWORD("⚔"),
     NOTE("♪");
 
     private final String emoji;
