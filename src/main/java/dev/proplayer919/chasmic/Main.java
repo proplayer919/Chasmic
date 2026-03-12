@@ -14,6 +14,7 @@ import dev.proplayer919.chasmic.service.ServiceInitializationException;
 import dev.proplayer919.chasmic.service.module.*;
 import dev.proplayer919.chasmic.time.ChasmicTime;
 import dev.proplayer919.chasmic.npc.NPC;
+import dev.proplayer919.chasmic.player.friend.FriendManager;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import lombok.Getter;
 import net.minestom.server.Auth;
@@ -85,11 +86,13 @@ public class Main {
         PunishmentManager punishmentManager = serviceContainer.getPunishmentManager();
         CustomItemRegistry customItemRegistry = serviceContainer.getCustomItemRegistry();
         AccessoryRegistry accessoryRegistry = serviceContainer.getAccessoryRegistry();
+        FriendManager friendManager = serviceContainer.getFriendManager();
 
         // Initialize modules with proper dependency injection
         ModuleManager moduleManager = new ModuleManager()
                 .register(new BanCheckModule(punishmentManager)) // Check for bans on login
                 .register(new PlayerDataModule(mongoDBHandler))  // Load player data from MongoDB
+                .register(new FriendsModule(friendManager)) // Notify friends when players join and leave
                 .register(new ChatModule()) // Handle chat formatting and commands
                 .register(new ServerListPingModule()) // Custom MOTD and player count
                 .register(new EntityAttackModule())  // Creatures attacking players
@@ -106,7 +109,7 @@ public class Main {
 
         // Register commands
         CommandRegistry.registerCommands(mongoDBHandler, punishmentManager,
-            customItemRegistry, accessoryRegistry);
+            customItemRegistry, accessoryRegistry, friendManager);
 
         // Create spawn instance and preload chunks
         spawnInstance = createSpawnInstance();

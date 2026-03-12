@@ -6,6 +6,7 @@ import dev.proplayer919.chasmic.entities.CreatureTypeRegistry;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.location.LocationRegistry;
+import dev.proplayer919.chasmic.player.friend.FriendManager;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import lombok.Getter;
 
@@ -27,6 +28,7 @@ import java.util.Set;
 @Getter
 public class ServiceContainer {
     private static final List<Class<?>> MANAGED_SERVICES = List.of(
+            FriendManager.class,
             PunishmentManager.class,
             ItemActionRegistry.class,
             CustomItemRegistry.class,
@@ -42,6 +44,7 @@ public class ServiceContainer {
     private final CreatureTypeRegistry creatureTypeRegistry;
     private final LocationRegistry locationRegistry;
     private final PunishmentManager punishmentManager;
+    private final FriendManager friendManager;
 
     public ServiceContainer(MongoDBHandler mongoDBHandler) {
         this.mongoDBHandler = Objects.requireNonNull(mongoDBHandler, "mongoDBHandler");
@@ -54,6 +57,7 @@ public class ServiceContainer {
             initialized.put(serviceClass, instantiateService(serviceClass, initialized));
         }
 
+        this.friendManager = getService(initialized, FriendManager.class);
         this.punishmentManager = getService(initialized, PunishmentManager.class);
         this.itemActionRegistry = getService(initialized, ItemActionRegistry.class);
         this.customItemRegistry = getService(initialized, CustomItemRegistry.class);

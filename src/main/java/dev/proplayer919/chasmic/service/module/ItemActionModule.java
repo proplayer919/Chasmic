@@ -1,8 +1,8 @@
 package dev.proplayer919.chasmic.service.module;
 
 
+import dev.proplayer919.chasmic.helpers.ItemCreator;
 import dev.proplayer919.chasmic.player.CustomPlayer;
-import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import dev.proplayer919.chasmic.items.ItemActionRegistry;
 import dev.proplayer919.chasmic.items.ItemActionResult;
@@ -14,11 +14,13 @@ import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.player.PlayerUseItemEvent;
+import net.minestom.server.item.ItemStack;
 import org.jspecify.annotations.NonNull;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class ItemActionModule implements Module {
     private final ItemActionRegistry itemActionRegistry;
@@ -35,8 +37,15 @@ public class ItemActionModule implements Module {
                 return;
             }
 
+            // Check if the player has a chasmic menu item in their main hand
+            ItemStack mainHandItem = player.getItemInMainHand();
+            String itemId = mainHandItem.getTag(ItemCreator.itemIdTag);
+            if (Objects.equals(itemId, "menu")) {
+                return;
+            }
+
             // Check if the item has an action
-            String itemActions = event.getItemStack().getTag(CustomItem.itemActionsTag);
+            String itemActions = event.getItemStack().getTag(ItemCreator.itemActionsTag);
 
             if (itemActions == null) {
                 return;

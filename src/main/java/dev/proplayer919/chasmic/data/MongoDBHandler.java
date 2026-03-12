@@ -17,9 +17,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 
 /**
  * Handles MongoDB connections and player data operations
@@ -74,6 +76,29 @@ public class MongoDBHandler {
     }
 
     /**
+     * Loads player data by username asynchronously (case-insensitive)
+     * @param username The player's username
+     * @return CompletableFuture with PlayerData, or null if not found
+     */
+    public CompletableFuture<PlayerData> loadPlayerDataByUsername(String username) {
+        Pattern usernamePattern = Pattern.compile("^" + Pattern.quote(username) + "$", Pattern.CASE_INSENSITIVE);
+        return CompletableFuture.supplyAsync(() -> playerCollection.find(Filters.regex("username", usernamePattern)).first());
+    }
+
+    /**
+     * Loads multiple player records by UUID asynchronously
+     * @param uuids UUIDs to load
+     * @return CompletableFuture with matching player data records
+     */
+    public CompletableFuture<List<PlayerData>> loadPlayerDataByUuids(List<UUID> uuids) {
+        if (uuids == null || uuids.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
+
+        return CompletableFuture.supplyAsync(() -> playerCollection.find(Filters.in("_id", uuids)).into(new ArrayList<>()));
+    }
+
+    /**
      * Saves player data to the database asynchronously
      * @param playerData The player data to save
      * @return CompletableFuture that completes when save is done
@@ -102,7 +127,7 @@ public class MongoDBHandler {
         playerData.setFirstJoinTimestamp(currentTime);
         playerData.setLastJoinTimestamp(currentTime);
         playerData.setNew(true);
-        playerData.setSchemaVersion(2);
+        playerData.setSchemaVersion(3);
 
         PlayerProfileData initialProfile = playerData.createProfileForSlot(1);
         playerData.setActiveProfileId(initialProfile.getProfileId());
@@ -125,6 +150,7 @@ public class MongoDBHandler {
                 return savePlayerData(newData).thenApply(v -> newData);
             } else {
                 // Player exists, update last join and mark as not new
+                data.setUsername(username);
                 data.setLastJoinTimestamp(System.currentTimeMillis());
                 data.setNew(false);
                 boolean migrated = migrateLegacySchemaIfNeeded(data);
@@ -165,8 +191,14 @@ public class MongoDBHandler {
             changed = true;
         }
 
-        if (data.getSchemaVersion() < 2) {
-            data.setSchemaVersion(2);
+        int beforeFriendCount = data.getFriends() != null ? data.getFriends().size() : -1;
+        data.ensureSocialIntegrity();
+        if (beforeFriendCount != data.getFriends().size()) {
+            changed = true;
+        }
+
+        if (data.getSchemaVersion() < 3) {
+            data.setSchemaVersion(3);
             changed = true;
         }
 

@@ -4,7 +4,6 @@ import dev.proplayer919.chasmic.player.PlayerStatBonus;
 import dev.proplayer919.chasmic.Rarity;
 import dev.proplayer919.chasmic.player.gui.GuiClickAction;
 import dev.proplayer919.chasmic.player.gui.GuiItem;
-import dev.proplayer919.chasmic.items.CustomItem;
 import dev.proplayer919.chasmic.items.ItemAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -23,6 +22,8 @@ import java.util.UUID;
 
 public abstract class ItemCreator {
     public static final Tag<String> itemUuidTag = Tag.String("custom_item_uuid");
+    public static final Tag<String> itemActionsTag = Tag.String("custom_item_action");
+    public static final Tag<String> itemIdTag = Tag.String("custom_item_id");
 
     public static ItemStack createItem(int amount, Material material, String id, String name, String description, Rarity rarity, Collection<PlayerStatBonus> statBonuses, String playerHeadTexture, Color leatherColor, List<ItemAction> actions, boolean edible) {
         ItemStack.Builder builder;
@@ -106,13 +107,13 @@ public abstract class ItemCreator {
 
         builder.set(DataComponents.ITEM_NAME, Component.text(name).color(rarity.getColor()))
                 .lore(lore)
-                .set(CustomItem.itemIdTag, id);
+                .set(itemIdTag, id);
 
         builder.set(itemUuidTag, UUID.randomUUID().toString());
 
         if (!validActions.isEmpty()) {
             String actionsString = String.join(",", validActions.stream().map(ItemAction::id).toList());
-            builder.set(CustomItem.itemActionsTag, actionsString);
+            builder.set(itemActionsTag, actionsString);
         }
 
         builder.amount(amount);

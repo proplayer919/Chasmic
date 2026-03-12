@@ -4,6 +4,7 @@ import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.commands.*;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.items.CustomItemRegistry;
+import dev.proplayer919.chasmic.player.friend.FriendManager;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandManager;
@@ -19,7 +20,8 @@ public class CommandRegistry {
      * @param punishmentManager The punishment manager for handling punishments
      */
     public static void registerCommands(MongoDBHandler mongoDBHandler, PunishmentManager punishmentManager,
-                                       CustomItemRegistry customItemRegistry, AccessoryRegistry accessoryRegistry) {
+                                       CustomItemRegistry customItemRegistry, AccessoryRegistry accessoryRegistry,
+                                       FriendManager friendManager) {
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
         // Set MongoDB handler for commands that need it
@@ -40,6 +42,8 @@ public class CommandRegistry {
 
         // Register commands
         commandManager.register(new MediaCommand());
+        commandManager.register(new FriendCommand(friendManager));
+        commandManager.register(new DeathNoticeAcknowledgeCommand());
 
         commandManager.register(new RankCommand());
         commandManager.register(new PermsCommand());

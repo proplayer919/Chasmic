@@ -8,7 +8,6 @@ import lombok.Getter;
 import net.minestom.server.color.Color;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
-import net.minestom.server.tag.Tag;
 
 import java.util.Collection;
 import java.util.List;
@@ -26,9 +25,6 @@ public class CustomItem {
     private List<ItemAction> actions; // List of actions that can be performed with this item
     private String playerHeadTexture; // Optional field for player head items
     private Color leatherColor; // Optional field for leather armor items
-
-    public static final Tag<String> itemActionsTag = Tag.String("custom_item_action");
-    public static final Tag<String> itemIdTag = Tag.String("custom_item_id");
 
     public CustomItem(String id, String displayName, Material material, String description, ItemType itemType, Rarity rarity, Collection<PlayerStatBonus> statBonuses) {
         this.id = id;
@@ -69,7 +65,7 @@ public class CustomItem {
     }
 
     public static CustomItem getCustomItemFromItemStack(ItemStack itemStack) {
-        String itemId = itemStack.getTag(itemIdTag);
+        String itemId = itemStack.getTag(ItemCreator.itemIdTag);
         if (itemId == null) {
             return null;
         }
@@ -77,6 +73,6 @@ public class CustomItem {
     }
 
     public static String getItemId(ItemStack itemStack) {
-        return itemStack.getTag(itemIdTag);
+        return itemStack.getTag(ItemCreator.itemIdTag);
     }
 }

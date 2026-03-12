@@ -13,6 +13,7 @@ import org.bson.codecs.pojo.annotations.BsonProperty;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 /**
@@ -49,7 +50,13 @@ public class PlayerData {
     private boolean isNew;
 
     @BsonProperty("schemaVersion")
-    private int schemaVersion = 2;
+    private int schemaVersion = 3;
+
+    @BsonProperty("friends")
+    private List<UUID> friends = new ArrayList<>();
+
+    @BsonProperty("deathPurseNoticeAcknowledged")
+    private boolean deathPurseNoticeAcknowledged;
 
     // Profile system
     @BsonProperty("profiles")
@@ -76,6 +83,15 @@ public class PlayerData {
     @BsonIgnore
     public void setRank(PlayerRank rank) {
         this.rankId = rank.getId();
+    }
+
+    @BsonIgnore
+    public void ensureSocialIntegrity() {
+        if (friends == null) {
+            friends = new ArrayList<>();
+        }
+
+        friends.removeIf(Objects::isNull);
     }
 
     @BsonIgnore

@@ -1,6 +1,7 @@
 package dev.proplayer919.chasmic.service.module;
 
 
+import dev.proplayer919.chasmic.helpers.ItemCreator;
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.Main;
 import dev.proplayer919.chasmic.items.CustomItem;
@@ -25,7 +26,7 @@ public class ItemFoodModule implements Module {
             }
 
             // Check if the item is edible and is a custom item
-            String itemId = event.getItemStack().getTag(CustomItem.itemIdTag);
+            String itemId = event.getItemStack().getTag(ItemCreator.itemIdTag);
 
             if (itemId == null) {
                 return;
@@ -56,7 +57,7 @@ public class ItemFoodModule implements Module {
 
             for (int slot = 0; slot < inventory.getSize(); slot++) {
                 ItemStack stack = inventory.getItemStack(slot);
-                String slotItemId = stack.getTag(CustomItem.itemIdTag);
+                String slotItemId = stack.getTag(ItemCreator.itemIdTag);
 
                 if (slotItemId == null) {
                     continue;

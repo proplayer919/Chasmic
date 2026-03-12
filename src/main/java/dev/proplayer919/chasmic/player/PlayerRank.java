@@ -13,7 +13,7 @@ import java.util.Set;
 @Getter
 public enum PlayerRank {
     DEFAULT("default", null, 0, NamedTextColor.WHITE, NamedTextColor.GRAY,
-            List.of(), 1),
+            List.of("command.friend"), 1),
 
     VIP("vip", Component.text("[VIP]").color(NamedTextColor.GREEN), 1, NamedTextColor.GREEN, NamedTextColor.WHITE,
             List.of(), 2),

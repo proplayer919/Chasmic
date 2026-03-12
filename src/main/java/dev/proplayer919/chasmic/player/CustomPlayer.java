@@ -7,12 +7,15 @@ import dev.proplayer919.chasmic.entities.CustomCreature;
 import dev.proplayer919.chasmic.entities.HealthCreature;
 import dev.proplayer919.chasmic.events.PlayerEnterLocationEvent;
 import dev.proplayer919.chasmic.events.PlayerExitLocationEvent;
+import dev.proplayer919.chasmic.helpers.CurrencyFormatter;
 import dev.proplayer919.chasmic.helpers.ExpValue;
 import dev.proplayer919.chasmic.location.Location;
 import dev.proplayer919.chasmic.player.permission.PermissionHolder;
 import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
@@ -62,7 +65,7 @@ public class CustomPlayer extends Player implements HealthCreature {
     private boolean streaming = false;
 
     private Date lastDamageTime;
-    private CustomCreature lastDamageAttacker;
+    private String lastDamageCause;
 
     private Location currentLocation;
 
@@ -192,12 +195,12 @@ public class CustomPlayer extends Player implements HealthCreature {
             if (event.getPlayer().getUuid().equals(getUuid())) {
                 event.setChatMessage(null);
 
-                if (lastDamageAttacker != null) {
-                    event.setDeathText(Component.text("☠  Killed by " + lastDamageAttacker.getCreatureType().name()).color(NamedTextColor.RED));
-                    lastDamageAttacker = null;
-                } else {
-                    event.setDeathText(Component.text("☠ You died!").color(NamedTextColor.RED));
-                }
+                String deathCause = lastDamageCause != null ? lastDamageCause : "the environment";
+                event.setDeathText(Component.text("☠  Killed by " + deathCause).color(NamedTextColor.RED));
+
+                broadcastDeathMessage(deathCause);
+                applyDeathPursePenalty();
+                lastDamageCause = null;
             }
         });
 
@@ -260,10 +263,10 @@ public class CustomPlayer extends Player implements HealthCreature {
 
         lastDamageTime = new Date();
 
-        if (attacker instanceof CustomCreature) {
-            lastDamageAttacker = (CustomCreature) attacker;
+        if (attacker instanceof CustomCreature creature) {
+            lastDamageCause = formatNameFromEnum(creature.getCreatureType().name());
         } else {
-            lastDamageAttacker = null;
+            lastDamageCause = "the environment";
         }
 
         statsManager.setCustomHealth(Math.max(0, statsManager.getCustomHealth() - amount));
@@ -280,6 +283,72 @@ public class CustomPlayer extends Player implements HealthCreature {
         if (statsManager.getCustomHealth() == 0) {
             this.kill();
         }
+    }
+
+    private void broadcastDeathMessage(String deathCause) {
+        Component message = Component.text("☠ ", NamedTextColor.RED)
+                .append(buildDisplayName())
+                .append(Component.text(" was killed by " + deathCause + ".", NamedTextColor.RED));
+
+        for (Player onlinePlayer : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+            onlinePlayer.sendMessage(message);
+        }
+    }
+
+    private void applyDeathPursePenalty() {
+        if (playerData == null) {
+            return;
+        }
+
+        long previousPurse = Math.max(0, playerData.getPurse());
+        long cappedHalfLoss = Math.min(previousPurse / 2, 100_000L);
+        long lostAmount = previousPurse > 0 ? Math.max(1L, cappedHalfLoss) : 0L;
+        lostAmount = Math.min(lostAmount, previousPurse);
+        long remainingAmount = previousPurse - lostAmount;
+        playerData.setPurse(remainingAmount);
+        uiManager.markActionBarDirty();
+
+        MongoDBHandler mongoDBHandler = Main.getServiceContainer() != null
+                ? Main.getServiceContainer().getMongoDBHandler()
+                : null;
+        if (mongoDBHandler != null) {
+            mongoDBHandler.savePlayerData(playerData);
+        }
+
+        if (playerData.isDeathPurseNoticeAcknowledged()) {
+            return;
+        }
+
+        Component acknowledge = Component.text("[I GET IT]", NamedTextColor.GREEN)
+                .clickEvent(ClickEvent.runCommand("/deathnoticeack"))
+                .hoverEvent(HoverEvent.showText(Component.text("Click to hide this reminder next time.", NamedTextColor.YELLOW)));
+
+        sendMessage(Component.text("Because you died, ", NamedTextColor.RED)
+                .append(Component.text(CurrencyFormatter.formatCurrency(lostAmount), NamedTextColor.GOLD))
+                .append(Component.text(" coins were removed from your purse. Death penalty = half your purse, up to 100k max (and at least 1 coin if you had any). Remaining purse: ", NamedTextColor.RED))
+                .append(Component.text(CurrencyFormatter.formatCurrency(remainingAmount), NamedTextColor.GOLD))
+                .append(Component.text(". ", NamedTextColor.RED))
+                .append(acknowledge));
+    }
+
+    private String formatNameFromEnum(String rawName) {
+        if (rawName == null || rawName.isBlank()) {
+            return "Unknown";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        String[] parts = rawName.toLowerCase(Locale.ROOT).split("_");
+        for (String part : parts) {
+            if (part.isBlank()) {
+                continue;
+            }
+
+            if (!builder.isEmpty()) {
+                builder.append(' ');
+            }
+            builder.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+        }
+        return builder.isEmpty() ? rawName : builder.toString();
     }
 
     public void addTemporaryStatBonus(PlayerStat stat, float bonusAmount, long durationMillis) {
