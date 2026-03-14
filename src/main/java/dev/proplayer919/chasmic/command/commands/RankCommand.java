@@ -5,7 +5,6 @@ import dev.proplayer919.chasmic.player.PlayerRank;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -20,10 +19,7 @@ import java.util.Arrays;
  * Permission: admin.command.rank
  */
 public class RankCommand extends PermissionCommand {
-    @Setter
-    private static MongoDBHandler mongoDBHandler;
-
-    public RankCommand() {
+    public RankCommand(MongoDBHandler mongoDBHandler) {
         super("rank", "admin.command.rank");
 
         // Arguments

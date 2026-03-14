@@ -21,11 +21,9 @@ import java.util.List;
  * /friend command for managing friends and friend requests.
  */
 public class FriendCommand extends PermissionCommand {
-    private final FriendManager friendManager;
 
     public FriendCommand(FriendManager friendManager) {
         super("friend", "command.friend");
-        this.friendManager = friendManager;
 
         ArgumentWord addArg = ArgumentType.Word("add").from("add");
         ArgumentWord removeArg = ArgumentType.Word("remove").from("remove");
@@ -53,6 +51,8 @@ public class FriendCommand extends PermissionCommand {
                 case ALREADY_FRIENDS -> sender.sendMessage(Component.text("You're already friends with ", NamedTextColor.YELLOW)
                         .append(customTarget.buildDisplayName())
                         .append(Component.text(".", NamedTextColor.YELLOW)));
+                case RECIPIENT_BLOCKED -> sender.sendMessage(customTarget.buildDisplayName()
+                        .append(Component.text(" is not accepting friend requests right now.", NamedTextColor.RED)));
                 case ALREADY_SENT -> sender.sendMessage(Component.text("You already sent a friend request to ", NamedTextColor.YELLOW)
                         .append(customTarget.buildDisplayName())
                         .append(Component.text(".", NamedTextColor.YELLOW)));

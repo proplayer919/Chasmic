@@ -2,6 +2,7 @@ package dev.proplayer919.chasmic.service.module;
 
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.player.friend.FriendManager;
+import dev.proplayer919.chasmic.player.social.PrivateMessageTracker;
 import dev.proplayer919.chasmic.service.Module;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
@@ -41,6 +42,7 @@ public class FriendsModule implements Module {
             }
 
             friendManager.clearPendingRequests(player.getUuid());
+            PrivateMessageTracker.clear(player.getUuid());
         });
     }
 

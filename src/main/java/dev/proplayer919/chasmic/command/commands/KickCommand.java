@@ -8,7 +8,6 @@ import dev.proplayer919.chasmic.player.punishment.Punishment;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import dev.proplayer919.chasmic.player.punishment.PunishmentMessages;
 import dev.proplayer919.chasmic.player.punishment.PunishmentType;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -22,10 +21,7 @@ import net.minestom.server.entity.Player;
  * Permission: admin.command.kick
  */
 public class KickCommand extends PermissionCommand {
-    @Setter
-    private static PunishmentManager punishmentManager;
-
-    public KickCommand() {
+    public KickCommand(PunishmentManager punishmentManager) {
         super("kick", "admin.command.kick");
 
         // Arguments

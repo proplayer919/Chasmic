@@ -12,6 +12,8 @@ import dev.proplayer919.chasmic.player.gui.GuiClickAction;
 import dev.proplayer919.chasmic.player.gui.GuiClickActionType;
 import dev.proplayer919.chasmic.player.gui.GuiItem;
 import dev.proplayer919.chasmic.player.gui.GuiScreen;
+import dev.proplayer919.chasmic.player.social.FriendRequestPrivacy;
+import dev.proplayer919.chasmic.player.social.MessagePrivacy;
 import dev.proplayer919.chasmic.helpers.ItemCreator;
 import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.service.Module;
@@ -130,6 +132,11 @@ public class MenuItemModule implements Module {
                 new GuiClickAction(GuiClickActionType.OPEN_ACCESSORY_BAG)
         ));
 
+        menuItems.put(13, new GuiItem(Material.COMPARATOR,
+                Component.text("Settings").color(NamedTextColor.AQUA),
+                "Configure account-level privacy and social settings.",
+                new GuiClickAction(GuiClickActionType.CUSTOM, event -> event.getPlayer().openInventory(createSettingsScreen(player).getInventory(accessoryRegistry, mongoDBHandler)))));
+
         return new GuiScreen(
                 Component.text("Chasmic Menu"),
                 InventoryType.CHEST_4_ROW,
@@ -219,6 +226,77 @@ public class MenuItemModule implements Module {
                 })));
 
         return new GuiScreen(Component.text("Confirm Delete"), InventoryType.CHEST_1_ROW, items);
+    }
+
+    private GuiScreen createSettingsScreen(CustomPlayer player) {
+        PlayerData playerData = player.getPlayerData();
+        playerData.ensureSocialIntegrity();
+
+        Map<Integer, GuiItem> items = new HashMap<>();
+
+        items.put(11, new GuiItem(Material.BOOK,
+                Component.text("Message Privacy").color(NamedTextColor.GREEN),
+                buildMessagePrivacyLore(playerData),
+                new GuiClickAction(GuiClickActionType.CUSTOM, event -> {
+                    playerData.setMessagePrivacy(playerData.getMessagePrivacy().next());
+                    savePlayerData(player);
+                    event.getPlayer().openInventory(createSettingsScreen(player).getInventory(accessoryRegistry, mongoDBHandler));
+                })));
+
+        items.put(15, new GuiItem(Material.PAPER,
+                Component.text("Friend Request Privacy").color(NamedTextColor.GOLD),
+                buildFriendRequestPrivacyLore(playerData),
+                new GuiClickAction(GuiClickActionType.CUSTOM, event -> {
+                    playerData.setFriendRequestPrivacy(playerData.getFriendRequestPrivacy().next());
+                    savePlayerData(player);
+                    event.getPlayer().openInventory(createSettingsScreen(player).getInventory(accessoryRegistry, mongoDBHandler));
+                })));
+
+        items.put(22, new GuiItem(Material.BARRIER,
+                Component.text("Back").color(NamedTextColor.RED),
+                "Return to Chasmic Menu.",
+                new GuiClickAction(GuiClickActionType.CUSTOM, event -> event.getPlayer().openInventory(createMenuScreen(player).getInventory(accessoryRegistry, mongoDBHandler)))));
+
+        return new GuiScreen(Component.text("Settings"), InventoryType.CHEST_3_ROW, items);
+    }
+
+    private List<Component> buildMessagePrivacyLore(PlayerData playerData) {
+        List<Component> lore = new ArrayList<>();
+        MessagePrivacy selected = playerData.getMessagePrivacy();
+
+        lore.add(Component.text("Who can send you private messages:").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.empty());
+        lore.add(buildPrivacyOptionLine(MessagePrivacy.EVERYONE.getDisplayName(), selected == MessagePrivacy.EVERYONE));
+        lore.add(buildPrivacyOptionLine(MessagePrivacy.FRIENDS_ONLY.getDisplayName(), selected == MessagePrivacy.FRIENDS_ONLY));
+        lore.add(buildPrivacyOptionLine(MessagePrivacy.NOBODY.getDisplayName(), selected == MessagePrivacy.NOBODY));
+        lore.add(Component.empty());
+        lore.add(Component.text("Left Click: ").color(NamedTextColor.GRAY)
+                .append(Component.text("Cycle option").color(NamedTextColor.YELLOW))
+                .decoration(TextDecoration.ITALIC, false));
+
+        return lore;
+    }
+
+    private List<Component> buildFriendRequestPrivacyLore(PlayerData playerData) {
+        List<Component> lore = new ArrayList<>();
+        FriendRequestPrivacy selected = playerData.getFriendRequestPrivacy();
+
+        lore.add(Component.text("Who can send you friend requests:").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false));
+        lore.add(Component.empty());
+        lore.add(buildPrivacyOptionLine(FriendRequestPrivacy.EVERYBODY.getDisplayName(), selected == FriendRequestPrivacy.EVERYBODY));
+        lore.add(buildPrivacyOptionLine(FriendRequestPrivacy.NOBODY.getDisplayName(), selected == FriendRequestPrivacy.NOBODY));
+        lore.add(Component.empty());
+        lore.add(Component.text("Left Click: ").color(NamedTextColor.GRAY)
+                .append(Component.text("Cycle option").color(NamedTextColor.YELLOW))
+                .decoration(TextDecoration.ITALIC, false));
+
+        return lore;
+    }
+
+    private Component buildPrivacyOptionLine(String optionName, boolean selected) {
+        return Component.text(selected ? "[x] " : "[ ] ", selected ? NamedTextColor.GREEN : NamedTextColor.DARK_GRAY)
+                .append(Component.text(optionName, selected ? NamedTextColor.GREEN : NamedTextColor.GRAY))
+                .decoration(TextDecoration.ITALIC, false);
     }
 
     private ItemStack buildProfileIcon(int slotNumber, boolean active) {

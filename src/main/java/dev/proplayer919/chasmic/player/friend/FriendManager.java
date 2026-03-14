@@ -3,6 +3,7 @@ package dev.proplayer919.chasmic.player.friend;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.data.PlayerData;
 import dev.proplayer919.chasmic.player.CustomPlayer;
+import dev.proplayer919.chasmic.player.social.FriendRequestPrivacy;
 import dev.proplayer919.chasmic.service.ServiceDependencies;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -37,6 +38,7 @@ public class FriendManager {
         SELF,
         DATA_NOT_READY,
         ALREADY_FRIENDS,
+        RECIPIENT_BLOCKED,
         ALREADY_SENT,
         REQUEST_SENT,
         ACCEPTED_EXISTING_REQUEST
@@ -89,6 +91,10 @@ public class FriendManager {
                 return SendRequestStatus.ACCEPTED_EXISTING_REQUEST;
             }
             return SendRequestStatus.DATA_NOT_READY;
+        }
+
+        if (!canReceiveFriendRequest(requester, recipient)) {
+            return SendRequestStatus.RECIPIENT_BLOCKED;
         }
 
         boolean added = pendingRequests
@@ -275,11 +281,20 @@ public class FriendManager {
         return player != null && player.getPlayerData() != null;
     }
 
-    private boolean areFriends(CustomPlayer first, CustomPlayer second) {
+    public boolean areFriends(CustomPlayer first, CustomPlayer second) {
+        if (!isDataReady(first) || !isDataReady(second)) {
+            return false;
+        }
+
         first.getPlayerData().ensureSocialIntegrity();
         second.getPlayerData().ensureSocialIntegrity();
         return first.getPlayerData().getFriends().contains(second.getUuid())
                 && second.getPlayerData().getFriends().contains(first.getUuid());
+    }
+
+    private boolean canReceiveFriendRequest(CustomPlayer requester, CustomPlayer recipient) {
+        FriendRequestPrivacy privacy = recipient.getPlayerData().getFriendRequestPrivacy();
+        return privacy != FriendRequestPrivacy.NOBODY;
     }
 
     private boolean hasPendingRequest(UUID requesterUuid, UUID recipientUuid) {

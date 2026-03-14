@@ -5,7 +5,6 @@ import dev.proplayer919.chasmic.accessories.Accessory;
 import dev.proplayer919.chasmic.accessories.AccessoryRegistry;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -19,10 +18,7 @@ import net.minestom.server.item.ItemStack;
  * Permission: admin.command.agive
  */
 public class AccessoryGiveCommand extends PermissionCommand {
-    @Setter
-    private static AccessoryRegistry accessoryRegistry;
-
-    public AccessoryGiveCommand() {
+    public AccessoryGiveCommand(AccessoryRegistry accessoryRegistry) {
         super("agive", "admin.command.agive");
 
         // Arguments

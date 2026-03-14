@@ -2,6 +2,8 @@ package dev.proplayer919.chasmic.data;
 
 import dev.proplayer919.chasmic.accessories.AccessoryBag;
 import dev.proplayer919.chasmic.player.PlayerRank;
+import dev.proplayer919.chasmic.player.social.FriendRequestPrivacy;
+import dev.proplayer919.chasmic.player.social.MessagePrivacy;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -50,10 +52,16 @@ public class PlayerData {
     private boolean isNew;
 
     @BsonProperty("schemaVersion")
-    private int schemaVersion = 4;
+    private int schemaVersion = 5;
 
     @BsonProperty("friends")
     private List<UUID> friends = new ArrayList<>();
+
+    @BsonProperty("messagePrivacy")
+    private MessagePrivacy messagePrivacy = MessagePrivacy.EVERYONE;
+
+    @BsonProperty("friendRequestPrivacy")
+    private FriendRequestPrivacy friendRequestPrivacy = FriendRequestPrivacy.EVERYBODY;
 
     @BsonProperty("deathPurseNoticeAcknowledged")
     private boolean deathPurseNoticeAcknowledged;
@@ -92,6 +100,14 @@ public class PlayerData {
         }
 
         friends.removeIf(Objects::isNull);
+
+        if (messagePrivacy == null) {
+            messagePrivacy = MessagePrivacy.EVERYONE;
+        }
+
+        if (friendRequestPrivacy == null) {
+            friendRequestPrivacy = FriendRequestPrivacy.EVERYBODY;
+        }
     }
 
     @BsonIgnore

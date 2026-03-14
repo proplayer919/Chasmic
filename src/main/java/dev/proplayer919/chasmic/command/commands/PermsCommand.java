@@ -4,7 +4,6 @@ import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -18,10 +17,7 @@ import net.minestom.server.entity.Player;
  * Permission: admin.command.perms
  */
 public class PermsCommand extends PermissionCommand {
-    @Setter
-    private static MongoDBHandler mongoDBHandler;
-
-    public PermsCommand() {
+    public PermsCommand(MongoDBHandler mongoDBHandler) {
         super("perms", "admin.command.perms");
 
         // Arguments

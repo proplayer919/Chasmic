@@ -8,7 +8,6 @@ import dev.proplayer919.chasmic.player.punishment.Punishment;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
 import dev.proplayer919.chasmic.player.punishment.PunishmentMessages;
 import dev.proplayer919.chasmic.player.punishment.PunishmentType;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -25,10 +24,7 @@ import java.util.concurrent.TimeUnit;
  * Permission: admin.command.ban
  */
 public class BanCommand extends PermissionCommand {
-    @Setter
-    private static PunishmentManager punishmentManager;
-
-    public BanCommand() {
+    public BanCommand(PunishmentManager punishmentManager) {
         super("ban", "admin.command.ban");
 
         // Arguments

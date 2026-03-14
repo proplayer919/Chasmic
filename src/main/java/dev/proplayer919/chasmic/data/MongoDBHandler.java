@@ -127,7 +127,8 @@ public class MongoDBHandler {
         playerData.setFirstJoinTimestamp(currentTime);
         playerData.setLastJoinTimestamp(currentTime);
         playerData.setNew(true);
-        playerData.setSchemaVersion(3);
+        playerData.setSchemaVersion(5);
+        playerData.ensureSocialIntegrity();
 
         PlayerProfileData initialProfile = playerData.createProfileForSlot(1);
         playerData.setActiveProfileId(initialProfile.getProfileId());
@@ -197,8 +198,8 @@ public class MongoDBHandler {
             changed = true;
         }
 
-        if (data.getSchemaVersion() < 3) {
-            data.setSchemaVersion(3);
+        if (data.getSchemaVersion() < 5) {
+            data.setSchemaVersion(5);
             changed = true;
         }
 

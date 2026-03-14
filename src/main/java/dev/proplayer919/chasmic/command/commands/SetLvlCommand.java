@@ -4,7 +4,6 @@ import dev.proplayer919.chasmic.player.CustomPlayer;
 import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.data.MongoDBHandler;
 import dev.proplayer919.chasmic.helpers.ExpValue;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.command.builder.arguments.ArgumentType;
@@ -17,10 +16,7 @@ import java.math.BigInteger;
  * Permission: admin.command.setlvl
  */
 public class SetLvlCommand extends PermissionCommand {
-    @Setter
-    private static MongoDBHandler mongoDBHandler;
-
-    public SetLvlCommand() {
+    public SetLvlCommand(MongoDBHandler mongoDBHandler) {
         super("setlvl", "admin.command.setlvl");
 
         ArgumentInteger levelArg = (ArgumentInteger) ArgumentType.Integer("level").between(1, ExpValue.MAX_LEVEL);

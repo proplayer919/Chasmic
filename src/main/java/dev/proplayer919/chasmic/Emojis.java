@@ -24,7 +24,8 @@ public enum Emojis {
     PENCIL("✏"),
     CHECKMARK("✔"),
     SWORD("⚔"),
-    NOTE("♪");
+    NOTE("♪"),
+    ARROW_RIGHT("→");
 
     private final String emoji;
 

@@ -24,49 +24,35 @@ public class CommandRegistry {
                                        FriendManager friendManager) {
         CommandManager commandManager = MinecraftServer.getCommandManager();
 
-        // Set MongoDB handler for commands that need it
-        RankCommand.setMongoDBHandler(mongoDBHandler);
-        PermsCommand.setMongoDBHandler(mongoDBHandler);
-        SetCurrencyCommand.setMongoDBHandler(mongoDBHandler);
-        SetLvlCommand.setMongoDBHandler(mongoDBHandler);
-
-        // Set registries for commands that need them
-        CustomGiveCommand.setCustomItemRegistry(customItemRegistry);
-        AccessoryGiveCommand.setAccessoryRegistry(accessoryRegistry);
-
-        // Set punishment manager for punishment commands
-        WarnCommand.setPunishmentManager(punishmentManager);
-        KickCommand.setPunishmentManager(punishmentManager);
-        BanCommand.setPunishmentManager(punishmentManager);
-        UnbanCommand.setPunishmentManager(punishmentManager);
-
         // Register commands
         commandManager.register(new MediaCommand());
         commandManager.register(new FriendCommand(friendManager));
+        commandManager.register(new MsgCommand(friendManager));
+        commandManager.register(new ReplyCommand(friendManager));
         commandManager.register(new DeathNoticeAcknowledgeCommand());
 
-        commandManager.register(new RankCommand());
-        commandManager.register(new PermsCommand());
+        commandManager.register(new RankCommand(mongoDBHandler));
+        commandManager.register(new PermsCommand(mongoDBHandler));
 
         commandManager.register(new FlyCommand());
         commandManager.register(new GamemodeCommand());
 
         commandManager.register(new GiveCommand());
-        commandManager.register(new CustomGiveCommand());
-        commandManager.register(new AccessoryGiveCommand());
+        commandManager.register(new CustomGiveCommand(customItemRegistry));
+        commandManager.register(new AccessoryGiveCommand(accessoryRegistry));
 
         commandManager.register(new CreatureCommand());
 
-        commandManager.register(new WarnCommand());
-        commandManager.register(new KickCommand());
-        commandManager.register(new BanCommand());
-        commandManager.register(new UnbanCommand());
+        commandManager.register(new WarnCommand(punishmentManager));
+        commandManager.register(new KickCommand(punishmentManager));
+        commandManager.register(new BanCommand(punishmentManager));
+        commandManager.register(new UnbanCommand(punishmentManager));
 
         commandManager.register(new PerformanceCommand());
         commandManager.register(new KillAllCommand());
 
         commandManager.register(new HealCommand());
-        commandManager.register(new SetCurrencyCommand());
-        commandManager.register(new SetLvlCommand());
+        commandManager.register(new SetCurrencyCommand(mongoDBHandler));
+        commandManager.register(new SetLvlCommand(mongoDBHandler));
     }
 }

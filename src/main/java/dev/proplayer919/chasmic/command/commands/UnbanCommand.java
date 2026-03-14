@@ -6,7 +6,6 @@ import dev.proplayer919.chasmic.command.PermissionCommand;
 import dev.proplayer919.chasmic.command.PlayerNameArgument;
 import dev.proplayer919.chasmic.player.punishment.Punishment;
 import dev.proplayer919.chasmic.player.punishment.PunishmentManager;
-import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -20,10 +19,7 @@ import java.util.UUID;
  * Permission: admin.command.unban
  */
 public class UnbanCommand extends PermissionCommand {
-    @Setter
-    private static PunishmentManager punishmentManager;
-
-    public UnbanCommand() {
+    public UnbanCommand(PunishmentManager punishmentManager) {
         super("unban", "admin.command.unban");
 
         // Arguments
