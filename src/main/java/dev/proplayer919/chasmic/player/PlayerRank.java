@@ -45,16 +45,18 @@ public enum PlayerRank {
             .append(Component.text("]").color(NamedTextColor.AQUA)), 6, NamedTextColor.AQUA, NamedTextColor.WHITE,
             List.of(), 7),
 
-    MEDIA("media", Component.text("[MEDIA]").color(NamedTextColor.RED), 7, NamedTextColor.RED, NamedTextColor.WHITE,
+    TESTER("tester", Component.text("[TESTER]").color(NamedTextColor.GREEN), 7, NamedTextColor.GREEN, NamedTextColor.WHITE, List.of(), 7),
+
+    MEDIA("media", Component.text("[MEDIA]").color(NamedTextColor.RED), 8, NamedTextColor.RED, NamedTextColor.WHITE,
             List.of("command.media.record", "command.media.stream"), 7),
 
-    BUILDER("builder", Component.text("[BUILDER]").color(NamedTextColor.YELLOW), 8, NamedTextColor.YELLOW, NamedTextColor.WHITE,
+    BUILDER("builder", Component.text("[BUILDER]").color(NamedTextColor.YELLOW), 9, NamedTextColor.YELLOW, NamedTextColor.WHITE,
             List.of("builder.*"), 7),
 
-    ADMIN("admin", Component.text("[ADMIN]").color(NamedTextColor.LIGHT_PURPLE), 9, NamedTextColor.LIGHT_PURPLE, NamedTextColor.WHITE,
+    ADMIN("admin", Component.text("[ADMIN]").color(NamedTextColor.LIGHT_PURPLE), 10, NamedTextColor.LIGHT_PURPLE, NamedTextColor.WHITE,
             List.of("admin.*"), 10),
 
-    OWNER("owner", Component.text("[OWNER]").color(NamedTextColor.GOLD), 10, NamedTextColor.GOLD, NamedTextColor.WHITE,
+    OWNER("owner", Component.text("[OWNER]").color(NamedTextColor.GOLD), 11, NamedTextColor.GOLD, NamedTextColor.WHITE,
             List.of("*"), 10);
 
     private final String id;
