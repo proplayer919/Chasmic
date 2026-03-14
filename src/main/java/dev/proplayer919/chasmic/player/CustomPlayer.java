@@ -323,7 +323,7 @@ public class CustomPlayer extends Player implements HealthCreature {
 
         sendMessage(Component.text("Because you died, ", NamedTextColor.RED)
                 .append(Component.text(CurrencyFormatter.formatCurrency(lostAmount), NamedTextColor.GOLD))
-                .append(Component.text(" coins were removed from your purse. Death penalty = half your purse, up to 100k max (and at least 1 coin if you had any). Remaining purse: ", NamedTextColor.RED))
+                .append(Component.text(" pennies were removed from your purse. Death penalty = half your purse, up to 100k max (and at least 1 coin if you had any). Remaining purse: ", NamedTextColor.RED))
                 .append(Component.text(CurrencyFormatter.formatCurrency(remainingAmount), NamedTextColor.GOLD))
                 .append(Component.text(". ", NamedTextColor.RED))
                 .append(acknowledge));
