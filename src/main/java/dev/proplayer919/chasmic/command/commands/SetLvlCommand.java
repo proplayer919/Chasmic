@@ -40,8 +40,7 @@ public class SetLvlCommand extends PermissionCommand {
                 mongoDBHandler.savePlayerData(player.getPlayerData());
             }
 
-            player.sendMessage(Component.text("Your level has been set to " + level + " .", NamedTextColor.GREEN));
+            player.sendMessage(Component.text("Your level has been set to " + level + ".", NamedTextColor.GREEN));
         }, levelArg);
     }
 }
-

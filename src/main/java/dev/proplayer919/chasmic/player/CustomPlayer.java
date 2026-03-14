@@ -278,7 +278,7 @@ public class CustomPlayer extends Player implements HealthCreature {
         DamageEventPacket damagePacket = new DamageEventPacket(getEntityId(), new Damage(damageType, attacker, attacker, damageSourcePos, 0.1f).getTypeId(), attacker.getEntityId(), attacker.getEntityId(), damageSourcePos);
         sendPacketToViewersAndSelf(damagePacket);
 
-        if (statsManager.getCustomHealth() == 0) {
+        if (statsManager.getCustomHealth() == 0 && !isDead()) {
             this.kill();
         }
     }
@@ -299,8 +299,8 @@ public class CustomPlayer extends Player implements HealthCreature {
         }
 
         long previousPurse = Math.max(0, playerData.getPurse());
-        long cappedHalfLoss = Math.min(previousPurse / 2, 100_000L);
-        long lostAmount = previousPurse > 0 ? Math.max(1L, cappedHalfLoss) : 0L;
+        long cappedQuarterLoss = Math.min(previousPurse / 4, 100_000L);
+        long lostAmount = previousPurse > 0 ? Math.max(1L, cappedQuarterLoss) : 0L;
         lostAmount = Math.min(lostAmount, previousPurse);
         long remainingAmount = previousPurse - lostAmount;
         playerData.setPurse(remainingAmount);
@@ -323,7 +323,7 @@ public class CustomPlayer extends Player implements HealthCreature {
 
         sendMessage(Component.text("Because you died, ", NamedTextColor.RED)
                 .append(Component.text(CurrencyFormatter.formatCurrency(lostAmount), NamedTextColor.GOLD))
-                .append(Component.text(" pennies were removed from your purse. Death penalty = half your purse, up to 100k max (and at least 1 coin if you had any). Remaining purse: ", NamedTextColor.RED))
+                .append(Component.text(" pennies were removed from your purse. Death penalty = quarter of your purse, up to 100k max (and at least 1 coin if you had any). Remaining purse: ", NamedTextColor.RED))
                 .append(Component.text(CurrencyFormatter.formatCurrency(remainingAmount), NamedTextColor.GOLD))
                 .append(Component.text(". ", NamedTextColor.RED))
                 .append(acknowledge));
